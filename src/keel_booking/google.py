@@ -17,8 +17,9 @@ from urllib.parse import urlencode
 import requests
 from django.core.cache import cache
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.dateparse import parse_datetime
+from django.utils.translation import gettext as _
 
 from . import conf
 from .models import GoogleAccount
@@ -183,21 +184,29 @@ def busy_ranges(start: datetime, end: datetime, fresh: bool = False) -> list[tup
 
 
 def event_body(booking) -> dict:
-    et = booking.event_type
+    """The calendar event, written in the language of the booking's owner side (mail.owner_language)."""
+    from . import i18n, mail
+
+    with translation.override(mail.owner_language(booking)):
+        return _event_body(booking, booking.event_type.localized(), i18n)
+
+
+def _event_body(booking, et, i18n) -> dict:
     attendees = [{"email": a.email, "displayName": a.name} if a.name else {"email": a.email}
                  for a in booking.attendees.all()]
-    lines = [f"Booked by {booking.guest_name} <{booking.guest_email}>", f"Language: {booking.language_name()}"]
+    lines = [_("Booked by {name} <{email}>").format(name=booking.guest_name, email=booking.guest_email),
+             _("Language: {language}").format(language=booking.language_name())]
     if booking.guest_company:
-        lines.append(f"Brand: {booking.guest_company}")
+        lines.append(_("Brand: {brand}").format(brand=booking.guest_company))
     if booking.guest_phone:
-        lines.append(f"Phone: {booking.guest_phone}")
+        lines.append(_("Phone: {phone}").format(phone=booking.guest_phone))
     for name, handle in booking.socials_display():
         lines.append(f"{name}: {handle}")
     if booking.files.exists():
-        lines.append(f"Files: {booking.files.count()} attached (in the booking)")
+        lines.append(_("Files: {count} attached (in the booking)").format(count=i18n.digits(booking.files.count())))
     if booking.guest_message:
         lines += ["", booking.guest_message]
-    lines += ["", f"Manage: {conf.absolute(reverse('admin:keel_booking_booking_change', args=[booking.pk]))}"]
+    lines += ["", _("Manage: {url}").format(url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))]
     body = {
         "summary": f"{et.name}: {booking.guest_name}",
         "description": "\n".join(lines),

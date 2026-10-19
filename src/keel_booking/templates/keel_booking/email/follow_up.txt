@@ -1,11 +1,11 @@
-{% autoescape off %}Follow up with {{ booking.guest_name }}{% if booking.guest_company %} ({{ booking.guest_company }}){% endif %}, {{ booking.guest_email }}
-Due {{ due }}
+{% load i18n %}{% autoescape off %}{% blocktranslate trimmed with guest=booking.guest_name %}Follow up with {{ guest }}{% endblocktranslate %}{% if booking.guest_company %} ({{ booking.guest_company }}){% endif %}, {{ booking.guest_email }}
+{% blocktranslate trimmed %}Due {{ due }}{% endblocktranslate %}
 
 {{ follow_up.note }}
 
-Meeting: {{ event_type.name }}, {{ when.date }}, {{ when.time }}
+{% translate "Meeting" %}: {{ event_type.name }}, {{ when.full }}
 {% for note in notes %}
-Note: {{ note.body }}
+{% translate "Note" %}: {{ note.body }}
 {% endfor %}
-Booking: {{ admin_url }}
+{% translate "Booking" %}: {{ admin_url }}
 {% endautoescape %}

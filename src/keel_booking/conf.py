@@ -38,6 +38,9 @@ DEFAULTS = {
     # the link straight in, even before the owner. "OPEN" asks Google for one more permission
     # (meetings.space.settings) and needs the Meet REST API enabled on the OAuth project.
     "MEET_ACCESS": "",
+    # The owner's emails (new booking, reminder, follow-up) and the calendar event's text follow the
+    # language the guest booked in, as the guest's emails do. False keeps them in LANGUAGE_CODE.
+    "OWNER_EMAILS_IN_BOOKING_LANGUAGE": False,
     # Seconds a free/busy answer from Google is reused for the slot pages.
     "FREEBUSY_CACHE_SECONDS": 60,
     # How many extra guest emails a visitor may add to one booking.

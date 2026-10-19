@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 20:56+0000\n"
+"POT-Creation-Date: 2026-10-19 21:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,6 +25,32 @@ msgid "Other"
 msgstr "Diğer"
 
 #, python-brace-format
+msgid "Booked by {name} <{email}>"
+msgstr "Randevuyu alan: {name} <{email}>"
+
+#, python-brace-format
+msgid "Language: {language}"
+msgstr "Dil: {language}"
+
+#, python-brace-format
+#| msgid "Brand or company"
+msgid "Brand: {brand}"
+msgstr "Marka: {brand}"
+
+#, python-brace-format
+msgid "Phone: {phone}"
+msgstr "Telefon: {phone}"
+
+#, python-brace-format
+msgid "Files: {count} attached (in the booking)"
+msgstr "Dosyalar: {count} dosya eklendi (randevuda)"
+
+#, python-brace-format
+#| msgid "Join: {url}"
+msgid "Manage: {url}"
+msgstr "Yönet: {url}"
+
+#, python-brace-format
 msgid "{weekday}, {day} {month} {year}"
 msgstr "{day} {month} {year} {weekday}"
 
@@ -37,7 +63,6 @@ msgid "{start} to {end}"
 msgstr "{start} - {end}"
 
 #, python-brace-format
-#| msgid "{day}, no times"
 msgid "{date}, {time}"
 msgstr "{date}, {time}"
 
@@ -54,12 +79,21 @@ msgid "Confirmed: {meeting} with {owner}, {when}"
 msgstr "Onaylandı: {owner} ile {meeting}, {when}"
 
 #, python-brace-format
+#| msgid "Confirmed: {meeting} with {owner}, {when}"
+msgid "New booking: {meeting} with {guest}, {when}"
+msgstr "Yeni randevu: {guest} ile {meeting}, {when}"
+
+#, python-brace-format
 msgid "Starts in {minutes} minutes: {meeting} with {owner}"
 msgstr "{minutes} dakika sonra başlıyor: {owner} ile {meeting}"
 
 #, python-brace-format
 msgid "Cancelled: {meeting} with {owner}, {when}"
 msgstr "İptal edildi: {owner} ile {meeting}, {when}"
+
+#, python-brace-format
+msgid "Follow up: {guest} ({meeting})"
+msgstr "Takip: {guest} ({meeting})"
 
 msgid "Book a meeting"
 msgstr "Görüşme planlayın"
@@ -176,6 +210,112 @@ msgid "Timezone"
 msgstr "Saat dilimi"
 
 #, python-format
+msgid "Follow up with %(guest)s."
+msgstr "Takip: %(guest)s."
+
+msgid "Follow-up due"
+msgstr "Takip zamanı geldi"
+
+#, python-format
+msgid "Follow up with %(guest)s"
+msgstr "Takip: %(guest)s"
+
+msgid "You planned a follow-up for this meeting."
+msgstr "Bu görüşme için bir takip planlamıştınız."
+
+#, python-format
+msgid "Due %(due)s"
+msgstr "Zamanı: %(due)s"
+
+msgid "Guest"
+msgstr "Katılımcı"
+
+#| msgid "Your details"
+msgid "Your notes"
+msgstr "Notlarınız"
+
+#| msgid "View the booking"
+msgid "Open the booking"
+msgstr "Randevuyu aç"
+
+msgid "Note"
+msgstr "Not"
+
+#| msgid "Book a meeting"
+msgid "Booking"
+msgstr "Randevu"
+
+#, python-format
+#| msgid "%(meeting)s, %(date)s at %(time)s."
+msgid "%(guest)s, %(date)s at %(time)s."
+msgstr "%(guest)s, %(date)s, %(time)s."
+
+#| msgid "View the booking"
+msgid "New booking"
+msgstr "Yeni randevu"
+
+#, python-format
+msgid "%(guest)s booked %(meeting)s"
+msgstr "%(guest)s, %(meeting)s randevusu aldı"
+
+msgid ""
+"A new meeting is on your calendar. Times below are in the meeting type's "
+"timezone."
+msgstr ""
+"Takviminize yeni bir görüşme eklendi. Aşağıdaki saatler görüşme türünün saat"
+" dilimindedir."
+
+#| msgid "Timezone"
+msgid "Their timezone"
+msgstr "Saat dilimi"
+
+#, python-format
+msgid "Booked in %(language)s"
+msgstr "Randevu dili: %(language)s"
+
+msgid "Invited"
+msgstr "Davetli"
+
+msgid "fixed attendee"
+msgstr "sabit davetli"
+
+msgid "added by the guest"
+msgstr "katılımcı ekledi"
+
+msgid "Description"
+msgstr "Açıklama"
+
+msgid "Files (also attached)"
+msgstr "Dosyalar (ekte de var)"
+
+msgid "Files"
+msgstr "Dosyalar"
+
+#, python-format
+msgid "Not on Google Calendar yet: %(error)s. The site retries every minute."
+msgstr ""
+"Henüz Google Takvim'de değil: %(error)s. Site her dakika yeniden dener."
+
+msgid "Not on Google Calendar yet. The site retries every minute."
+msgstr "Henüz Google Takvim'de değil. Site her dakika yeniden dener."
+
+msgid "Open the booking to add notes and a follow-up"
+msgstr "Not ve takip eklemek için randevuyu açın"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "no Meet link yet"
+msgstr "henüz Meet bağlantısı yok"
+
+#| msgid "Files"
+msgid "File"
+msgstr "Dosya"
+
+msgid "Notes and follow-up"
+msgstr "Notlar ve takip"
+
+#, python-format
 msgid "%(meeting)s starts at %(time)s."
 msgstr "%(meeting)s başlıyor: saat %(time)s."
 
@@ -186,6 +326,17 @@ msgstr "%(minutes)s dakika sonra başlıyor"
 #, python-format
 msgid "Your meeting with %(owner_name)s starts soon"
 msgstr "%(owner_name)s ile görüşmeniz birazdan başlıyor"
+
+#, python-format
+#| msgid ""
+#| "Hi %(guest)s, your %(meeting)s with %(owner_name)s starts in %(minutes)s "
+#| "minutes."
+msgid ""
+"Your meeting with %(guest)s starts in %(minutes)s minutes. The guest booked "
+"in %(language)s."
+msgstr ""
+"%(guest)s ile görüşmeniz %(minutes)s dakika sonra başlıyor. Randevu dili: "
+"%(language)s."
 
 #, python-format
 msgid ""
@@ -246,9 +397,6 @@ msgstr "E-posta"
 msgid "Brand or company"
 msgstr "Marka veya şirket"
 
-msgid "Phone"
-msgstr "Telefon"
-
 msgid "Social profiles"
 msgstr "Sosyal medya profilleri"
 
@@ -263,12 +411,6 @@ msgstr "Kaldır"
 
 msgid "Add another profile"
 msgstr "Başka bir profil ekleyin"
-
-msgid "Description"
-msgstr "Açıklama"
-
-msgid "Files"
-msgstr "Dosyalar"
 
 msgid "Other guests (emails)"
 msgstr "Diğer katılımcılar (e-postalar)"

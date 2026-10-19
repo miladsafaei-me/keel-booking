@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
-from keel_booking import availability, services
+from keel_booking import availability, mail, services
 from keel_booking.models import (AvailabilityWindow, Booking, DateOverride, EventType, EventTypeTranslation,
                                  FixedAttendee, FollowUp, BookingAttendee)
 
@@ -190,9 +190,27 @@ class LanguageTests(TestCase):
         self.assertIn('dir="rtl"', html)
         self.assertIn("SUMMARY:مشاوره‌ی سئو با Test Owner", guest.attachments[0][1])
         self.assertTrue(owner.subject.startswith("New booking: SEO consultation"), owner.subject)
-        self.assertIn("Booked in: Persian", owner.body)
+        self.assertIn("Booked in Persian", owner.body)
         confirmed = self.client.get(response.json()["redirect"])
         self.assertContains(confirmed, "جلسه‌ی شما رزرو شد")
+
+    def test_owner_side_follows_the_booking_language_when_asked(self, _now):
+        from django.conf import settings
+        from keel_booking import google
+
+        with override_settings(KEEL_BOOKING={**settings.KEEL_BOOKING, "OWNER_EMAILS_IN_BOOKING_LANGUAGE": True}):
+            self.assertEqual(self.reserve("/fa").status_code, 201)
+            booking = Booking.objects.get()
+            owner = next(m for m in outbox.outbox if m.to == ["owner@example.com"])
+            self.assertTrue(owner.subject.startswith("رزرو تازه: مشاوره‌ی سئو با Sara"), owner.subject)
+            self.assertIn("زبان رزرو: فارسی", owner.body)
+            self.assertIn('dir="rtl"', owner.alternatives[0][0])
+            body = google.event_body(booking)
+            self.assertEqual(body["summary"], "مشاوره‌ی سئو: Sara")
+            self.assertIn("زبان: فارسی", body["description"])
+            outbox.outbox.clear()
+            mail.send_reminder(booking)
+            self.assertTrue(all("دقیقه‌ی دیگر" in m.subject for m in outbox.outbox), [m.subject for m in outbox.outbox])
 
     def test_turkish_errors_and_default_english(self, _now):
         response = self.client.post("/tr/book/seo/reserve/", json.dumps({"start": "2026-11-02T07:00:00Z"}),

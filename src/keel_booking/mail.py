@@ -5,7 +5,8 @@ overrides either by shipping a template of the same name. Colours and fonts come
 ``KEEL_BOOKING["EMAIL_THEME"]`` because email clients ignore CSS variables.
 
 The guest-side emails, the calendar file and the Google Calendar link are written in the language
-the guest booked in (``Booking.language``); the owner's emails stay in English.
+the guest booked in (``Booking.language``). The owner's emails follow it too when
+``OWNER_EMAILS_IN_BOOKING_LANGUAGE`` is on, and are in ``LANGUAGE_CODE`` otherwise.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import zoneinfo
 from datetime import datetime, timezone as dt_timezone
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.base import BaseEmailBackend
 from django.template.loader import render_to_string
@@ -184,9 +186,15 @@ def _send(template: str, subject: str, to: list[str], context: dict, attach_ics=
         message.send()
 
 
-def _owner_language():
-    """The owner's emails are written in English, whatever the page the guest booked on."""
-    return translation.override("en")
+def owner_language(booking) -> str:
+    """The language of the owner's side of a booking: its own language when the host says so, else the site's."""
+    if conf.get("OWNER_EMAILS_IN_BOOKING_LANGUAGE"):
+        return booking.guest_language
+    return settings.LANGUAGE_CODE.split("-")[0]
+
+
+def _owner_language(booking):
+    return translation.override(owner_language(booking))
 
 
 def send_confirmation(booking) -> None:
@@ -201,11 +209,12 @@ def send_confirmation(booking) -> None:
 def notify_owner(booking) -> None:
     files = list(booking.files.all())
     attach = files if sum(f.size for f in files) <= conf.get("OWNER_ATTACH_MB") * 1024 * 1024 else []
-    with _owner_language():
+    with _owner_language(booking):
         context = _context(booking, booking.event_type.timezone, files=files, files_attached=bool(attach),
                            file_links=[(f, conf.absolute(reverse("admin:keel_booking_booking_file", args=[f.pk]))) for f in files],
                            admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))
-        subject = f"New booking: {booking.event_type.name} with {booking.guest_name}, {context['when']['short']}"
+        subject = _("New booking: {meeting} with {guest}, {when}").format(
+            meeting=context["event_type"].name, guest=booking.guest_name, when=context["when"]["short"])
         _send("owner_new_booking", subject, [conf.get("OWNER_EMAIL")], context, attach_ics=ics(booking),
               reply_to=[booking.guest_email] if booking.guest_email else None, files=attach)
 
@@ -217,11 +226,13 @@ def send_reminder(booking) -> None:
         subject = _("Starts in {minutes} minutes: {meeting} with {owner}").format(
             minutes=i18n.digits(minutes), meeting=guest_context["event_type"].name, owner=conf.get("OWNER_NAME"))
         _send("reminder", subject, booking.email_recipients(), guest_context, reply_to=[conf.get("OWNER_EMAIL")])
-    with _owner_language():
-        owner_context = _context(booking, booking.event_type.timezone, minutes=minutes, for_owner=True,
+    with _owner_language(booking):
+        owner_context = _context(booking, booking.event_type.timezone, minutes=i18n.digits(minutes), for_owner=True,
                                  admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))
-        _send("reminder", f"Starts in {minutes} minutes: {booking.event_type.name} with {booking.guest_name}",
-              [conf.get("OWNER_EMAIL")], owner_context, reply_to=[booking.guest_email] if booking.guest_email else None)
+        subject = _("Starts in {minutes} minutes: {meeting} with {owner}").format(
+            minutes=i18n.digits(minutes), meeting=owner_context["event_type"].name, owner=booking.guest_name)
+        _send("reminder", subject, [conf.get("OWNER_EMAIL")], owner_context,
+              reply_to=[booking.guest_email] if booking.guest_email else None)
 
 
 def send_cancellation(booking) -> None:
@@ -235,10 +246,11 @@ def send_cancellation(booking) -> None:
 def send_follow_up_reminder(follow_up) -> None:
     booking = follow_up.booking
     tz = zoneinfo.ZoneInfo(booking.event_type.timezone)
-    with _owner_language():
+    with _owner_language(booking):
         context = _context(booking, booking.event_type.timezone, follow_up=follow_up,
-                           due=f"{follow_up.due_at.astimezone(tz):%A %d %B, %H:%M}",
+                           due=i18n.short_date(follow_up.due_at.astimezone(tz)),
                            admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])),
                            notes=list(booking.notes.all()))
-        _send("follow_up", f"Follow up: {booking.guest_name} ({booking.event_type.name})",
+        subject = _("Follow up: {guest} ({meeting})").format(guest=booking.guest_name, meeting=context["event_type"].name)
+        _send("follow_up", subject,
               [conf.get("OWNER_EMAIL")], context, reply_to=[booking.guest_email] if booking.guest_email else None)

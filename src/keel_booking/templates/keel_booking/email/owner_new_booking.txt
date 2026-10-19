@@ -1,17 +1,17 @@
-{% autoescape off %}New booking: {{ event_type.name }}
+{% load i18n %}{% autoescape off %}{% translate "New booking" %}: {{ event_type.name }}
 
-Guest: {{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %} <{{ booking.guest_email }}>
-Phone: {{ booking.guest_phone|default:"-" }}
+{% translate "Guest" %}: {{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %} <{{ booking.guest_email }}>
+{% translate "Phone" %}: {{ booking.guest_phone|default:"-" }}
 {% for name, handle in booking.socials_display %}{{ name }}: {{ handle }}
-{% endfor %}Their timezone: {{ booking.guest_timezone }}
-Booked in: {{ booking.language_name }}
-When: {{ when.date }}, {{ when.time }} ({{ when.timezone }})
-Where: {% if booking.meet_url %}{{ booking.meet_url }}{% else %}no Meet link yet{% endif %}
-{% for a in booking.attendees.all %}{% if a.role != "guest" %}Invited: {{ a.email }} ({{ a.get_role_display|lower }})
+{% endfor %}{% translate "Their timezone" %}: {{ booking.guest_timezone }}
+{% blocktranslate trimmed with language=booking.language_name %}Booked in {{ language }}{% endblocktranslate %}
+{% translate "When" %}: {{ when.full }} ({{ when.timezone }})
+{% translate "Where" %}: {% if booking.meet_url %}{{ booking.meet_url }}{% else %}{% translate "no Meet link yet" %}{% endif %}
+{% for a in booking.attendees.all %}{% if a.role != "guest" %}{% translate "Invited" %}: {{ a.email }} ({% if a.role == "fixed" %}{% translate "fixed attendee" %}{% else %}{% translate "added by the guest" %}{% endif %})
 {% endif %}{% endfor %}{% if booking.guest_message %}
-Description:
+{% translate "Description" %}:
 {{ booking.guest_message }}
-{% endif %}{% for f, url in file_links %}File: {{ f.original_name }} {{ url }}
+{% endif %}{% for f, url in file_links %}{% translate "File" %}: {{ f.original_name }} {{ url }}
 {% endfor %}
-Notes and follow-up: {{ admin_url }}
+{% translate "Notes and follow-up" %}: {{ admin_url }}
 {% endautoescape %}

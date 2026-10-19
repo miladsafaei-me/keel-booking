@@ -1,9 +1,9 @@
-{% load i18n %}{% autoescape off %}{% if for_owner %}Your meeting with {{ booking.guest_name }} starts in {{ minutes }} minutes. The guest booked in {{ booking.language_name }}.{% else %}{% blocktranslate trimmed with guest=booking.guest_name meeting=event_type.name %}Hi {{ guest }}, your {{ meeting }} with {{ owner_name }} starts in {{ minutes }} minutes.{% endblocktranslate %}{% endif %}
+{% load i18n %}{% autoescape off %}{% if for_owner %}{% blocktranslate trimmed with guest=booking.guest_name language=booking.language_name %}Your meeting with {{ guest }} starts in {{ minutes }} minutes. The guest booked in {{ language }}.{% endblocktranslate %}{% else %}{% blocktranslate trimmed with guest=booking.guest_name meeting=event_type.name %}Hi {{ guest }}, your {{ meeting }} with {{ owner_name }} starts in {{ minutes }} minutes.{% endblocktranslate %}{% endif %}
 
 {% translate "When" %}: {{ when.full }} ({{ when.timezone }})
 {% translate "Join" %}: {% if booking.meet_url %}{{ booking.meet_url }}{% else %}{% translate "the link is in your calendar invitation" %}{% endif %}
 {% if for_owner %}
-Booking: {{ admin_url }}{% endif %}
+{% translate "Booking" %}: {{ admin_url }}{% endif %}
 
 {{ owner_name }}
 {% endautoescape %}

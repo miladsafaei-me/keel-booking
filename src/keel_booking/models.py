@@ -320,9 +320,9 @@ class Booking(models.Model):
         return self.language or settings.LANGUAGE_CODE.split("-")[0]
 
     def language_name(self) -> str:
-        """The booked language in English, such as Persian, for the owner's side."""
+        """The booked language named in the active language: Persian, Farsça, فارسی."""
         try:
-            return translation.get_language_info(self.guest_language)["name"]
+            return str(translation.get_language_info(self.guest_language)["name_translated"])
         except KeyError:
             return self.guest_language
 

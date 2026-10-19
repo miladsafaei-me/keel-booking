@@ -3,7 +3,8 @@
 Part of the **Keel** platform (see keel-kit `PLATFORM.md`). A reusable Django app for booking
 meetings: meeting types, the slot engine, Google Calendar/Meet/Gmail, emails, reminders, the
 owner's notes and follow-ups. Guest-facing text is translated (English source, Persian and Turkish
-shipped in `locale/`); the admin and the owner's emails stay English. No banner comments; CSS
+shipped in `locale/`); every email follows the booking's language (the owner's too when
+`OWNER_EMAILS_IN_BOOKING_LANGUAGE` is on); the admin stays in `LANGUAGE_CODE`. No banner comments; CSS
 variables only in styling; multi-line Django template comments use `{% comment %}...{% endcomment %}`.
 
 ## Task tracking

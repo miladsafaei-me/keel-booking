@@ -71,15 +71,17 @@ urlpatterns = [path("book/admin/", admin.site.urls)] + i18n_patterns(
 
 - **Meeting types** take a translation per language in the admin (`EventTypeTranslation`: name,
   tagline, description, highlights, confirmation note). An empty text keeps the type's own.
-- **A booking keeps its language** (`Booking.language`, the page it was made on). The guest's
-  confirmation, reminder, cancellation, `.ics` and Google Calendar link are written in it, with a
-  right-to-left layout for Persian and the theme's `font_rtl`. The owner's emails and the admin stay
-  English and say which language the guest booked in.
+- **A booking keeps its language** (`Booking.language`, the page it was made on). Every email of
+  the booking is written in it: the guest's confirmation, reminder and cancellation, the `.ics` and
+  Google Calendar link, and, with `OWNER_EMAILS_IN_BOOKING_LANGUAGE` on, the owner's new-booking
+  notice, reminder and follow-up and the calendar event's text too (off: those use `LANGUAGE_CODE`).
+  Persian emails are right to left in the theme's `font_rtl`. The admin stays in `LANGUAGE_CODE`.
 - **Dates and numbers:** weekday and month names come from Django's own translations; Persian
   writes numbers in Persian digits (`i18n.digits`, the `local_digits` filter). The widget formats
   with the page's `lang` on the Gregorian calendar, starts the week on `config.weekStart`
   (Saturday for Persian) and takes its sentences from `config.labels`.
-- `OWNER_NAME` may be a lazy translation (`gettext_lazy("Jane Doe")`) to spell the owner's name per language.
+- `OWNER_NAME` and `EMAIL_THEME["brand_name"]` may be lazy translations (`gettext_lazy("Jane Doe")`) to spell
+  the owner's name per language; leave `FROM_EMAIL` empty and the From name follows it.
 
 ## Pages and endpoints
 

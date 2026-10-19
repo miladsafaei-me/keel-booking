@@ -3,6 +3,7 @@
   Table layout and inline styles only, because email clients drop stylesheets and CSS variables;
   every colour and font comes from KEEL_BOOKING["EMAIL_THEME"]. A right-to-left language turns the
   whole email around (dir, align) and drops the spaced capitals (caps), which Arabic script lacks.
+  The Latin brand name keeps lang="en", so Turkish capitals never turn its i into İ.
 {% endcomment %}<!doctype html>
 <html lang="{{ language }}" dir="{% if rtl %}rtl{% else %}ltr{% endif %}">
 <head>
@@ -20,7 +21,7 @@
 <tr><td style="padding:0 4px 20px 4px;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
     {% if theme.logo_url %}<td style="padding-{{ end }}:12px;"><img src="{{ theme.logo_url }}" width="44" height="44" alt="" style="display:block;border-radius:50%;"></td>{% endif %}
-    <td dir="ltr" style="font:600 14px/1.2 {{ theme.font_heading }};letter-spacing:2px;text-transform:uppercase;color:{{ theme.heading }};">{{ theme.brand_name|default:owner_name }}</td>
+    <td{% if not rtl %} lang="en"{% endif %} style="font:600 14px/1.2 {{ theme.font_heading }};{{ caps_wide }}color:{{ theme.heading }};">{{ theme.brand_name|default:owner_name }}</td>
   </tr></table>
 </td></tr>
 <tr><td style="background:{{ theme.card }};border-radius:10px;border:1px solid {{ theme.rule }};padding:36px 32px;">
