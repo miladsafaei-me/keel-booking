@@ -35,7 +35,7 @@ class GmailBackend(BaseEmailBackend):
         sent = 0
         for message in email_messages:
             try:
-                google.send_raw_email(message.message().as_bytes(linesep="\r\n"))
+                google.send_raw_email(message.message().as_bytes())
                 sent += 1
             except google.GoogleError:
                 if not self.fail_silently:

@@ -158,6 +158,21 @@ class ReserveTests(TestCase):
         self.assertEqual(data["days"]["2026-11-02"], ["2026-11-02T07:00:00Z", "2026-11-02T07:30:00Z", "2026-11-02T08:00:00Z"])
 
 
+class GmailBackendTests(TestCase):
+    def test_sends_a_raw_message_with_attachment(self):
+        from django.core.mail import EmailMultiAlternatives
+        from keel_booking.mail import GmailBackend
+
+        message = EmailMultiAlternatives("Hi", "text", "owner@example.com", ["guest@example.com"])
+        message.attach_alternative("<p>html</p>", "text/html")
+        message.attach("invite.ics", "BEGIN:VCALENDAR", "text/calendar")
+        with mock.patch("keel_booking.google.send_raw_email") as send:
+            self.assertEqual(GmailBackend().send_messages([message]), 1)
+        raw = send.call_args[0][0]
+        self.assertIn(b"To: guest@example.com", raw)
+        self.assertIn(b"invite.ics", raw)
+
+
 class TickTests(TestCase):
     def test_reminder_and_follow_up(self):
         et = make_type()
