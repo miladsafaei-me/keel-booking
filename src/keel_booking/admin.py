@@ -112,16 +112,16 @@ class BookingAdmin(admin.ModelAdmin):
     list_display = ("start_at", "event_type", "guest_name", "guest_company", "guest_email", "guest_phone",
                     "socials_short", "description_short", "file_count", "status", "meet", "next_follow_up")
     list_display_links = ("start_at", "guest_name")
-    list_filter = (UpcomingFilter, "status", "event_type")
+    list_filter = (UpcomingFilter, "status", "event_type", "source")
     search_fields = ("guest_name", "guest_email", "guest_company", "guest_phone", "guest_message")
     date_hierarchy = "start_at"
     list_per_page = 50
     inlines = (BookingFileInline, BookingNoteInline, FollowUpInline, BookingAttendeeInline)
-    readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "guest_timezone", "meet", "calendar",
+    readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "guest_timezone", "meet", "calendar",
                        "socials_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
-        ("Meeting", {"fields": ("event_type", "start_at", "end_at", "status", "meet", "calendar")}),
+        ("Meeting", {"fields": ("event_type", "start_at", "end_at", "status", "source", "meet", "calendar")}),
         ("Guest", {"fields": ("guest_name", "guest_company", "guest_email", "guest_phone", "socials_list",
                               "guest_message", "guest_timezone")}),
         ("Delivery", {"classes": ("collapse",), "fields": ("confirmation_sent_at", "owner_notified_at", "reminder_sent_at",

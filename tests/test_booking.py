@@ -173,6 +173,34 @@ class GmailBackendTests(TestCase):
         self.assertIn(b"invite.ics", raw)
 
 
+class ImportCalendarTests(TestCase):
+    def test_imports_meetings_once_and_emails_nobody(self):
+        from django.core.management import call_command
+        from keel_booking.models import GoogleAccount
+
+        make_type(slug="startup", name="Startup consultation")
+        GoogleAccount.objects.create(pk=1, refresh_token="t", email="owner@example.com")
+        events = {"items": [
+            {"id": "e1", "summary": "Masoud Seifi (Startup)", "status": "confirmed", "htmlLink": "https://cal/e1",
+             "hangoutLink": "https://meet.google.com/aaa-bbbb-ccc", "created": "2026-10-10T10:00:00Z",
+             "start": {"dateTime": "2026-10-12T17:30:00+03:00"}, "end": {"dateTime": "2026-10-12T18:15:00+03:00"},
+             "attendees": [{"email": "second@example.com"}, {"email": "owner@example.com", "self": True}]},
+            {"id": "e2", "summary": "Happy birthday!", "status": "confirmed", "start": {"date": "2027-06-19"}, "end": {"date": "2027-06-20"}},
+        ]}
+        with mock.patch("keel_booking.google._call") as call:
+            call.return_value.json.return_value = events
+            call_command("booking_import_calendar", "--since", "2026-10-12", "--event-type", "startup",
+                         "--exclude-guest", "second@example.com", stdout=open("/dev/null", "w"))
+            call_command("booking_import_calendar", "--since", "2026-10-12", "--event-type", "startup",
+                         "--exclude-guest", "second@example.com", stdout=open("/dev/null", "w"))
+        booking = Booking.objects.get()
+        self.assertEqual((booking.guest_name, booking.guest_email, booking.source), ("Masoud Seifi", "", "calendar"))
+        self.assertEqual(booking.meet_url, "https://meet.google.com/aaa-bbbb-ccc")
+        self.assertEqual(list(booking.attendees.values_list("email", "role")), [("second@example.com", "fixed")])
+        self.assertEqual(services.tick(now=NOW)["emails"], 0)
+        self.assertEqual(len(outbox.outbox), 0)
+
+
 class TickTests(TestCase):
     def test_reminder_and_follow_up(self):
         et = make_type()

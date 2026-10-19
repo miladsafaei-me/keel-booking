@@ -217,8 +217,13 @@ class Booking(models.Model):
     start_at = models.DateTimeField(db_index=True)
     end_at = models.DateTimeField()
 
+    class Source(models.TextChoices):
+        SITE = "site", "Booked on the site"
+        CALENDAR = "calendar", "Imported from Google Calendar"
+
+    source = models.CharField(max_length=12, choices=Source.choices, default=Source.SITE, db_index=True)
     guest_name = models.CharField(max_length=120)
-    guest_email = models.EmailField()
+    guest_email = models.EmailField(blank=True, help_text="Empty only on a meeting imported without the guest's email.")
     guest_company = models.CharField("brand or company", max_length=160, blank=True)
     guest_phone = models.CharField("phone", max_length=40, blank=True)
     guest_socials = models.JSONField("social profiles", default=list, blank=True,
@@ -269,7 +274,7 @@ class Booking(models.Model):
         emails = [self.guest_email]
         emails += [a.email for a in self.attendees.all() if a.role == BookingAttendee.Role.ADDITIONAL]
         emails += [a.email for a in self.attendees.all() if a.role == BookingAttendee.Role.FIXED and a.receive_emails]
-        return list(dict.fromkeys(e.lower() for e in emails))
+        return list(dict.fromkeys(e.lower() for e in emails if e))
 
 
 class BookingAttendee(models.Model):

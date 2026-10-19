@@ -171,7 +171,7 @@ def notify_owner(booking) -> None:
                        admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))
     subject = f"New booking: {booking.event_type.name} with {booking.guest_name}, {context['when']['short']}"
     _send("owner_new_booking", subject, [conf.get("OWNER_EMAIL")], context, attach_ics=ics(booking),
-          reply_to=[booking.guest_email], files=attach)
+          reply_to=[booking.guest_email] if booking.guest_email else None, files=attach)
 
 
 def send_reminder(booking) -> None:
@@ -182,7 +182,7 @@ def send_reminder(booking) -> None:
     owner_context = _context(booking, booking.event_type.timezone, minutes=minutes, for_owner=True,
                              admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))
     _send("reminder", f"Starts in {minutes} minutes: {booking.event_type.name} with {booking.guest_name}",
-          [conf.get("OWNER_EMAIL")], owner_context, reply_to=[booking.guest_email])
+          [conf.get("OWNER_EMAIL")], owner_context, reply_to=[booking.guest_email] if booking.guest_email else None)
 
 
 def send_cancellation(booking) -> None:
@@ -199,4 +199,4 @@ def send_follow_up_reminder(follow_up) -> None:
                        admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])),
                        notes=list(booking.notes.all()))
     _send("follow_up", f"Follow up: {booking.guest_name} ({booking.event_type.name})",
-          [conf.get("OWNER_EMAIL")], context, reply_to=[booking.guest_email])
+          [conf.get("OWNER_EMAIL")], context, reply_to=[booking.guest_email] if booking.guest_email else None)
