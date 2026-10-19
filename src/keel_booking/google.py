@@ -243,7 +243,9 @@ def can_set_meet_access(account: GoogleAccount | None = None) -> bool:
 
 def set_meet_access(meet_url: str, access: str) -> None:
     """Set who may enter one Meet without knocking (OPEN, TRUSTED or RESTRICTED)."""
-    _call("PATCH", f"{MEET_API}/spaces/{meet_code(meet_url)}", params={"updateMask": "config.accessType"},
+    # Edits need the space's resource name (spaces/<id>); the meeting code only reads.
+    name = _call("GET", f"{MEET_API}/spaces/{meet_code(meet_url)}").json()["name"]
+    _call("PATCH", f"{MEET_API}/{name}", params={"updateMask": "config.accessType"},
           json={"config": {"accessType": access}})
 
 

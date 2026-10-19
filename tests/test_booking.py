@@ -234,12 +234,14 @@ class MeetAccessTests(TestCase):
     @override_settings(KEEL_BOOKING={"OWNER_NAME": "Test Owner", "OWNER_EMAIL": "owner@example.com", "MEET_ACCESS": "OPEN"})
     def test_meet_access_open_is_set_once_by_the_tick(self):
         with mock.patch("keel_booking.google._call") as call:
+            call.return_value.json.return_value = {"name": "spaces/xYz123"}
             services.tick(now=NOW)
             services.tick(now=NOW)
         meet_calls = [c for c in call.call_args_list if "meet.googleapis.com" in c.args[1]]
-        self.assertEqual(len(meet_calls), 1)
-        self.assertEqual(meet_calls[0].args[1], "https://meet.googleapis.com/v2/spaces/abc-defg-hij")
-        self.assertEqual(meet_calls[0].kwargs["json"], {"config": {"accessType": "OPEN"}})
+        self.assertEqual([(c.args[0], c.args[1]) for c in meet_calls],
+                         [("GET", "https://meet.googleapis.com/v2/spaces/abc-defg-hij"),
+                          ("PATCH", "https://meet.googleapis.com/v2/spaces/xYz123")])
+        self.assertEqual(meet_calls[1].kwargs["json"], {"config": {"accessType": "OPEN"}})
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.meet_access, "OPEN")
 
