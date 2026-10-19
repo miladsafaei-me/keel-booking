@@ -1,8 +1,8 @@
-{% autoescape off %}Hi {{ booking.guest_name }},
+{% load i18n %}{% autoescape off %}{% blocktranslate with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}
 
-Your {{ event_type.name }} with {{ owner_name }} on {{ when.date }}, {{ when.time }} ({{ when.timezone }}) is cancelled.
+{% blocktranslate trimmed with meeting=event_type.name date=when.date time=when.time zone=when.timezone %}Your {{ meeting }} with {{ owner_name }} on {{ date }}, {{ time }} ({{ zone }}) is cancelled.{% endblocktranslate %}
 
-Pick a new time: {{ book_url }}
+{% translate "Pick a new time" %}: {{ book_url }}
 
 {{ owner_name }}
 {% endautoescape %}

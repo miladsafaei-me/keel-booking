@@ -6,6 +6,10 @@
   (weekday, day, blank, slot). The JSON config is the element #kb-config (Django json_script).
   State is shown with attributes the host styles: aria-pressed, aria-current="date", disabled,
   hidden, and the is-now / is-done classes on [data-kb-stepper-item].
+
+  Language: dates and numbers follow the page's <html lang> (always on the Gregorian calendar, which
+  the month grid is), the week starts on config.weekStart (0 is Sunday), and every sentence comes
+  from config.labels, which the view fills in the page's language.
 */
 (function () {
   "use strict";
@@ -27,8 +31,18 @@
     return value;
   }
 
-  var locale = document.documentElement.lang || navigator.language || "en";
-  var timeLocale = navigator.language || locale;
+  var pageLocale = document.documentElement.lang || navigator.language || "en";
+  // The visitor's own regional settings (12 or 24 hours) when the browser speaks the page's language.
+  var browser = navigator.language || "";
+  var sameLanguage = browser.split("-")[0].toLowerCase() === pageLocale.split("-")[0].toLowerCase();
+  var locale = gregorian(pageLocale);
+  var timeLocale = gregorian(sameLanguage ? browser : pageLocale);
+  var weekStart = typeof config.weekStart === "number" ? config.weekStart : 1;
+  var numbers = new Intl.NumberFormat(locale, { useGrouping: false });
+
+  function gregorian(tag) {
+    try { return Intl.getCanonicalLocales(tag.indexOf("-u-") < 0 ? tag + "-u-ca-gregory" : tag)[0]; } catch (e) { return tag; }
+  }
   var state = { tz: config.timezone, month: null, data: null, date: null, slot: null, busy: false };
 
   function guessTimezone() {
@@ -107,10 +121,15 @@
   function renderWeekdays() {
     var row = $("weekdays");
     if (!row || row.childElementCount) { return; }
-    var format = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+    // 7 January 2024 was a Sunday. Languages whose short names run long (Persian) take one letter, as their calendars do.
+    var days = [], style = "short";
+    for (var n = 0; n < 7; n++) { days.push(new Date(Date.UTC(2024, 0, 7 + weekStart + n))); }
+    var short = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+    if (days.some(function (day) { return short.format(day).length > 4; })) { style = "narrow"; }
+    var format = new Intl.DateTimeFormat(locale, { weekday: style, timeZone: "UTC" });
     for (var i = 0; i < 7; i++) {
       var cell = template("weekday");
-      cell.textContent = format.format(new Date(Date.UTC(2024, 0, 1 + i)));
+      cell.textContent = format.format(days[i]);
       row.appendChild(cell);
     }
   }
@@ -124,7 +143,7 @@
     $("next").disabled = data.month >= data.lastMonth;
     var m = parseMonth(data.month);
     var first = new Date(Date.UTC(m.year, m.month - 1, 1));
-    var lead = (first.getUTCDay() + 6) % 7;
+    var lead = (first.getUTCDay() - weekStart + 7) % 7;
     var count = new Date(Date.UTC(m.year, m.month, 0)).getUTCDate();
     for (var b = 0; b < lead; b++) { grid.appendChild(template("blank")); }
     var dayLabel = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
@@ -132,7 +151,7 @@
       var iso = data.month + "-" + String(d).padStart(2, "0");
       var open = (data.days[iso] || []).length > 0;
       var button = template("day");
-      button.textContent = String(d);
+      button.textContent = numbers.format(d);
       button.setAttribute("data-date", iso);
       button.disabled = !open;
       button.setAttribute("aria-pressed", iso === state.date ? "true" : "false");
@@ -214,7 +233,7 @@
   function summary() {
     var node = $("summary");
     if (!node || !state.slot) { return; }
-    node.textContent = dayTitle(state.date) + ", " + timeOf(state.slot) + " - " + timeOf(endOf(state.slot));
+    node.textContent = text("summary", "{day}, {start} to {end}", { day: dayTitle(state.date), start: timeOf(state.slot), end: timeOf(endOf(state.slot)) });
     var tz = $("summary-timezone");
     if (tz) { tz.textContent = zoneName(state.tz) + " (" + offsetLabel(state.tz) + ")"; }
   }
@@ -304,17 +323,18 @@
     var input = form.elements.files;
     if (!input || !input.files) { return ""; }
     var files = Array.prototype.slice.call(input.files);
-    if (files.length > config.maxFiles) { return text("tooManyFiles", "You can attach up to {n} files.", { n: config.maxFiles }); }
+    if (files.length > config.maxFiles) { return text("tooManyFiles", "You can attach up to {n} files.", { n: numbers.format(config.maxFiles) }); }
     for (var i = 0; i < files.length; i++) {
       var ext = files[i].name.indexOf(".") >= 0 ? files[i].name.split(".").pop().toLowerCase() : "";
       if (config.fileExtensions.indexOf(ext) < 0) { return text("badFileType", "{name}: this file type is not accepted.", { name: files[i].name }); }
-      if (files[i].size > config.maxFileMb * 1048576) { return text("fileTooLarge", "{name} is larger than {mb} MB.", { name: files[i].name, mb: config.maxFileMb }); }
+      if (files[i].size > config.maxFileMb * 1048576) { return text("fileTooLarge", "{name} is larger than {mb} MB.", { name: files[i].name, mb: numbers.format(config.maxFileMb) }); }
     }
     return "";
   }
 
   function size(bytes) {
-    return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(bytes / 1024)) + " KB";
+    var mb = new Intl.NumberFormat(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+    return bytes >= 1048576 ? mb.format(bytes / 1048576) + " MB" : numbers.format(Math.max(1, Math.round(bytes / 1024))) + " KB";
   }
 
   function bindFiles() {

@@ -1,0 +1,355 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-19 20:56+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Website"
+msgstr "وب‌سایت"
+
+msgid "Other"
+msgstr "دیگر"
+
+#, python-brace-format
+msgid "{weekday}, {day} {month} {year}"
+msgstr "{weekday}، {day} {month} {year}"
+
+#, python-brace-format
+msgid "{weekday} {day} {month}, {time}"
+msgstr "{weekday} {day} {month}، ساعت {time}"
+
+#, python-brace-format
+msgid "{start} to {end}"
+msgstr "{start} تا {end}"
+
+#, python-brace-format
+#| msgid "{day}, no times"
+msgid "{date}, {time}"
+msgstr "{date}، ساعت {time}"
+
+#, python-brace-format
+msgid "{meeting} with {owner}"
+msgstr "{meeting} با {owner}"
+
+#, python-brace-format
+msgid "Join: {url}"
+msgstr "ورود به جلسه: {url}"
+
+#, python-brace-format
+msgid "Confirmed: {meeting} with {owner}, {when}"
+msgstr "تأیید شد: {meeting} با {owner}، {when}"
+
+#, python-brace-format
+msgid "Starts in {minutes} minutes: {meeting} with {owner}"
+msgstr "{minutes} دقیقه‌ی دیگر شروع می‌شود: {meeting} با {owner}"
+
+#, python-brace-format
+msgid "Cancelled: {meeting} with {owner}, {when}"
+msgstr "لغو شد: {meeting} با {owner}، {when}"
+
+msgid "Book a meeting"
+msgstr "رزرو جلسه"
+
+#, python-format
+msgid "Booked: %(meeting)s with %(owner_name)s"
+msgstr "رزرو شد: %(meeting)s با %(owner_name)s"
+
+msgid "You are booked"
+msgstr "جلسه‌ی شما رزرو شد"
+
+#, python-format
+msgid "%(meeting)s with %(owner_name)s"
+msgstr "%(meeting)s با %(owner_name)s"
+
+#, python-format
+msgid "A confirmation is on its way to %(email)s."
+msgstr "ایمیل تأیید به %(email)s فرستاده می‌شود."
+
+msgid "Add to Google Calendar"
+msgstr "افزودن به Google Calendar"
+
+#, python-format
+msgid "%(meeting)s (%(minutes)s min)"
+msgstr "%(meeting)s (%(minutes)s دقیقه)"
+
+msgid "Meeting"
+msgstr "جلسه"
+
+msgid "When"
+msgstr "زمان"
+
+msgid "Where"
+msgstr "مکان"
+
+msgid "Google Meet. The link follows in a separate email."
+msgstr "Google Meet. لینک جلسه در ایمیل جداگانه‌ای می‌رسد."
+
+msgid "Online"
+msgstr "آنلاین"
+
+msgid "Join with Google Meet"
+msgstr "ورود با Google Meet"
+
+#, python-format
+msgid "%(meeting)s on %(date)s is cancelled."
+msgstr "%(meeting)s در %(date)s لغو شد."
+
+msgid "Cancelled"
+msgstr "لغو شد"
+
+msgid "Your meeting is cancelled"
+msgstr "جلسه‌ی شما لغو شد"
+
+#, python-format
+msgid ""
+"Hi %(guest)s, the meeting below with %(owner_name)s is cancelled and has "
+"been removed from the calendar."
+msgstr ""
+"سلام %(guest)s، جلسه‌ی زیر با %(owner_name)s لغو شد و از تقویم هم حذف شد."
+
+msgid "Pick a new time"
+msgstr "زمان تازه‌ای انتخاب کنید"
+
+#, python-format
+msgid "Hi %(guest)s,"
+msgstr "سلام %(guest)s،"
+
+#, python-format
+msgid ""
+"Your %(meeting)s with %(owner_name)s on %(date)s, %(time)s (%(zone)s) is "
+"cancelled."
+msgstr ""
+"جلسه‌ی «%(meeting)s» شما با %(owner_name)s در %(date)s، ساعت %(time)s "
+"(%(zone)s) لغو شد."
+
+#, python-format
+msgid "%(meeting)s, %(date)s at %(time)s."
+msgstr "%(meeting)s، %(date)s، ساعت %(time)s."
+
+msgid "Booking confirmed"
+msgstr "رزرو تأیید شد"
+
+#, python-format
+msgid "You are booked with %(owner_name)s"
+msgstr "جلسه‌ی شما با %(owner_name)s رزرو شد"
+
+#, python-format
+msgid ""
+"Hi %(guest)s, your %(meeting)s is confirmed. The details are below, and the "
+"calendar file attached adds it to your calendar."
+msgstr ""
+"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما تأیید شد. جزئیات را پایین‌تر "
+"می‌بینید. فایل تقویم پیوست‌شده هم جلسه را به تقویم شما اضافه می‌کند."
+
+msgid "View the booking"
+msgstr "دیدن رزرو"
+
+#, python-format
+msgid ""
+"Need to change the time? Reply to this email and %(owner_name)s will sort it"
+" out. A reminder with the link arrives %(minutes)s minutes before the start."
+msgstr ""
+"اگر لازم است زمان را عوض کنید، به همین ایمیل پاسخ دهید تا %(owner_name)s "
+"هماهنگ کند. یادآوری همراه با لینک جلسه %(minutes)s دقیقه پیش از شروع می‌رسد."
+
+#, python-format
+msgid "Your %(meeting)s with %(owner_name)s is confirmed."
+msgstr "جلسه‌ی «%(meeting)s» شما با %(owner_name)s تأیید شد."
+
+msgid "Timezone"
+msgstr "منطقه‌ی زمانی"
+
+#, python-format
+msgid "%(meeting)s starts at %(time)s."
+msgstr "%(meeting)s ساعت %(time)s شروع می‌شود."
+
+#, python-format
+msgid "Starts in %(minutes)s minutes"
+msgstr "%(minutes)s دقیقه‌ی دیگر شروع می‌شود"
+
+#, python-format
+msgid "Your meeting with %(owner_name)s starts soon"
+msgstr "جلسه‌ی شما با %(owner_name)s به‌زودی شروع می‌شود"
+
+#, python-format
+msgid ""
+"Hi %(guest)s, this is a reminder that your %(meeting)s starts in %(minutes)s"
+" minutes."
+msgstr ""
+"سلام %(guest)s، یادآوری می‌کنیم که جلسه‌ی «%(meeting)s» شما %(minutes)s "
+"دقیقه‌ی دیگر شروع می‌شود."
+
+#, python-format
+msgid ""
+"Hi %(guest)s, your %(meeting)s with %(owner_name)s starts in %(minutes)s "
+"minutes."
+msgstr ""
+"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما با %(owner_name)s %(minutes)s "
+"دقیقه‌ی دیگر شروع می‌شود."
+
+msgid "Join"
+msgstr "ورود به جلسه"
+
+msgid "the link is in your calendar invitation"
+msgstr "لینک در دعوت‌نامه‌ی تقویم شماست"
+
+#, python-format
+msgid "%(minutes)s min"
+msgstr "%(minutes)s دقیقه"
+
+msgid "Pick a time"
+msgstr "انتخاب زمان"
+
+msgid "Your details"
+msgstr "مشخصات شما"
+
+msgid "Confirmed"
+msgstr "تأیید"
+
+msgid "Previous month"
+msgstr "ماه قبل"
+
+msgid "Next month"
+msgstr "ماه بعد"
+
+msgid "No open times this month."
+msgstr "این ماه زمان خالی‌ای نمانده است."
+
+msgid "Loading times..."
+msgstr "در حال بارگیری زمان‌ها..."
+
+msgid "No times left on this day."
+msgstr "در این روز زمان خالی‌ای نمانده است."
+
+msgid "Name"
+msgstr "نام"
+
+msgid "Email"
+msgstr "ایمیل"
+
+msgid "Brand or company"
+msgstr "برند یا شرکت"
+
+msgid "Phone"
+msgstr "تلفن"
+
+msgid "Social profiles"
+msgstr "شبکه‌های اجتماعی"
+
+msgid "Network"
+msgstr "شبکه"
+
+msgid "Profile link or ID"
+msgstr "لینک یا شناسه‌ی پروفایل"
+
+msgid "Remove"
+msgstr "حذف"
+
+msgid "Add another profile"
+msgstr "افزودن پروفایل دیگر"
+
+msgid "Description"
+msgstr "توضیحات"
+
+msgid "Files"
+msgstr "فایل‌ها"
+
+msgid "Other guests (emails)"
+msgstr "مهمان‌های دیگر (ایمیل)"
+
+msgid "Back"
+msgstr "بازگشت"
+
+msgid "Confirm booking"
+msgstr "تأیید رزرو"
+
+#, python-format
+msgid "Book a meeting with %(owner_name)s"
+msgstr "رزرو جلسه با %(owner_name)s"
+
+msgid "No meeting types are open right now."
+msgstr "فعلاً هیچ جلسه‌ای برای رزرو باز نیست."
+
+#, python-brace-format
+msgid "{day}, times available"
+msgstr "{day}، زمان خالی دارد"
+
+#, python-brace-format
+msgid "{day}, no times"
+msgstr "{day}، زمان خالی ندارد"
+
+msgid "Pick a day"
+msgstr "یک روز انتخاب کنید"
+
+msgid "The calendar did not load. Please refresh the page."
+msgstr "تقویم بارگیری نشد. لطفاً صفحه را دوباره باز کنید."
+
+msgid "Please check the highlighted fields."
+msgstr "لطفاً فیلدهای مشخص‌شده را بررسی کنید."
+
+msgid "The booking did not go through. Please try again."
+msgstr "رزرو انجام نشد. لطفاً دوباره تلاش کنید."
+
+#, python-brace-format
+msgid "You can attach up to {n} files."
+msgstr "حداکثر {n} فایل می‌توانید پیوست کنید."
+
+#, python-brace-format
+msgid "{name}: this file type is not accepted."
+msgstr "{name}: این نوع فایل پذیرفته نمی‌شود."
+
+#, python-brace-format
+msgid "{name} is larger than {mb} MB."
+msgstr "حجم {name} بیشتر از {mb} مگابایت است."
+
+#, python-brace-format
+msgid "{day}, {start} to {end}"
+msgstr "{day}، {start} تا {end}"
+
+#, python-brace-format
+msgid "You can add up to {n} profiles."
+msgstr "حداکثر {n} پروفایل می‌توانید اضافه کنید."
+
+msgid "The form could not be read."
+msgstr "فرم خوانده نشد."
+
+msgid "Please fill this in."
+msgstr "لطفاً این فیلد را پر کنید."
+
+msgid "Please enter a phone number with digits only."
+msgstr "لطفاً شماره‌ی تلفن را فقط با عدد وارد کنید."
+
+msgid "Please enter a valid email address."
+msgstr "لطفاً یک ایمیل معتبر وارد کنید."
+
+#, python-brace-format
+msgid "{email} is not a valid email address."
+msgstr "{email} ایمیل معتبری نیست."
+
+#, python-brace-format
+msgid "You can add up to {n} guests."
+msgstr "حداکثر {n} مهمان می‌توانید اضافه کنید."
+
+msgid "Please pick a time."
+msgstr "لطفاً یک زمان انتخاب کنید."
+
+msgid "Too many bookings from this connection. Please try again later."
+msgstr ""
+"از این اتصال رزروهای زیادی ثبت شده است. لطفاً کمی بعد دوباره تلاش کنید."
+
+msgid "That time was just taken. Please pick another one."
+msgstr "این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید."

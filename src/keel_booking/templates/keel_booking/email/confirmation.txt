@@ -1,19 +1,18 @@
-{% autoescape off %}Hi {{ booking.guest_name }},
+{% load i18n keel_booking %}{% autoescape off %}{% blocktranslate with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}
 
-Your {{ event_type.name }} with {{ owner_name }} is confirmed.
+{% blocktranslate trimmed with meeting=event_type.name %}Your {{ meeting }} with {{ owner_name }} is confirmed.{% endblocktranslate %}
 
-Meeting: {{ event_type.name }} ({{ event_type.duration_minutes }} min)
-When: {{ when.date }}, {{ when.time }}
-Timezone: {{ when.timezone }}
-Where: {% if booking.meet_url %}Google Meet, {{ booking.meet_url }}{% elif event_type.create_meet_link %}Google Meet, the link follows in a separate email{% else %}Online{% endif %}
+{% translate "Meeting" %}: {% include "keel_booking/email/_meeting.txt" %}
+{% translate "When" %}: {{ when.full }}
+{% translate "Timezone" %}: {{ when.timezone }}
+{% translate "Where" %}: {% if booking.meet_url %}Google Meet, {{ booking.meet_url }}{% elif event_type.create_meet_link %}{% translate "Google Meet. The link follows in a separate email." %}{% else %}{% translate "Online" %}{% endif %}
 {% if event_type.confirmation_note %}
 {{ event_type.confirmation_note }}
 {% endif %}
-Add to Google Calendar: {{ calendar_link }}
-View the booking: {{ page_url }}
+{% translate "Add to Google Calendar" %}: {{ calendar_link }}
+{% translate "View the booking" %}: {{ page_url }}
 
-Need to change the time? Reply to this email.
-A reminder with the link arrives {{ event_type.reminder_minutes }} minutes before the start.
+{% with minutes=event_type.reminder_minutes|local_digits %}{% blocktranslate trimmed %}Need to change the time? Reply to this email and {{ owner_name }} will sort it out. A reminder with the link arrives {{ minutes }} minutes before the start.{% endblocktranslate %}{% endwith %}
 
 {{ owner_name }}
 {{ site_url }}

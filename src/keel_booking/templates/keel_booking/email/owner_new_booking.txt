@@ -4,6 +4,7 @@ Guest: {{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_
 Phone: {{ booking.guest_phone|default:"-" }}
 {% for name, handle in booking.socials_display %}{{ name }}: {{ handle }}
 {% endfor %}Their timezone: {{ booking.guest_timezone }}
+Booked in: {{ booking.language_name }}
 When: {{ when.date }}, {{ when.time }} ({{ when.timezone }})
 Where: {% if booking.meet_url %}{{ booking.meet_url }}{% else %}no Meet link yet{% endif %}
 {% for a in booking.attendees.all %}{% if a.role != "guest" %}Invited: {{ a.email }} ({{ a.get_role_display|lower }})

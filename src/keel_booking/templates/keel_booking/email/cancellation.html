@@ -1,10 +1,11 @@
 {% extends "keel_booking/email/base.html" %}
-{% block preheader %}{{ event_type.name }} on {{ when.date }} is cancelled.{% endblock %}
-{% block eyebrow %}Cancelled{% endblock %}
-{% block title %}Your meeting is cancelled{% endblock %}
-{% block intro %}<p style="margin:0;">Hi {{ booking.guest_name }}, the meeting below with {{ owner_name }} is cancelled and has been removed from the calendar.</p>{% endblock %}
+{% load i18n %}
+{% block preheader %}{% blocktranslate trimmed with meeting=event_type.name date=when.date %}{{ meeting }} on {{ date }} is cancelled.{% endblocktranslate %}{% endblock %}
+{% block eyebrow %}{% translate "Cancelled" %}{% endblock %}
+{% block title %}{% translate "Your meeting is cancelled" %}{% endblock %}
+{% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }}, the meeting below with {{ owner_name }} is cancelled and has been removed from the calendar.{% endblocktranslate %}</p>{% endblock %}
 {% block cta %}
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;"><tr>
-  <td style="background:{{ theme.primary }};border-radius:6px;"><a href="{{ book_url }}" style="display:inline-block;padding:15px 32px;font:500 15px/1.4 {{ theme.font_body }};color:{{ theme.on_primary }};text-decoration:none;">Pick a new time</a></td>
+  <td style="background:{{ theme.primary }};border-radius:6px;"><a href="{{ book_url }}" style="display:inline-block;padding:15px 32px;font:500 15px/1.4 {{ theme.font_body }};color:{{ theme.on_primary }};text-decoration:none;">{% translate "Pick a new time" %}</a></td>
 </tr></table>
 {% endblock %}

@@ -57,6 +57,30 @@ urlpatterns = [
 
 Every key and its default is in `src/keel_booking/conf.py`.
 
+## Languages
+
+Every guest-facing word is a Django translation; the package ships Persian (`fa`) and Turkish (`tr`)
+beside the English source. Mount the pages inside `i18n_patterns` with `LocaleMiddleware`, and
+each language gets its own pages (`/book/`, `/fa/book/`, `/tr/book/`):
+
+```python
+LANGUAGES = [("en", "English"), ("tr", "Türkçe"), ("fa", "فارسی")]
+urlpatterns = [path("book/admin/", admin.site.urls)] + i18n_patterns(
+    path("book/", include("keel_booking.urls")), prefix_default_language=False)
+```
+
+- **Meeting types** take a translation per language in the admin (`EventTypeTranslation`: name,
+  tagline, description, highlights, confirmation note). An empty text keeps the type's own.
+- **A booking keeps its language** (`Booking.language`, the page it was made on). The guest's
+  confirmation, reminder, cancellation, `.ics` and Google Calendar link are written in it, with a
+  right-to-left layout for Persian and the theme's `font_rtl`. The owner's emails and the admin stay
+  English and say which language the guest booked in.
+- **Dates and numbers:** weekday and month names come from Django's own translations; Persian
+  writes numbers in Persian digits (`i18n.digits`, the `local_digits` filter). The widget formats
+  with the page's `lang` on the Gregorian calendar, starts the week on `config.weekStart`
+  (Saturday for Persian) and takes its sentences from `config.labels`.
+- `OWNER_NAME` may be a lazy translation (`gettext_lazy("Jane Doe")`) to spell the owner's name per language.
+
 ## Pages and endpoints
 
 | Path (under the mount) | What |

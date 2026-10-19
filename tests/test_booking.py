@@ -12,8 +12,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
 from keel_booking import availability, services
-from keel_booking.models import (AvailabilityWindow, Booking, DateOverride, EventType, FixedAttendee, FollowUp,
-                                 BookingAttendee)
+from keel_booking.models import (AvailabilityWindow, Booking, DateOverride, EventType, EventTypeTranslation,
+                                 FixedAttendee, FollowUp, BookingAttendee)
 
 UTC = dt_timezone.utc
 IST = ZoneInfo("Europe/Istanbul")
@@ -156,6 +156,58 @@ class ReserveTests(TestCase):
     def test_slots_endpoint(self, _now):
         data = self.client.get("/book/seo/slots/?month=2026-11&tz=Europe/Istanbul").json()
         self.assertEqual(data["days"]["2026-11-02"], ["2026-11-02T07:00:00Z", "2026-11-02T07:30:00Z", "2026-11-02T08:00:00Z"])
+
+
+@mock.patch("keel_booking.availability.timezone.now", return_value=NOW)
+class LanguageTests(TestCase):
+    """A booking made on a translated page keeps its language: its pages and the guest's emails follow it."""
+
+    def setUp(self):
+        self.et = make_type()
+        EventTypeTranslation.objects.create(event_type=self.et, language="fa", name="مشاوره‌ی سئو",
+                                            highlights="یک\nدو")
+
+    def reserve(self, prefix):
+        body = {"start": "2026-11-02T07:00:00Z", "name": "Sara", "email": "sara@example.com", "timezone": "Asia/Tehran"}
+        return self.client.post(f"{prefix}/book/seo/reserve/", json.dumps(body), content_type="application/json")
+
+    def test_persian_booking(self, _now):
+        page = self.client.get("/fa/book/seo/")
+        self.assertContains(page, "مشاوره‌ی سئو")
+        self.assertContains(page, '"weekStart": 6')
+        self.assertContains(page, "۴۵")
+        response = self.reserve("/fa")
+        self.assertEqual(response.status_code, 201, response.content)
+        self.assertTrue(response.json()["redirect"].startswith("/fa/book/confirmed/"))
+        booking = Booking.objects.get()
+        self.assertEqual(booking.language, "fa")
+        guest = next(m for m in outbox.outbox if m.to == ["sara@example.com"])
+        owner = next(m for m in outbox.outbox if m.to == ["owner@example.com"])
+        self.assertTrue(guest.subject.startswith("تأیید شد: مشاوره‌ی سئو"), guest.subject)
+        self.assertIn("دوشنبه، ۲ نوامبر ۲۰۲۶", guest.body)
+        self.assertIn("https://example.com/fa/book/confirmed/", guest.body)
+        html = guest.alternatives[0][0]
+        self.assertIn('dir="rtl"', html)
+        self.assertIn("SUMMARY:مشاوره‌ی سئو با Test Owner", guest.attachments[0][1])
+        self.assertTrue(owner.subject.startswith("New booking: SEO consultation"), owner.subject)
+        self.assertIn("Booked in: Persian", owner.body)
+        confirmed = self.client.get(response.json()["redirect"])
+        self.assertContains(confirmed, "جلسه‌ی شما رزرو شد")
+
+    def test_turkish_errors_and_default_english(self, _now):
+        response = self.client.post("/tr/book/seo/reserve/", json.dumps({"start": "2026-11-02T07:00:00Z"}),
+                                    content_type="application/json")
+        self.assertEqual(response.json()["fields"]["email"], "Lütfen geçerli bir e-posta adresi girin.")
+        self.assertEqual(self.reserve("").status_code, 201)
+        self.assertEqual(Booking.objects.get().language, "en")
+        self.assertContains(self.client.get("/book/seo/"), "SEO consultation")
+        self.assertContains(self.client.get("/book/seo/"), '"weekStart": 1')
+
+    def test_translation_falls_back_per_text(self, _now):
+        local = self.et.localized("fa")
+        self.assertEqual((local.name, local.highlight_list(), local.tagline), ("مشاوره‌ی سئو", ["یک", "دو"], self.et.tagline))
+        self.assertEqual(self.et.localized("tr").name, "SEO consultation")
+        self.assertEqual(EventType.objects.get().name, "SEO consultation")
 
 
 class GmailBackendTests(TestCase):

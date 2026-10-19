@@ -186,7 +186,7 @@ def event_body(booking) -> dict:
     et = booking.event_type
     attendees = [{"email": a.email, "displayName": a.name} if a.name else {"email": a.email}
                  for a in booking.attendees.all()]
-    lines = [f"Booked by {booking.guest_name} <{booking.guest_email}>"]
+    lines = [f"Booked by {booking.guest_name} <{booking.guest_email}>", f"Language: {booking.language_name()}"]
     if booking.guest_company:
         lines.append(f"Brand: {booking.guest_company}")
     if booking.guest_phone:

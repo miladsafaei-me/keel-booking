@@ -11,7 +11,7 @@ from django.utils.html import format_html, format_html_join
 
 from . import google, services
 from .models import (AvailabilityWindow, Booking, BookingAttendee, BookingFile, BookingNote, DateOverride, EventType,
-                     FixedAttendee, FollowUp, GoogleAccount)
+                     EventTypeTranslation, FixedAttendee, FollowUp, GoogleAccount)
 
 
 class AvailabilityWindowInline(admin.TabularInline):
@@ -29,12 +29,20 @@ class FixedAttendeeInline(admin.TabularInline):
     extra = 0
 
 
+class EventTypeTranslationInline(admin.StackedInline):
+    """The page and email texts in each other language of the site; an empty text keeps the type's own."""
+
+    model = EventTypeTranslation
+    extra = 0
+    fields = ("language", "name", "tagline", "description", "highlights", "confirmation_note")
+
+
 @admin.register(EventType)
 class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "duration_minutes", "timezone", "is_active", "sort_order", "page_link")
     list_editable = ("is_active", "sort_order")
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (AvailabilityWindowInline, DateOverrideInline, FixedAttendeeInline)
+    inlines = (EventTypeTranslationInline, AvailabilityWindowInline, DateOverrideInline, FixedAttendeeInline)
     fieldsets = (
         ("Page", {"fields": ("name", "slug", "tagline", "description", "highlights", "icon", "is_active", "sort_order")}),
         ("Length and spacing", {"fields": ("duration_minutes", "buffer_before_minutes", "buffer_after_minutes",
@@ -110,20 +118,20 @@ class UpcomingFilter(admin.SimpleListFilter):
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = ("start_at", "event_type", "guest_name", "guest_company", "guest_email", "guest_phone",
-                    "socials_short", "description_short", "file_count", "status", "meet", "next_follow_up")
+                    "socials_short", "description_short", "file_count", "language", "status", "meet", "next_follow_up")
     list_display_links = ("start_at", "guest_name")
-    list_filter = (UpcomingFilter, "status", "event_type", "source")
+    list_filter = (UpcomingFilter, "status", "event_type", "source", "language")
     search_fields = ("guest_name", "guest_email", "guest_company", "guest_phone", "guest_message")
     date_hierarchy = "start_at"
     list_per_page = 50
     inlines = (BookingFileInline, BookingNoteInline, FollowUpInline, BookingAttendeeInline)
-    readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "meet", "calendar",
+    readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "language", "meet", "calendar",
                        "socials_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
         ("Meeting", {"fields": ("event_type", "start_at", "end_at", "status", "source", "meet", "calendar")}),
         ("Guest", {"fields": ("guest_name", "guest_company", "guest_email", "guest_phone", "socials_list",
-                              "guest_message", "guest_timezone")}),
+                              "guest_message", "guest_timezone", "language")}),
         ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )

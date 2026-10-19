@@ -1,8 +1,9 @@
 {% extends "keel_booking/email/base.html" %}
-{% block preheader %}{{ event_type.name }} starts at {{ when.time }}.{% endblock %}
-{% block eyebrow %}Starts in {{ minutes }} minutes{% endblock %}
-{% block title %}{% if for_owner %}{{ booking.guest_name }}, {{ event_type.name }}{% else %}Your meeting with {{ owner_name }} starts soon{% endif %}{% endblock %}
-{% block intro %}<p style="margin:0;">{% if for_owner %}Your meeting with {{ booking.guest_name }}{% if booking.guest_company %} ({{ booking.guest_company }}){% endif %} starts in {{ minutes }} minutes.{% else %}Hi {{ booking.guest_name }}, this is a reminder that your {{ event_type.name }} starts in {{ minutes }} minutes.{% endif %}</p>{% endblock %}
+{% load i18n %}
+{% block preheader %}{% if for_owner %}{{ event_type.name }} starts at {{ when.time }}.{% else %}{% blocktranslate trimmed with meeting=event_type.name time=when.time %}{{ meeting }} starts at {{ time }}.{% endblocktranslate %}{% endif %}{% endblock %}
+{% block eyebrow %}{% blocktranslate trimmed %}Starts in {{ minutes }} minutes{% endblocktranslate %}{% endblock %}
+{% block title %}{% if for_owner %}{{ booking.guest_name }}, {{ event_type.name }}{% else %}{% blocktranslate trimmed %}Your meeting with {{ owner_name }} starts soon{% endblocktranslate %}{% endif %}{% endblock %}
+{% block intro %}<p style="margin:0;">{% if for_owner %}Your meeting with {{ booking.guest_name }}{% if booking.guest_company %} ({{ booking.guest_company }}){% endif %} starts in {{ minutes }} minutes. The guest booked in {{ booking.language_name }}.{% else %}{% blocktranslate trimmed with guest=booking.guest_name meeting=event_type.name %}Hi {{ guest }}, this is a reminder that your {{ meeting }} starts in {{ minutes }} minutes.{% endblocktranslate %}{% endif %}</p>{% endblock %}
 {% block body_extra %}
 {% if for_owner %}{% if booking.guest_message %}<p style="margin:24px 0 0 0;padding:16px;background:{{ theme.ground }};border-radius:6px;font:400 15px/1.7 {{ theme.font_body }};color:{{ theme.text }};">{{ booking.guest_message|linebreaksbr }}</p>{% endif %}
 <p style="margin:24px 0 0 0;font:400 14px/1.7 {{ theme.font_body }};"><a href="{{ admin_url }}" style="color:{{ theme.primary }};">Open the booking</a></p>{% endif %}

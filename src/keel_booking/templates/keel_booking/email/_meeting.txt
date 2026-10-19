@@ -1,0 +1,1 @@
+{% load i18n keel_booking %}{% with minutes=event_type.duration_minutes|local_digits %}{% blocktranslate trimmed with meeting=event_type.name %}{{ meeting }} ({{ minutes }} min){% endblocktranslate %}{% endwith %}

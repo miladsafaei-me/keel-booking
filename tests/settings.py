@@ -1,12 +1,15 @@
 SECRET_KEY = "test"
 USE_TZ = True
+LANGUAGE_CODE = "en"
+LANGUAGES = [("en", "English"), ("tr", "Türkçe"), ("fa", "فارسی")]
 TIME_ZONE = "UTC"
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "keel_booking",
 ]
 MIDDLEWARE = [
-    "django.contrib.sessions.middleware.SessionMiddleware", "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware", "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware", "django.contrib.messages.middleware.MessageMiddleware",
 ]
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}

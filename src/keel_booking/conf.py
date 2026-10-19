@@ -15,6 +15,7 @@ A host sets only what differs, for example::
 from __future__ import annotations
 
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 DEFAULTS = {
     # Who the meetings are with. OWNER_EMAIL gets every owner notification and follow-up reminder.
@@ -45,8 +46,8 @@ DEFAULTS = {
     "REQUIRED_FIELDS": ("name", "email"),
     # The networks a visitor can pick for a social profile, as (value, label).
     "SOCIAL_NETWORKS": (("linkedin", "LinkedIn"), ("instagram", "Instagram"), ("telegram", "Telegram"),
-                        ("x", "X"), ("youtube", "YouTube"), ("github", "GitHub"), ("website", "Website"),
-                        ("other", "Other")),
+                        ("x", "X"), ("youtube", "YouTube"), ("github", "GitHub"), ("website", _("Website")),
+                        ("other", _("Other"))),
     "MAX_SOCIALS": 6,
     # Files a visitor can attach: how many, how large each, and which extensions.
     "MAX_FILES": 5,
@@ -73,6 +74,8 @@ DEFAULTS = {
         "on_primary": "#FFFFFF",
         "font_heading": "Arial, Helvetica, sans-serif",
         "font_body": "Arial, Helvetica, sans-serif",
+        # Headings and text of an email in a right-to-left language, such as Persian.
+        "font_rtl": "Tahoma, Arial, sans-serif",
         "logo_url": "",
         "brand_name": "",
     },

@@ -2,8 +2,9 @@
 
 Part of the **Keel** platform (see keel-kit `PLATFORM.md`). A reusable Django app for booking
 meetings: meeting types, the slot engine, Google Calendar/Meet/Gmail, emails, reminders, the
-owner's notes and follow-ups. English only; no banner comments; CSS variables only in styling;
-multi-line Django template comments use `{% comment %}...{% endcomment %}`.
+owner's notes and follow-ups. Guest-facing text is translated (English source, Persian and Turkish
+shipped in `locale/`); the admin and the owner's emails stay English. No banner comments; CSS
+variables only in styling; multi-line Django template comments use `{% comment %}...{% endcomment %}`.
 
 ## Task tracking
 
@@ -25,6 +26,12 @@ Remaining and follow-up work is tracked in [TODO.md](TODO.md), not in chat memor
 - Times are stored in UTC; weekly hours are wall-clock times in the type's timezone.
 - Releases: `~/www/keel-kit/scripts/keel-release.sh X.Y.Z`; consumers re-pin the tag.
 - Tests: `PYTHONPATH=src:. DJANGO_SETTINGS_MODULE=tests.settings django-admin test tests`.
+- A new or changed guest-facing string is marked for translation (`{% translate %}`, `gettext`) and
+  gets its Persian and Turkish in the same change: from `src/keel_booking`, run
+  `PYTHONPATH=../..:.. DJANGO_SETTINGS_MODULE=tests.settings django-admin makemessages -l fa -l tr --no-location`,
+  fill the `.po` files, then `django-admin compilemessages`. The `.mo` files are committed.
+- Numbers in a guest-facing text go through `i18n.digits` (or the `local_digits` filter), so Persian
+  reads them in Persian digits.
 
 ## Consumers
 

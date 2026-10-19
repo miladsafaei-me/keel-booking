@@ -6,14 +6,16 @@ Times are stored in UTC; a meeting type's weekly hours are wall-clock times in i
 
 from __future__ import annotations
 
+import copy
 import uuid
 import zoneinfo
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.conf import settings
 from django.db import models
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from . import conf
 
@@ -136,6 +138,52 @@ class EventType(models.Model):
     def highlight_list(self) -> list[str]:
         return [line.strip() for line in self.highlights.splitlines() if line.strip()]
 
+    def localized(self, language: str | None = None) -> "EventType":
+        """A copy whose page and email texts are in ``language`` (the active one by default).
+
+        Each text comes from the type's translation in that language when it has one, and stays
+        as written on the type otherwise. The copy is for display only; never save it.
+        """
+        language = (language or translation.get_language() or "").split("-")[0]
+        rows = getattr(self, "_prefetched_objects_cache", {}).get("translations")
+        row = (next((r for r in rows if r.language == language), None) if rows is not None
+               else self.translations.filter(language=language).first())
+        if row is None:
+            return self
+        local = copy.copy(self)
+        for name in EventTypeTranslation.TEXT_FIELDS:
+            value = getattr(row, name)
+            if value:
+                setattr(local, name, value)
+        return local
+
+
+def language_choices():
+    return [(code, name) for code, name in settings.LANGUAGES]
+
+
+class EventTypeTranslation(models.Model):
+    """A meeting type's page and email texts in one more language. An empty text keeps the type's own."""
+
+    TEXT_FIELDS = ("name", "tagline", "description", "highlights", "confirmation_note")
+
+    event_type = models.ForeignKey(EventType, on_delete=models.CASCADE, related_name="translations")
+    language = models.CharField(max_length=10, choices=language_choices)
+    name = models.CharField(max_length=120, blank=True)
+    tagline = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    highlights = models.TextField(blank=True, help_text="One point per line.")
+    confirmation_note = models.TextField(blank=True)
+
+    class Meta:
+        db_table = "keel_booking_event_type_translation"
+        unique_together = ("event_type", "language")
+        ordering = ("language",)
+        verbose_name = "translation"
+
+    def __str__(self) -> str:
+        return f"{self.event_type.slug} ({self.language})"
+
 
 class AvailabilityWindow(models.Model):
     """Weekly hours: a weekday and a time range. A weekday with no window is a day off."""
@@ -230,6 +278,8 @@ class Booking(models.Model):
                                      help_text="A list of {network, handle} the guest gave.")
     guest_message = models.TextField("description", blank=True)
     guest_timezone = models.CharField(max_length=64, default="UTC", validators=[validate_timezone])
+    language = models.CharField(max_length=10, blank=True,
+                                help_text="The language the guest booked in; their emails are written in it.")
 
     google_event_id = models.CharField(max_length=255, blank=True)
     google_event_link = models.URLField(max_length=500, blank=True)
@@ -263,6 +313,18 @@ class Booking(models.Model):
         et = self.event_type
         return (self.start_at - timedelta(minutes=et.buffer_before_minutes),
                 self.end_at + timedelta(minutes=et.buffer_after_minutes))
+
+    @property
+    def guest_language(self) -> str:
+        """The language of the guest-side emails: the one booked in, else the site's default."""
+        return self.language or settings.LANGUAGE_CODE.split("-")[0]
+
+    def language_name(self) -> str:
+        """The booked language in English, such as Persian, for the owner's side."""
+        try:
+            return translation.get_language_info(self.guest_language)["name"]
+        except KeyError:
+            return self.guest_language
 
     def socials_display(self) -> list[tuple[str, str]]:
         """The guest's social profiles as (network name, handle)."""

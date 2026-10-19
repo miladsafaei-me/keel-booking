@@ -1,17 +1,18 @@
 {% extends base_template %}
-{% block title %}Book a meeting with {{ owner_name }}{% endblock %}
+{% load i18n keel_booking %}
+{% block title %}{% blocktranslate %}Book a meeting with {{ owner_name }}{% endblocktranslate %}{% endblock %}
 {% block content %}
 <section class="kb-landing" aria-labelledby="kb-landing-title">
-  <h1 id="kb-landing-title">Book a meeting with {{ owner_name }}</h1>
+  <h1 id="kb-landing-title">{% blocktranslate %}Book a meeting with {{ owner_name }}{% endblocktranslate %}</h1>
   <ul class="kb-type-list">
     {% for type in event_types %}
     <li class="kb-type-card">
       <h2><a href="{% url 'keel_booking:event_type' type.slug %}">{{ type.name }}</a></h2>
-      <p>{{ type.duration_minutes }} min</p>
+      <p>{% with minutes=type.duration_minutes|local_digits %}{% blocktranslate %}{{ minutes }} min{% endblocktranslate %}{% endwith %}</p>
       {% if type.tagline %}<p>{{ type.tagline }}</p>{% endif %}
     </li>
     {% empty %}
-    <li>No meeting types are open right now.</li>
+    <li>{% translate "No meeting types are open right now." %}</li>
     {% endfor %}
   </ul>
 </section>

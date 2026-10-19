@@ -1,0 +1,357 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-19 20:56+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Website"
+msgstr "Web sitesi"
+
+msgid "Other"
+msgstr "Diğer"
+
+#, python-brace-format
+msgid "{weekday}, {day} {month} {year}"
+msgstr "{day} {month} {year} {weekday}"
+
+#, python-brace-format
+msgid "{weekday} {day} {month}, {time}"
+msgstr "{day} {month} {weekday}, {time}"
+
+#, python-brace-format
+msgid "{start} to {end}"
+msgstr "{start} - {end}"
+
+#, python-brace-format
+#| msgid "{day}, no times"
+msgid "{date}, {time}"
+msgstr "{date}, {time}"
+
+#, python-brace-format
+msgid "{meeting} with {owner}"
+msgstr "{owner} ile {meeting}"
+
+#, python-brace-format
+msgid "Join: {url}"
+msgstr "Katılın: {url}"
+
+#, python-brace-format
+msgid "Confirmed: {meeting} with {owner}, {when}"
+msgstr "Onaylandı: {owner} ile {meeting}, {when}"
+
+#, python-brace-format
+msgid "Starts in {minutes} minutes: {meeting} with {owner}"
+msgstr "{minutes} dakika sonra başlıyor: {owner} ile {meeting}"
+
+#, python-brace-format
+msgid "Cancelled: {meeting} with {owner}, {when}"
+msgstr "İptal edildi: {owner} ile {meeting}, {when}"
+
+msgid "Book a meeting"
+msgstr "Görüşme planlayın"
+
+#, python-format
+msgid "Booked: %(meeting)s with %(owner_name)s"
+msgstr "Randevu alındı: %(owner_name)s ile %(meeting)s"
+
+msgid "You are booked"
+msgstr "Randevunuz alındı"
+
+#, python-format
+msgid "%(meeting)s with %(owner_name)s"
+msgstr "%(owner_name)s ile %(meeting)s"
+
+#, python-format
+msgid "A confirmation is on its way to %(email)s."
+msgstr "Onay e-postası %(email)s adresine gönderiliyor."
+
+msgid "Add to Google Calendar"
+msgstr "Google Takvim'e ekle"
+
+#, python-format
+msgid "%(meeting)s (%(minutes)s min)"
+msgstr "%(meeting)s (%(minutes)s dakika)"
+
+msgid "Meeting"
+msgstr "Görüşme"
+
+msgid "When"
+msgstr "Zaman"
+
+msgid "Where"
+msgstr "Yer"
+
+msgid "Google Meet. The link follows in a separate email."
+msgstr "Google Meet. Bağlantı ayrı bir e-postayla gelecek."
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Join with Google Meet"
+msgstr "Google Meet ile katılın"
+
+#, python-format
+msgid "%(meeting)s on %(date)s is cancelled."
+msgstr "%(date)s tarihli %(meeting)s iptal edildi."
+
+msgid "Cancelled"
+msgstr "İptal edildi"
+
+msgid "Your meeting is cancelled"
+msgstr "Görüşmeniz iptal edildi"
+
+#, python-format
+msgid ""
+"Hi %(guest)s, the meeting below with %(owner_name)s is cancelled and has "
+"been removed from the calendar."
+msgstr ""
+"Merhaba %(guest)s, %(owner_name)s ile aşağıdaki görüşmeniz iptal edildi ve "
+"takvimden kaldırıldı."
+
+msgid "Pick a new time"
+msgstr "Yeni bir zaman seçin"
+
+#, python-format
+msgid "Hi %(guest)s,"
+msgstr "Merhaba %(guest)s,"
+
+#, python-format
+msgid ""
+"Your %(meeting)s with %(owner_name)s on %(date)s, %(time)s (%(zone)s) is "
+"cancelled."
+msgstr ""
+"%(owner_name)s ile %(date)s, %(time)s (%(zone)s) tarihli %(meeting)s "
+"görüşmeniz iptal edildi."
+
+#, python-format
+msgid "%(meeting)s, %(date)s at %(time)s."
+msgstr "%(meeting)s, %(date)s, %(time)s."
+
+msgid "Booking confirmed"
+msgstr "Randevu onaylandı"
+
+#, python-format
+msgid "You are booked with %(owner_name)s"
+msgstr "%(owner_name)s ile randevunuz alındı"
+
+#, python-format
+msgid ""
+"Hi %(guest)s, your %(meeting)s is confirmed. The details are below, and the "
+"calendar file attached adds it to your calendar."
+msgstr ""
+"Merhaba %(guest)s, %(meeting)s randevunuz onaylandı. Ayrıntılar aşağıda. "
+"Ekteki takvim dosyası görüşmeyi takviminize ekler."
+
+msgid "View the booking"
+msgstr "Randevuyu görüntüle"
+
+#, python-format
+msgid ""
+"Need to change the time? Reply to this email and %(owner_name)s will sort it"
+" out. A reminder with the link arrives %(minutes)s minutes before the start."
+msgstr ""
+"Zamanı değiştirmeniz mi gerekiyor? Bu e-postayı yanıtlayın, %(owner_name)s "
+"sizin için düzenlesin. Bağlantıyı içeren hatırlatma, başlangıçtan "
+"%(minutes)s dakika önce gelir."
+
+#, python-format
+msgid "Your %(meeting)s with %(owner_name)s is confirmed."
+msgstr "%(owner_name)s ile %(meeting)s randevunuz onaylandı."
+
+msgid "Timezone"
+msgstr "Saat dilimi"
+
+#, python-format
+msgid "%(meeting)s starts at %(time)s."
+msgstr "%(meeting)s başlıyor: saat %(time)s."
+
+#, python-format
+msgid "Starts in %(minutes)s minutes"
+msgstr "%(minutes)s dakika sonra başlıyor"
+
+#, python-format
+msgid "Your meeting with %(owner_name)s starts soon"
+msgstr "%(owner_name)s ile görüşmeniz birazdan başlıyor"
+
+#, python-format
+msgid ""
+"Hi %(guest)s, this is a reminder that your %(meeting)s starts in %(minutes)s"
+" minutes."
+msgstr ""
+"Merhaba %(guest)s, %(meeting)s görüşmenizin %(minutes)s dakika sonra "
+"başlayacağını hatırlatırız."
+
+#, python-format
+msgid ""
+"Hi %(guest)s, your %(meeting)s with %(owner_name)s starts in %(minutes)s "
+"minutes."
+msgstr ""
+"Merhaba %(guest)s, %(owner_name)s ile %(meeting)s görüşmeniz %(minutes)s "
+"dakika sonra başlıyor."
+
+msgid "Join"
+msgstr "Katılın"
+
+msgid "the link is in your calendar invitation"
+msgstr "bağlantı takvim davetinizde"
+
+#, python-format
+msgid "%(minutes)s min"
+msgstr "%(minutes)s dakika"
+
+msgid "Pick a time"
+msgstr "Zaman seçin"
+
+msgid "Your details"
+msgstr "Bilgileriniz"
+
+msgid "Confirmed"
+msgstr "Onaylandı"
+
+msgid "Previous month"
+msgstr "Önceki ay"
+
+msgid "Next month"
+msgstr "Sonraki ay"
+
+msgid "No open times this month."
+msgstr "Bu ay boş zaman yok."
+
+msgid "Loading times..."
+msgstr "Zamanlar yükleniyor..."
+
+msgid "No times left on this day."
+msgstr "Bu günde boş zaman kalmadı."
+
+msgid "Name"
+msgstr "Ad"
+
+msgid "Email"
+msgstr "E-posta"
+
+msgid "Brand or company"
+msgstr "Marka veya şirket"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Social profiles"
+msgstr "Sosyal medya profilleri"
+
+msgid "Network"
+msgstr "Ağ"
+
+msgid "Profile link or ID"
+msgstr "Profil bağlantısı veya kullanıcı adı"
+
+msgid "Remove"
+msgstr "Kaldır"
+
+msgid "Add another profile"
+msgstr "Başka bir profil ekleyin"
+
+msgid "Description"
+msgstr "Açıklama"
+
+msgid "Files"
+msgstr "Dosyalar"
+
+msgid "Other guests (emails)"
+msgstr "Diğer katılımcılar (e-postalar)"
+
+msgid "Back"
+msgstr "Geri"
+
+msgid "Confirm booking"
+msgstr "Randevuyu onayla"
+
+#, python-format
+msgid "Book a meeting with %(owner_name)s"
+msgstr "%(owner_name)s ile görüşme planlayın"
+
+msgid "No meeting types are open right now."
+msgstr "Şu anda açık görüşme yok."
+
+#, python-brace-format
+msgid "{day}, times available"
+msgstr "{day}, boş zaman var"
+
+#, python-brace-format
+msgid "{day}, no times"
+msgstr "{day}, boş zaman yok"
+
+msgid "Pick a day"
+msgstr "Bir gün seçin"
+
+msgid "The calendar did not load. Please refresh the page."
+msgstr "Takvim yüklenmedi. Lütfen sayfayı yenileyin."
+
+msgid "Please check the highlighted fields."
+msgstr "Lütfen işaretli alanları kontrol edin."
+
+msgid "The booking did not go through. Please try again."
+msgstr "Randevu tamamlanamadı. Lütfen tekrar deneyin."
+
+#, python-brace-format
+msgid "You can attach up to {n} files."
+msgstr "En fazla {n} dosya ekleyebilirsiniz."
+
+#, python-brace-format
+msgid "{name}: this file type is not accepted."
+msgstr "{name}: bu dosya türü kabul edilmiyor."
+
+#, python-brace-format
+msgid "{name} is larger than {mb} MB."
+msgstr "{name} dosyası {mb} MB sınırını aşıyor."
+
+#, python-brace-format
+msgid "{day}, {start} to {end}"
+msgstr "{day}, {start} - {end}"
+
+#, python-brace-format
+msgid "You can add up to {n} profiles."
+msgstr "En fazla {n} profil ekleyebilirsiniz."
+
+msgid "The form could not be read."
+msgstr "Form okunamadı."
+
+msgid "Please fill this in."
+msgstr "Lütfen bu alanı doldurun."
+
+msgid "Please enter a phone number with digits only."
+msgstr "Lütfen yalnızca rakamlardan oluşan bir telefon numarası girin."
+
+msgid "Please enter a valid email address."
+msgstr "Lütfen geçerli bir e-posta adresi girin."
+
+#, python-brace-format
+msgid "{email} is not a valid email address."
+msgstr "{email} geçerli bir e-posta adresi değil."
+
+#, python-brace-format
+msgid "You can add up to {n} guests."
+msgstr "En fazla {n} katılımcı ekleyebilirsiniz."
+
+msgid "Please pick a time."
+msgstr "Lütfen bir zaman seçin."
+
+msgid "Too many bookings from this connection. Please try again later."
+msgstr ""
+"Bu bağlantıdan çok fazla randevu alındı. Lütfen daha sonra tekrar deneyin."
+
+msgid "That time was just taken. Please pick another one."
+msgstr "Bu zaman az önce doldu. Lütfen başka bir zaman seçin."

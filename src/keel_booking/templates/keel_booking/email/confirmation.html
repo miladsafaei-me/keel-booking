@@ -1,10 +1,11 @@
 {% extends "keel_booking/email/base.html" %}
-{% block preheader %}{{ event_type.name }}, {{ when.date }} at {{ when.time }}.{% endblock %}
-{% block eyebrow %}Booking confirmed{% endblock %}
-{% block title %}You are booked with {{ owner_name }}{% endblock %}
-{% block intro %}<p style="margin:0;">Hi {{ booking.guest_name }}, your {{ event_type.name }} is confirmed. The details are below, and the calendar file attached adds it to your calendar.</p>{% endblock %}
+{% load i18n keel_booking %}
+{% block preheader %}{% blocktranslate trimmed with meeting=event_type.name date=when.date time=when.time %}{{ meeting }}, {{ date }} at {{ time }}.{% endblocktranslate %}{% endblock %}
+{% block eyebrow %}{% translate "Booking confirmed" %}{% endblock %}
+{% block title %}{% blocktranslate trimmed %}You are booked with {{ owner_name }}{% endblocktranslate %}{% endblock %}
+{% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name meeting=event_type.name %}Hi {{ guest }}, your {{ meeting }} is confirmed. The details are below, and the calendar file attached adds it to your calendar.{% endblocktranslate %}</p>{% endblock %}
 {% block body_extra %}
-{% if event_type.confirmation_note %}<p style="margin:24px 0 0 0;font:400 16px/1.7 {{ theme.font_body }};color:{{ theme.text }};">{{ event_type.confirmation_note|linebreaksbr }}</p>{% endif %}
-<p style="margin:24px 0 0 0;font:400 14px/1.7 {{ theme.font_body }};color:{{ theme.muted }};"><a href="{{ calendar_link }}" style="color:{{ theme.primary }};">Add to Google Calendar</a> · <a href="{{ page_url }}" style="color:{{ theme.primary }};">View the booking</a></p>
-<p style="margin:12px 0 0 0;font:400 14px/1.7 {{ theme.font_body }};color:{{ theme.muted }};">Need to change the time? Reply to this email and {{ owner_name }} will sort it out. A reminder with the link arrives {{ event_type.reminder_minutes }} minutes before the start.</p>
+{% if event_type.confirmation_note %}<p style="margin:24px 0 0 0;font:400 16px/1.8 {{ theme.font_body }};color:{{ theme.text }};">{{ event_type.confirmation_note|linebreaksbr }}</p>{% endif %}
+<p style="margin:24px 0 0 0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};"><a href="{{ calendar_link }}" style="color:{{ theme.primary }};">{% translate "Add to Google Calendar" %}</a> · <a href="{{ page_url }}" style="color:{{ theme.primary }};">{% translate "View the booking" %}</a></p>
+<p style="margin:12px 0 0 0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};">{% with minutes=event_type.reminder_minutes|local_digits %}{% blocktranslate trimmed %}Need to change the time? Reply to this email and {{ owner_name }} will sort it out. A reminder with the link arrives {{ minutes }} minutes before the start.{% endblocktranslate %}{% endwith %}</p>
 {% endblock %}
