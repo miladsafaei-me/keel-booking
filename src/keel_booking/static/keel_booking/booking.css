@@ -1,0 +1,9 @@
+/* Neutral defaults for the package's own templates. A host with a design system replaces the templates and this file. */
+:root { --kb-gap: 1rem; --kb-primary: CanvasText; }
+.kb-body { margin: 0; font-family: system-ui, sans-serif; }
+.kb-main { max-inline-size: 60rem; margin-inline: auto; padding: var(--kb-gap); }
+.kb-type-list, .kb-slots, .kb-steps { display: grid; gap: var(--kb-gap); padding: 0; list-style: none; }
+.kb-calendar__weekdays, .kb-calendar__days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; }
+.kb-day[aria-pressed="true"], .kb-slot[aria-pressed="true"] { font-weight: 700; text-decoration: underline; }
+.kb-day:disabled { opacity: 0.4; }
+.kb-steps .is-now { font-weight: 700; }

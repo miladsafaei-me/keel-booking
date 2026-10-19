@@ -1,0 +1,2 @@
+recursive-include src/keel_booking/templates *
+recursive-include src/keel_booking/static *

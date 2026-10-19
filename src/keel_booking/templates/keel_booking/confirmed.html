@@ -1,0 +1,13 @@
+{% extends base_template %}
+{% block title %}Booked: {{ event_type.name }} with {{ owner_name }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block content %}
+<section class="kb-confirmed" aria-labelledby="kb-confirmed-title">
+  <h1 id="kb-confirmed-title">You are booked</h1>
+  <p>{{ event_type.name }} with {{ owner_name }}</p>
+  <p>{{ when.date }}, {{ when.time }} ({{ when.timezone }})</p>
+  {% if booking.meet_url %}<p><a href="{{ booking.meet_url }}">{{ booking.meet_url }}</a></p>{% endif %}
+  <p>A confirmation is on its way to {{ booking.guest_email }}.</p>
+  <p><a href="{{ calendar_link }}" rel="noopener" target="_blank">Add to Google Calendar</a></p>
+</section>
+{% endblock %}

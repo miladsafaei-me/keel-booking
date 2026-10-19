@@ -1,0 +1,56 @@
+{% comment %}
+  The frame of every booking email: a tinted ground, one white card, the brand row on top and a short footer.
+  Table layout and inline styles only, because email clients drop stylesheets and CSS variables;
+  every colour and font comes from KEEL_BOOKING["EMAIL_THEME"].
+{% endcomment %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background:{{ theme.ground }};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">{% block preheader %}{% endblock %}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{{ theme.ground }};">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+<tr><td style="padding:0 4px 20px 4px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+    {% if theme.logo_url %}<td style="padding-right:12px;"><img src="{{ theme.logo_url }}" width="44" height="44" alt="" style="display:block;border-radius:50%;"></td>{% endif %}
+    <td style="font:600 14px/1.2 {{ theme.font_heading }};letter-spacing:2px;text-transform:uppercase;color:{{ theme.heading }};">{{ theme.brand_name|default:owner_name }}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="background:{{ theme.card }};border-radius:10px;border:1px solid {{ theme.rule }};padding:36px 32px;">
+  <p style="margin:0 0 12px 0;font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:2px;text-transform:uppercase;color:{{ theme.primary }};">{% block eyebrow %}{% endblock %}</p>
+  <h1 style="margin:0 0 16px 0;font:700 26px/1.3 {{ theme.font_heading }};color:{{ theme.heading }};">{% block title %}{% endblock %}</h1>
+  <div style="font:400 16px/1.7 {{ theme.font_body }};color:{{ theme.text }};">{% block intro %}{% endblock %}</div>
+  {% block details %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;border-top:1px solid {{ theme.rule }};">
+    <tr><td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};width:110px;vertical-align:top;">Meeting</td>
+        <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ event_type.name }} ({{ event_type.duration_minutes }} min)</td></tr>
+    <tr><td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};vertical-align:top;">When</td>
+        <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ when.date }}<br>{{ when.time }}<br><span style="color:{{ theme.muted }};font-size:14px;">{{ when.timezone }}</span></td></tr>
+    {% block extra_rows %}{% endblock %}
+    <tr><td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};vertical-align:top;">Where</td>
+        <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{% if booking.meet_url %}Google Meet<br><a href="{{ booking.meet_url }}" style="color:{{ theme.primary }};text-decoration:underline;word-break:break-all;">{{ booking.meet_url }}</a>{% elif event_type.create_meet_link %}Google Meet. The link follows in a separate email.{% else %}Online{% endif %}</td></tr>
+  </table>
+  {% endblock %}
+  {% block cta %}
+  {% if booking.meet_url %}
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 8px 0;"><tr>
+    <td style="background:{{ theme.primary }};border-radius:6px;"><a href="{{ booking.meet_url }}" style="display:inline-block;padding:15px 32px;font:500 15px/1.4 {{ theme.font_body }};color:{{ theme.on_primary }};text-decoration:none;">Join with Google Meet</a></td>
+  </tr></table>
+  {% endif %}
+  {% endblock %}
+  {% block body_extra %}{% endblock %}
+</td></tr>
+<tr><td style="padding:24px 4px 0 4px;font:400 13px/1.6 {{ theme.font_body }};color:{{ theme.muted }};">
+  {% block footer %}{{ owner_name }}{% if site_url %} · <a href="{{ site_url }}" style="color:{{ theme.muted }};">{{ site_url|cut:"https://" }}</a>{% endif %}{% endblock %}
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

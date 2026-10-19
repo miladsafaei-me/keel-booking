@@ -1,0 +1,39 @@
+{% extends "admin/change_form.html" %}
+{% comment %}
+  The Google page: connection status and the connect or disconnect button above the calendar fields.
+{% endcomment %}
+{% block form_top %}
+<fieldset class="module aligned">
+  <h2>Google connection</h2>
+  <div class="form-row">
+    {% if account.is_connected %}
+      <p><strong>Connected:</strong> {{ account.email|default:"(email unknown)" }}, since {{ account.connected_at|date:"Y-m-d H:i" }}.</p>
+      <p>New meetings are written to the calendar below with a Google Meet link, busy time on the listed calendars blocks slots, and booking emails are sent from this account's Gmail.</p>
+    {% elif not google_configured %}
+      <p><strong>Not ready:</strong> the site has no Google OAuth client yet. Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the server's environment.</p>
+    {% else %}
+      <p><strong>Not connected.</strong> Until it is, slots are checked against bookings on this site only, and meetings get no Meet link.</p>
+    {% endif %}
+    {% if account.last_error %}<p><strong>Last error:</strong> {{ account.last_error }}</p>{% endif %}
+    <p>Redirect URI to register on the OAuth client: <code>{{ redirect_uri }}</code></p>
+    <p>Permissions asked for: {% for scope in scopes %}<code>{{ scope }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  </div>
+  <div class="form-row">
+    {% if google_configured %}
+      <a class="button" href="{% url 'admin:keel_booking_google_start' %}">{% if account.is_connected %}Reconnect Google{% else %}Connect Google{% endif %}</a>
+    {% endif %}
+  </div>
+</fieldset>
+{% endblock %}
+{% block after_field_sets %}
+{{ block.super }}
+{% if account.is_connected %}
+<p><button type="submit" form="keel-booking-disconnect" class="button">Disconnect Google</button></p>
+{% endif %}
+{% endblock %}
+{% block content %}
+{{ block.super }}
+{% if account.is_connected %}
+<form id="keel-booking-disconnect" method="post" action="{% url 'admin:keel_booking_google_disconnect' %}">{% csrf_token %}</form>
+{% endif %}
+{% endblock %}

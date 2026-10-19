@@ -1,0 +1,17 @@
+{% extends "keel_booking/email/base.html" %}
+{% block preheader %}Follow up with {{ booking.guest_name }}.{% endblock %}
+{% block eyebrow %}Follow-up due{% endblock %}
+{% block title %}Follow up with {{ booking.guest_name }}{% endblock %}
+{% block intro %}<p style="margin:0;">{% if follow_up.note %}{{ follow_up.note|linebreaksbr }}{% else %}You planned a follow-up for this meeting.{% endif %}</p><p style="margin:12px 0 0 0;color:{{ theme.muted }};font-size:14px;">Due {{ due }}</p>{% endblock %}
+{% block extra_rows %}
+    <tr><td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};vertical-align:top;">Guest</td>
+        <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %}<br><a href="mailto:{{ booking.guest_email }}" style="color:{{ theme.primary }};">{{ booking.guest_email }}</a></td></tr>
+{% endblock %}
+{% block cta %}{% endblock %}
+{% block body_extra %}
+{% if notes %}<p style="margin:8px 0 6px 0;font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};">Your notes</p>
+{% for note in notes %}<p style="margin:0 0 10px 0;padding:14px 16px;background:{{ theme.ground }};border-radius:6px;font:400 15px/1.7 {{ theme.font_body }};color:{{ theme.text }};">{{ note.body|linebreaksbr }}</p>{% endfor %}{% endif %}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0 0 0;"><tr>
+  <td style="background:{{ theme.primary }};border-radius:6px;"><a href="{{ admin_url }}" style="display:inline-block;padding:15px 32px;font:500 15px/1.4 {{ theme.font_body }};color:{{ theme.on_primary }};text-decoration:none;">Open the booking</a></td>
+</tr></table>
+{% endblock %}

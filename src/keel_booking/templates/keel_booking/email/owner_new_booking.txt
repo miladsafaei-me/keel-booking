@@ -1,0 +1,16 @@
+{% autoescape off %}New booking: {{ event_type.name }}
+
+Guest: {{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %} <{{ booking.guest_email }}>
+Phone: {{ booking.guest_phone|default:"-" }}
+{% for s in booking.guest_socials %}{{ s.network|capfirst }}: {{ s.handle }}
+{% endfor %}Their timezone: {{ booking.guest_timezone }}
+When: {{ when.date }}, {{ when.time }} ({{ when.timezone }})
+Where: {% if booking.meet_url %}{{ booking.meet_url }}{% else %}no Meet link yet{% endif %}
+{% for a in booking.attendees.all %}{% if a.role != "guest" %}Invited: {{ a.email }} ({{ a.get_role_display|lower }})
+{% endif %}{% endfor %}{% if booking.guest_message %}
+Description:
+{{ booking.guest_message }}
+{% endif %}{% for f, url in file_links %}File: {{ f.original_name }} {{ url }}
+{% endfor %}
+Notes and follow-up: {{ admin_url }}
+{% endautoescape %}

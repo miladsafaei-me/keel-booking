@@ -1,0 +1,18 @@
+{% extends base_template %}
+{% block title %}Book a meeting with {{ owner_name }}{% endblock %}
+{% block content %}
+<section class="kb-landing" aria-labelledby="kb-landing-title">
+  <h1 id="kb-landing-title">Book a meeting with {{ owner_name }}</h1>
+  <ul class="kb-type-list">
+    {% for type in event_types %}
+    <li class="kb-type-card">
+      <h2><a href="{% url 'keel_booking:event_type' type.slug %}">{{ type.name }}</a></h2>
+      <p>{{ type.duration_minutes }} min</p>
+      {% if type.tagline %}<p>{{ type.tagline }}</p>{% endif %}
+    </li>
+    {% empty %}
+    <li>No meeting types are open right now.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

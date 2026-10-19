@@ -1,0 +1,11 @@
+{% autoescape off %}Follow up with {{ booking.guest_name }}{% if booking.guest_company %} ({{ booking.guest_company }}){% endif %}, {{ booking.guest_email }}
+Due {{ due }}
+
+{{ follow_up.note }}
+
+Meeting: {{ event_type.name }}, {{ when.date }}, {{ when.time }}
+{% for note in notes %}
+Note: {{ note.body }}
+{% endfor %}
+Booking: {{ admin_url }}
+{% endautoescape %}

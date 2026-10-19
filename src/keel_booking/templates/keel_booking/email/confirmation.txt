@@ -1,0 +1,20 @@
+{% autoescape off %}Hi {{ booking.guest_name }},
+
+Your {{ event_type.name|lower }} with {{ owner_name }} is confirmed.
+
+Meeting: {{ event_type.name }} ({{ event_type.duration_minutes }} min)
+When: {{ when.date }}, {{ when.time }}
+Timezone: {{ when.timezone }}
+Where: {% if booking.meet_url %}Google Meet, {{ booking.meet_url }}{% elif event_type.create_meet_link %}Google Meet, the link follows in a separate email{% else %}Online{% endif %}
+{% if event_type.confirmation_note %}
+{{ event_type.confirmation_note }}
+{% endif %}
+Add to Google Calendar: {{ calendar_link }}
+View the booking: {{ page_url }}
+
+Need to change the time? Reply to this email.
+A reminder with the link arrives {{ event_type.reminder_minutes }} minutes before the start.
+
+{{ owner_name }}
+{{ site_url }}
+{% endautoescape %}

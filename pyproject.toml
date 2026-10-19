@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "keel-booking"
+version = "0.1.0"
+description = "Keel Booking: meeting types, a slot engine, Google Calendar and Meet sync, branded booking emails, reminders and owner follow-ups for a Django site."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Milad Safaei" }]
+license = { text = "UNLICENSED" }
+keywords = ["django", "keel", "booking", "scheduling", "google-calendar"]
+dependencies = [
+    "Django>=4.2",
+    "requests>=2.28",
+]
+
+[project.urls]
+Homepage = "https://github.com/miladsafaei-me/keel-booking"
+
+[tool.hatch.build.targets.wheel]
+# Templates, static files and migrations live inside src/keel_booking/, so hatchling
+# ships them as package data automatically.
+packages = ["src/keel_booking"]

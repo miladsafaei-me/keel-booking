@@ -1,0 +1,18 @@
+{% load static %}<!doctype html>
+{% comment %}
+  The package's neutral layout. A host points KEEL_BOOKING["BASE_TEMPLATE"] at its own layout,
+  which must offer the blocks title, meta, head and content.
+{% endcomment %}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Book a meeting{% endblock %}</title>
+{% block meta %}{% endblock %}
+<link rel="stylesheet" href="{% static 'keel_booking/booking.css' %}">
+{% block head %}{% endblock %}
+</head>
+<body class="kb-body">
+<main class="kb-main">{% block content %}{% endblock %}</main>
+</body>
+</html>

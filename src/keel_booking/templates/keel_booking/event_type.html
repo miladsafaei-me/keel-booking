@@ -1,0 +1,77 @@
+{% extends base_template %}
+{% load static %}
+{% comment %}
+  The neutral booking page. booking.js binds to the data-kb-* attributes, not to classes, so a
+  host template keeps these attributes and the four <template> elements and styles them freely.
+{% endcomment %}
+{% block title %}{{ event_type.name }} with {{ owner_name }}{% endblock %}
+{% block content %}
+<section class="kb-booking" data-kb-app aria-labelledby="kb-type-title">
+  <header class="kb-booking__about">
+    <h1 id="kb-type-title">{{ event_type.name }}</h1>
+    <p>{{ event_type.duration_minutes }} min{% if event_type.create_meet_link %}, Google Meet{% endif %}</p>
+    {% if event_type.description %}<p>{{ event_type.description|linebreaksbr }}</p>{% endif %}
+  </header>
+  <ol class="kb-steps">
+    <li data-kb-stepper-item="pick">Pick a time</li>
+    <li data-kb-stepper-item="details">Your details</li>
+    <li data-kb-stepper-item="done">Confirmed</li>
+  </ol>
+  <div class="kb-error" data-kb-error role="alert" hidden></div>
+  <div data-kb-step="pick">
+    <label>Timezone <select data-kb-timezone></select></label>
+    <div class="kb-calendar">
+      <button type="button" data-kb-prev aria-label="Previous month">&lsaquo;</button>
+      <h2 data-kb-month-label aria-live="polite"></h2>
+      <button type="button" data-kb-next aria-label="Next month">&rsaquo;</button>
+      <div class="kb-calendar__weekdays" data-kb-weekdays aria-hidden="true"></div>
+      <div class="kb-calendar__days" data-kb-days></div>
+      <p data-kb-month-empty hidden>No open times this month.</p>
+      <p data-kb-loading hidden>Loading times...</p>
+    </div>
+    <h3 data-kb-date-label></h3>
+    <ul class="kb-slots" data-kb-slots></ul>
+    <p data-kb-empty hidden>No times left on this day.</p>
+  </div>
+  <form data-kb-step="details" data-kb-form hidden novalidate enctype="multipart/form-data">
+    <p data-kb-summary></p>
+    <p data-kb-summary-timezone></p>
+    <label>Name <input name="name" autocomplete="name" required></label>
+    <p data-kb-field-error="name" hidden></p>
+    <label>Email <input name="email" type="email" autocomplete="email" required></label>
+    <p data-kb-field-error="email" hidden></p>
+    <label>Brand or company <input name="company" autocomplete="organization"></label>
+    <p data-kb-field-error="company" hidden></p>
+    <label>Phone <input name="phone" type="tel" autocomplete="tel" inputmode="tel"></label>
+    <p data-kb-field-error="phone" hidden></p>
+    <fieldset>
+      <legend>Social profiles</legend>
+      <ul data-kb-socials>
+        <li data-kb-social-row>
+          <select name="social_network" aria-label="Network">{% for value, label in social_networks %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
+          <input name="social_handle" aria-label="Profile link or ID">
+          <button type="button" data-kb-social-remove aria-label="Remove" hidden>x</button>
+        </li>
+      </ul>
+      <button type="button" data-kb-social-add>Add another profile</button>
+      <p data-kb-field-error="socials" hidden></p>
+    </fieldset>
+    <label>Description <textarea name="message"></textarea></label>
+    <p data-kb-field-error="message" hidden></p>
+    <label>Files <input name="files" type="file" multiple accept="{{ accept }}"></label>
+    <ul data-kb-files></ul>
+    <p data-kb-field-error="files" hidden></p>
+    {% if config.maxGuests %}<label>Other guests (emails) <input name="guests"></label><p data-kb-field-error="guests" hidden></p>{% endif %}
+    <input name="website" tabindex="-1" autocomplete="off" hidden>
+    <button type="button" data-kb-back>Back</button>
+    <button type="submit" data-kb-submit>Confirm booking</button>
+  </form>
+  <template data-kb-template="weekday"><span></span></template>
+  <template data-kb-template="blank"><span></span></template>
+  <template data-kb-template="day"><button type="button" class="kb-day"></button></template>
+  <template data-kb-template="file"><li><span data-kb-file-name></span> <span data-kb-file-size></span></li></template>
+  <template data-kb-template="slot"><li><button type="button" class="kb-slot"></button></li></template>
+  {{ config|json_script:"kb-config" }}
+</section>
+<script src="{% static 'keel_booking/booking.js' %}" defer></script>
+{% endblock %}
