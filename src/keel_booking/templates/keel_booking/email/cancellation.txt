@@ -1,6 +1,6 @@
 {% autoescape off %}Hi {{ booking.guest_name }},
 
-Your {{ event_type.name|lower }} with {{ owner_name }} on {{ when.date }}, {{ when.time }} ({{ when.timezone }}) is cancelled.
+Your {{ event_type.name }} with {{ owner_name }} on {{ when.date }}, {{ when.time }} ({{ when.timezone }}) is cancelled.
 
 Pick a new time: {{ book_url }}
 

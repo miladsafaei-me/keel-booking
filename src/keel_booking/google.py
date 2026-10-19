@@ -184,8 +184,8 @@ def event_body(booking) -> dict:
         lines.append(f"Brand: {booking.guest_company}")
     if booking.guest_phone:
         lines.append(f"Phone: {booking.guest_phone}")
-    for social in booking.guest_socials or []:
-        lines.append(f"{str(social.get('network', '')).capitalize()}: {social.get('handle', '')}")
+    for name, handle in booking.socials_display():
+        lines.append(f"{name}: {handle}")
     if booking.files.exists():
         lines.append(f"Files: {booking.files.count()} attached (in the booking)")
     if booking.guest_message:

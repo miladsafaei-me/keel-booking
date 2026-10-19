@@ -44,6 +44,21 @@ class GmailBackend(BaseEmailBackend):
         return sent
 
 
+def can_send() -> bool:
+    """False while the email backend is Gmail and no Google account is connected yet.
+
+    Emails then wait, without using up their retries, and go out on the first tick after the
+    owner connects Google.
+    """
+    from django.conf import settings
+
+    from .models import GoogleAccount
+
+    if settings.EMAIL_BACKEND.endswith("GmailBackend"):
+        return GoogleAccount.load().is_connected
+    return True
+
+
 def _fmt_offset(moment: datetime) -> str:
     offset = moment.utcoffset()
     minutes = int(offset.total_seconds() // 60) if offset else 0

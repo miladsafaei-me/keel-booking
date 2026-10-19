@@ -258,6 +258,12 @@ class Booking(models.Model):
         return (self.start_at - timedelta(minutes=et.buffer_before_minutes),
                 self.end_at + timedelta(minutes=et.buffer_after_minutes))
 
+    def socials_display(self) -> list[tuple[str, str]]:
+        """The guest's social profiles as (network name, handle)."""
+        names = dict(conf.get("SOCIAL_NETWORKS"))
+        return [(names.get(item.get("network"), str(item.get("network", "")).capitalize()), item.get("handle", ""))
+                for item in self.guest_socials or [] if isinstance(item, dict)]
+
     def email_recipients(self) -> list[str]:
         """Everyone who gets the guest-side emails: the guest, the guests they added, and opted-in fixed attendees."""
         emails = [self.guest_email]

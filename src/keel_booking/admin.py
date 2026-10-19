@@ -154,14 +154,14 @@ class BookingAdmin(admin.ModelAdmin):
 
     @admin.display(description="Social")
     def socials_short(self, obj):
-        return ", ".join(f"{s.get('network')}: {s.get('handle')}" for s in obj.guest_socials or []) or "-"
+        return ", ".join(f"{name}: {handle}" for name, handle in obj.socials_display()) or "-"
 
     @admin.display(description="Social profiles")
     def socials_list(self, obj):
-        rows = obj.guest_socials or []
+        rows = obj.socials_display()
         if not rows:
             return "-"
-        return format_html_join("", "<div>{}: {}</div>", ((s.get("network"), s.get("handle")) for s in rows))
+        return format_html_join("", "<div>{}: {}</div>", rows)
 
     @admin.display(description="Description")
     def description_short(self, obj):

@@ -2,7 +2,7 @@
 {% block preheader %}{{ event_type.name }}, {{ when.date }} at {{ when.time }}.{% endblock %}
 {% block eyebrow %}Booking confirmed{% endblock %}
 {% block title %}You are booked with {{ owner_name }}{% endblock %}
-{% block intro %}<p style="margin:0;">Hi {{ booking.guest_name }}, your {{ event_type.name|lower }} is confirmed. The details are below, and the calendar file attached adds it to your calendar.</p>{% endblock %}
+{% block intro %}<p style="margin:0;">Hi {{ booking.guest_name }}, your {{ event_type.name }} is confirmed. The details are below, and the calendar file attached adds it to your calendar.</p>{% endblock %}
 {% block body_extra %}
 {% if event_type.confirmation_note %}<p style="margin:24px 0 0 0;font:400 16px/1.7 {{ theme.font_body }};color:{{ theme.text }};">{{ event_type.confirmation_note|linebreaksbr }}</p>{% endif %}
 <p style="margin:24px 0 0 0;font:400 14px/1.7 {{ theme.font_body }};color:{{ theme.muted }};"><a href="{{ calendar_link }}" style="color:{{ theme.primary }};">Add to Google Calendar</a> · <a href="{{ page_url }}" style="color:{{ theme.primary }};">View the booking</a></p>

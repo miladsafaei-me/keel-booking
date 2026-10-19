@@ -113,6 +113,8 @@ def _waiting_for_meet(booking: Booking) -> bool:
 
 def send_new_booking_emails(booking: Booking) -> None:
     """The guest's confirmation and the owner's notice, each sent once."""
+    if not mail.can_send():
+        return
     errors = []
     if not booking.owner_notified_at:
         try:
@@ -169,6 +171,8 @@ def tick(now: datetime | None = None) -> dict:
         send_new_booking_emails(booking)
         done["emails"] += 1
 
+    if not mail.can_send():
+        return done
     for booking in upcoming.filter(reminder_sent_at__isnull=True, start_at__gt=now):
         if booking.start_at - timedelta(minutes=booking.event_type.reminder_minutes) > now:
             continue

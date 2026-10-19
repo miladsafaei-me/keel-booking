@@ -1,6 +1,6 @@
 {% autoescape off %}Hi {{ booking.guest_name }},
 
-Your {{ event_type.name|lower }} with {{ owner_name }} is confirmed.
+Your {{ event_type.name }} with {{ owner_name }} is confirmed.
 
 Meeting: {{ event_type.name }} ({{ event_type.duration_minutes }} min)
 When: {{ when.date }}, {{ when.time }}

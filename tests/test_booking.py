@@ -101,6 +101,15 @@ class ReserveTests(TestCase):
         page = self.client.get(response.json()["redirect"])
         self.assertContains(page, "You are booked")
 
+    @override_settings(EMAIL_BACKEND="keel_booking.mail.GmailBackend")
+    def test_emails_wait_for_google_without_using_retries(self, _now):
+        self.assertEqual(self.post().status_code, 201)
+        booking = Booking.objects.get()
+        self.assertEqual((booking.mail_attempts, booking.confirmation_sent_at, len(outbox.outbox)), (0, None, 0))
+        services.tick()
+        booking.refresh_from_db()
+        self.assertEqual(booking.mail_attempts, 0)
+
     def test_slot_taken_twice(self, _now):
         self.assertEqual(self.post().status_code, 201)
         self.assertEqual(self.post(email="other@example.com").status_code, 409)
@@ -135,7 +144,7 @@ class ReserveTests(TestCase):
         self.assertEqual(b"".join(self.client.get(url).streaming_content), b"%PDF-1.4 test")
         listing = self.client.get("/book/admin/keel_booking/booking/")
         self.assertContains(listing, "Acme")
-        self.assertContains(listing, "linkedin: sara-acme")
+        self.assertContains(listing, "LinkedIn: sara-acme")
 
     def test_bad_file_type_is_refused(self, _now):
         bad = SimpleUploadedFile("run.exe", b"MZ", content_type="application/octet-stream")

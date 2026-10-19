@@ -1,11 +1,11 @@
 {% extends "keel_booking/email/base.html" %}
 {% block preheader %}{{ booking.guest_name }}, {{ when.date }} at {{ when.time }}.{% endblock %}
 {% block eyebrow %}New booking{% endblock %}
-{% block title %}{{ booking.guest_name }} booked {{ event_type.name|lower }}{% endblock %}
+{% block title %}{{ booking.guest_name }} booked {{ event_type.name }}{% endblock %}
 {% block intro %}<p style="margin:0;">A new meeting is on your calendar. Times below are in the meeting type's timezone.</p>{% endblock %}
 {% block extra_rows %}
     <tr><td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};vertical-align:top;">Guest</td>
-        <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %}<br><a href="mailto:{{ booking.guest_email }}" style="color:{{ theme.primary }};">{{ booking.guest_email }}</a>{% if booking.guest_phone %}<br><a href="tel:{{ booking.guest_phone }}" style="color:{{ theme.primary }};">{{ booking.guest_phone }}</a>{% endif %}{% for s in booking.guest_socials %}<br>{{ s.network|capfirst }}: {{ s.handle }}{% endfor %}<br><span style="color:{{ theme.muted }};font-size:14px;">Their timezone: {{ booking.guest_timezone }}</span></td></tr>
+        <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %}<br><a href="mailto:{{ booking.guest_email }}" style="color:{{ theme.primary }};">{{ booking.guest_email }}</a>{% if booking.guest_phone %}<br><a href="tel:{{ booking.guest_phone }}" style="color:{{ theme.primary }};">{{ booking.guest_phone }}</a>{% endif %}{% for name, handle in booking.socials_display %}<br>{{ name }}: {{ handle }}{% endfor %}<br><span style="color:{{ theme.muted }};font-size:14px;">Their timezone: {{ booking.guest_timezone }}</span></td></tr>
     {% with others=booking.attendees.all %}{% if others|length > 1 %}
     <tr><td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};letter-spacing:1px;text-transform:uppercase;color:{{ theme.muted }};vertical-align:top;">Invited</td>
         <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 15px/1.6 {{ theme.font_body }};color:{{ theme.heading }};">{% for a in others %}{% if a.role != "guest" %}{{ a.email }} <span style="color:{{ theme.muted }};">({{ a.get_role_display|lower }})</span><br>{% endif %}{% endfor %}</td></tr>

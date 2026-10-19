@@ -1,4 +1,4 @@
-{% autoescape off %}{% if for_owner %}Your meeting with {{ booking.guest_name }} starts in {{ minutes }} minutes.{% else %}Hi {{ booking.guest_name }}, your {{ event_type.name|lower }} with {{ owner_name }} starts in {{ minutes }} minutes.{% endif %}
+{% autoescape off %}{% if for_owner %}Your meeting with {{ booking.guest_name }} starts in {{ minutes }} minutes.{% else %}Hi {{ booking.guest_name }}, your {{ event_type.name }} with {{ owner_name }} starts in {{ minutes }} minutes.{% endif %}
 
 When: {{ when.date }}, {{ when.time }} ({{ when.timezone }})
 Join: {% if booking.meet_url %}{{ booking.meet_url }}{% else %}the link is in your calendar invitation{% endif %}
