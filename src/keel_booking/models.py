@@ -234,6 +234,7 @@ class Booking(models.Model):
     google_event_id = models.CharField(max_length=255, blank=True)
     google_event_link = models.URLField(max_length=500, blank=True)
     meet_url = models.URLField(max_length=300, blank=True)
+    meet_access = models.CharField(max_length=12, blank=True, help_text="The Meet access type the site last set.")
     sync_attempts = models.PositiveSmallIntegerField(default=0)
     sync_error = models.TextField(blank=True)
 

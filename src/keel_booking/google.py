@@ -37,7 +37,14 @@ SCOPES = (
     "https://www.googleapis.com/auth/calendar.freebusy",
     "https://www.googleapis.com/auth/gmail.send",
 )
+MEET_SETTINGS_SCOPE = "https://www.googleapis.com/auth/meetings.space.settings"
+MEET_API = "https://meet.googleapis.com/v2"
 TIMEOUT = 20
+
+
+def scopes() -> tuple[str, ...]:
+    """The permissions to ask for: the base set, plus Meet settings when MEET_ACCESS is set."""
+    return SCOPES + ((MEET_SETTINGS_SCOPE,) if conf.get("MEET_ACCESS") else ())
 
 
 class GoogleError(Exception):
@@ -55,7 +62,7 @@ def authorization_url(redirect_uri: str) -> tuple[str, str]:
         "client_id": conf.get("GOOGLE_CLIENT_ID"),
         "redirect_uri": redirect_uri,
         "response_type": "code",
-        "scope": " ".join(SCOPES),
+        "scope": " ".join(scopes()),
         "access_type": "offline",
         "prompt": "consent",
         "include_granted_scopes": "true",
@@ -223,6 +230,42 @@ def meet_url_of(event: dict) -> str:
         if point.get("entryPointType") == "video":
             return point.get("uri", "")
     return ""
+
+
+def meet_code(meet_url: str) -> str:
+    return meet_url.rstrip("/").rsplit("/", 1)[-1] if meet_url else ""
+
+
+def can_set_meet_access(account: GoogleAccount | None = None) -> bool:
+    account = account or GoogleAccount.load()
+    return account.is_connected and MEET_SETTINGS_SCOPE in account.scopes.split()
+
+
+def set_meet_access(meet_url: str, access: str) -> None:
+    """Set who may enter one Meet without knocking (OPEN, TRUSTED or RESTRICTED)."""
+    _call("PATCH", f"{MEET_API}/spaces/{meet_code(meet_url)}", params={"updateMask": "config.accessType"},
+          json={"config": {"accessType": access}})
+
+
+def push_attendees(event_id: str, emails: list[tuple[str, str]]) -> None:
+    """Make the event's guest list match ``emails`` ((email, name) pairs), keeping the account's own entry.
+
+    Google then counts each of them as invited, which is what lets them into the Meet without knocking.
+    """
+    account = GoogleAccount.load()
+    url = f"{CALENDAR_API}/calendars/{account.calendar_id}/events/{event_id}"
+    current = _call("GET", url, account).json().get("attendees", [])
+    kept = [a for a in current if a.get("self") or a.get("organizer")]
+    by_email = {a.get("email", "").lower(): a for a in current}
+    wanted = []
+    for email, name in emails:
+        entry = dict(by_email.get(email.lower(), {"email": email}))
+        if name and not entry.get("displayName"):
+            entry["displayName"] = name
+        wanted.append(entry)
+    seen = {a.get("email", "").lower() for a in kept}
+    attendees = kept + [a for a in wanted if a["email"].lower() not in seen]
+    _call("PATCH", url, account, params={"sendUpdates": conf.get("GOOGLE_SEND_UPDATES")}, json={"attendees": attendees})
 
 
 def delete_event(event_id: str) -> None:

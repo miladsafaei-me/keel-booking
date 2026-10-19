@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from django.db import connection, transaction
 from django.utils import timezone
 
-from . import availability, google, mail
+from . import availability, conf, google, mail
 from .models import Booking, BookingAttendee, BookingFile, EventType, FollowUp
 
 log = logging.getLogger(__name__)
@@ -99,6 +99,51 @@ def sync_to_google(booking: Booking) -> bool:
     booking.meet_url = google.meet_url_of(event)
     booking.sync_error = ""
     booking.save(update_fields=["google_event_id", "google_event_link", "meet_url", "sync_error", "updated_at"])
+    apply_meet_access(booking)
+    return True
+
+
+def apply_meet_access(booking: Booking) -> bool:
+    """Set the booking's Meet to KEEL_BOOKING["MEET_ACCESS"] once. True when it is set (or nothing to do)."""
+    access = conf.get("MEET_ACCESS")
+    if not access or not booking.meet_url or booking.meet_access == access:
+        return True
+    if not google.can_set_meet_access():
+        return False
+    try:
+        google.set_meet_access(booking.meet_url, access)
+    except google.GoogleError as error:
+        log.warning("Meet access failed for %s: %s", booking.uid, error)
+        Booking.objects.filter(pk=booking.pk).update(sync_error=str(error)[:2000])
+        return False
+    booking.meet_access = access
+    Booking.objects.filter(pk=booking.pk).update(meet_access=access, sync_error="")
+    return True
+
+
+def ensure_guest_attendee(booking: Booking) -> None:
+    """Keep one guest row matching the booking's guest email (an import may have had none)."""
+    if not booking.guest_email:
+        return
+    guest = booking.attendees.filter(role=BookingAttendee.Role.GUEST).first()
+    if guest is None:
+        BookingAttendee.objects.create(booking=booking, email=booking.guest_email, name=booking.guest_name,
+                                       role=BookingAttendee.Role.GUEST, receive_emails=False)
+    elif guest.email.lower() != booking.guest_email.lower():
+        guest.email = booking.guest_email
+        guest.save(update_fields=["email"])
+
+
+def push_attendees(booking: Booking) -> bool:
+    """Copy the booking's attendees to its calendar event, so each counts as invited to the Meet."""
+    if not booking.google_event_id or booking.status != Booking.Status.CONFIRMED:
+        return False
+    try:
+        google.push_attendees(booking.google_event_id, [(a.email, a.name) for a in booking.attendees.all()])
+    except google.GoogleError as error:
+        log.warning("attendee push failed for %s: %s", booking.uid, error)
+        Booking.objects.filter(pk=booking.pk).update(sync_error=str(error)[:2000])
+        return False
     return True
 
 
@@ -164,6 +209,10 @@ def tick(now: datetime | None = None) -> dict:
     for booking in upcoming.filter(google_event_id="", sync_attempts__lt=MAX_ATTEMPTS):
         if sync_to_google(booking):
             done["synced"] += 1
+
+    if conf.get("MEET_ACCESS"):
+        for booking in upcoming.exclude(meet_url="").exclude(meet_access=conf.get("MEET_ACCESS"))[:20]:
+            apply_meet_access(booking)
 
     pending = upcoming.filter(mail_attempts__lt=MAX_ATTEMPTS).filter(
         confirmation_sent_at__isnull=True) | upcoming.filter(mail_attempts__lt=MAX_ATTEMPTS, owner_notified_at__isnull=True)

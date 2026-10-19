@@ -117,20 +117,31 @@ class BookingAdmin(admin.ModelAdmin):
     date_hierarchy = "start_at"
     list_per_page = 50
     inlines = (BookingFileInline, BookingNoteInline, FollowUpInline, BookingAttendeeInline)
-    readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "guest_timezone", "meet", "calendar",
+    readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "meet", "calendar",
                        "socials_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
         ("Meeting", {"fields": ("event_type", "start_at", "end_at", "status", "source", "meet", "calendar")}),
         ("Guest", {"fields": ("guest_name", "guest_company", "guest_email", "guest_phone", "socials_list",
                               "guest_message", "guest_timezone")}),
-        ("Delivery", {"classes": ("collapse",), "fields": ("confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
+        ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )
-    actions = ("resync_to_google", "resend_confirmation", "cancel_bookings")
+    actions = ("resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
 
     def has_add_permission(self, request):
         return False
+
+    def save_related(self, request, form, formsets, change):
+        """After an edit, the calendar event's guest list follows the booking's attendees."""
+        super().save_related(request, form, formsets, change)
+        booking = form.instance
+        services.ensure_guest_attendee(booking)
+        if booking.google_event_id and booking.status == Booking.Status.CONFIRMED:
+            if services.push_attendees(booking):
+                self.message_user(request, "The calendar event's guests now match this booking, so each can enter the Meet.")
+            else:
+                self.message_user(request, "The calendar event could not be updated; see Delivery for the error.", messages.WARNING)
 
     def get_queryset(self, request):
         from django.db.models import Count
@@ -194,6 +205,15 @@ class BookingAdmin(admin.ModelAdmin):
         written = sum(1 for booking in queryset.filter(status=Booking.Status.CONFIRMED) if services.sync_to_google(booking))
         self.message_user(request, f"{written} of {queryset.count()} meetings are on the calendar.")
 
+    @admin.action(description="Copy the guests to the calendar event (lets them into the Meet)")
+    def push_guests(self, request, queryset):
+        done = 0
+        for booking in queryset.filter(status=Booking.Status.CONFIRMED):
+            services.ensure_guest_attendee(booking)
+            done += services.push_attendees(booking)
+            services.apply_meet_access(booking)
+        self.message_user(request, f"{done} calendar events updated.")
+
     @admin.action(description="Send the confirmation email again")
     def resend_confirmation(self, request, queryset):
         for booking in queryset.filter(status=Booking.Status.CONFIRMED):
@@ -253,7 +273,7 @@ class GoogleAccountAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = {**(extra_context or {}), "google_configured": google.is_configured(),
                          "redirect_uri": self._redirect_uri(request), "account": GoogleAccount.load(),
-                         "scopes": google.SCOPES}
+                         "scopes": google.scopes()}
         return super().change_view(request, object_id, form_url, extra_context)
 
     def oauth_start(self, request):

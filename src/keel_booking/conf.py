@@ -32,6 +32,11 @@ DEFAULTS = {
     # Google's own invitation emails: "none" because the package sends its own branded ones;
     # "all" makes Google email every attendee as well.
     "GOOGLE_SEND_UPDATES": "none",
+    # Who may enter a meeting's Google Meet without being let in: "" leaves Google's default
+    # (Trusted: the event's invitees, signed in with that Google account); "OPEN" lets anyone with
+    # the link straight in, even before the owner. "OPEN" asks Google for one more permission
+    # (meetings.space.settings) and needs the Meet REST API enabled on the OAuth project.
+    "MEET_ACCESS": "",
     # Seconds a free/busy answer from Google is reused for the slot pages.
     "FREEBUSY_CACHE_SECONDS": 60,
     # How many extra guest emails a visitor may add to one booking.

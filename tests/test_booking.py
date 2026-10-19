@@ -201,6 +201,49 @@ class ImportCalendarTests(TestCase):
         self.assertEqual(len(outbox.outbox), 0)
 
 
+class MeetAccessTests(TestCase):
+    def setUp(self):
+        from keel_booking.models import GoogleAccount
+
+        self.account = GoogleAccount.objects.create(
+            pk=1, refresh_token="t", access_token="a", token_expiry=NOW + timedelta(days=3650), email="owner@example.com",
+            scopes="openid https://www.googleapis.com/auth/meetings.space.settings")
+        self.et = make_type(slug="startup", name="Startup consultation")
+        self.booking = Booking.objects.create(
+            event_type=self.et, start_at=NOW + timedelta(days=2), end_at=NOW + timedelta(days=2, minutes=45),
+            guest_name="Masoud", guest_email="", google_event_id="ev1", meet_url="https://meet.google.com/abc-defg-hij",
+            source="calendar", confirmation_sent_at=NOW, owner_notified_at=NOW, reminder_sent_at=NOW)
+        BookingAttendee.objects.create(booking=self.booking, email="second@example.com", role="fixed", receive_emails=False)
+
+    def test_guest_email_added_later_reaches_the_event(self):
+        self.booking.guest_email = "masoud@example.com"
+        self.booking.save()
+        services.ensure_guest_attendee(self.booking)
+        current = {"attendees": [{"email": "owner@example.com", "self": True, "organizer": True, "responseStatus": "accepted"},
+                                 {"email": "second@example.com", "responseStatus": "accepted"}]}
+        with mock.patch("keel_booking.google._call") as call:
+            call.return_value.json.return_value = current
+            self.assertTrue(services.push_attendees(self.booking))
+        patch = call.call_args_list[-1]
+        self.assertEqual(patch.args[0], "PATCH")
+        sent = patch.kwargs["json"]["attendees"]
+        self.assertEqual([a["email"] for a in sent], ["owner@example.com", "second@example.com", "masoud@example.com"])
+        self.assertEqual(sent[1]["responseStatus"], "accepted")
+        self.assertEqual(len(outbox.outbox), 0)
+
+    @override_settings(KEEL_BOOKING={"OWNER_NAME": "Test Owner", "OWNER_EMAIL": "owner@example.com", "MEET_ACCESS": "OPEN"})
+    def test_meet_access_open_is_set_once_by_the_tick(self):
+        with mock.patch("keel_booking.google._call") as call:
+            services.tick(now=NOW)
+            services.tick(now=NOW)
+        meet_calls = [c for c in call.call_args_list if "meet.googleapis.com" in c.args[1]]
+        self.assertEqual(len(meet_calls), 1)
+        self.assertEqual(meet_calls[0].args[1], "https://meet.googleapis.com/v2/spaces/abc-defg-hij")
+        self.assertEqual(meet_calls[0].kwargs["json"], {"config": {"accessType": "OPEN"}})
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.meet_access, "OPEN")
+
+
 class TickTests(TestCase):
     def test_reminder_and_follow_up(self):
         et = make_type()
