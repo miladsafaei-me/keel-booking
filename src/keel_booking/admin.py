@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from django import forms
 from django.contrib import admin, messages
+from django.db import models
 from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import path, reverse
@@ -12,6 +14,11 @@ from django.utils.html import format_html, format_html_join
 from . import google, services
 from .models import (AvailabilityWindow, Booking, BookingAttendee, BookingFile, BookingNote, DateOverride, EventType,
                      EventTypeTranslation, FixedAttendee, FollowUp, GoogleAccount)
+
+
+def short_text(rows=3, cols=40):
+    """A textarea sized to what is typed into it, so a form is not a column of empty boxes."""
+    return {models.TextField: {"widget": forms.Textarea(attrs={"rows": rows, "cols": cols})}}
 
 
 class AvailabilityWindowInline(admin.TabularInline):
@@ -34,7 +41,9 @@ class EventTypeTranslationInline(admin.StackedInline):
 
     model = EventTypeTranslation
     extra = 0
-    fields = ("language", "name", "tagline", "description", "highlights", "confirmation_note")
+    classes = ("collapse",)
+    formfield_overrides = short_text()
+    fields = (("language", "name"), "tagline", ("description", "highlights"), "confirmation_note")
 
 
 @admin.register(EventType)
@@ -42,13 +51,20 @@ class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "duration_minutes", "timezone", "is_active", "sort_order", "page_link")
     list_editable = ("is_active", "sort_order")
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (EventTypeTranslationInline, AvailabilityWindowInline, DateOverrideInline, FixedAttendeeInline)
+    inlines = (AvailabilityWindowInline, DateOverrideInline, FixedAttendeeInline, EventTypeTranslationInline)
+    formfield_overrides = short_text()
     fieldsets = (
-        ("Page", {"fields": ("name", "slug", "tagline", "description", "highlights", "icon", "is_active", "sort_order")}),
-        ("Length and spacing", {"fields": ("duration_minutes", "buffer_before_minutes", "buffer_after_minutes",
-                                           "slot_step_minutes", "daily_limit")}),
-        ("Booking window", {"fields": ("timezone", "detect_visitor_timezone", "min_notice_minutes", "max_days_ahead")}),
-        ("Meeting and emails", {"fields": ("create_meet_link", "allow_additional_guests", "reminder_minutes",
+        ("Page", {"description": "What visitors read in the list of meetings and at the top of this meeting's page.",
+                  "fields": (("name", "slug"), "tagline", ("description", "highlights"),
+                             ("icon", "sort_order", "is_active"))}),
+        ("Length and booking window", {
+            "description": "How long the meeting runs and which start times are offered. "
+                           "The days and hours themselves are under Weekly hours below.",
+            "fields": (("duration_minutes", "slot_step_minutes", "daily_limit"),
+                       ("buffer_before_minutes", "buffer_after_minutes"),
+                       ("min_notice_minutes", "max_days_ahead"),
+                       ("timezone", "detect_visitor_timezone"))}),
+        ("Meeting and emails", {"fields": (("create_meet_link", "allow_additional_guests", "reminder_minutes"),
                                            "confirmation_note")}),
     )
 
@@ -85,11 +101,12 @@ class BookingFileInline(admin.TabularInline):
         return f"{obj.size / 1048576:.1f} MB" if obj.size >= 1048576 else f"{max(1, obj.size // 1024)} KB"
 
 
-class BookingNoteInline(admin.StackedInline):
+class BookingNoteInline(admin.TabularInline):
     model = BookingNote
     extra = 1
     fields = ("body", "created_at")
     readonly_fields = ("created_at",)
+    formfield_overrides = short_text(2, 60)
 
 
 class FollowUpInline(admin.TabularInline):
@@ -97,6 +114,7 @@ class FollowUpInline(admin.TabularInline):
     extra = 1
     fields = ("due_at", "note", "is_done", "reminder_sent_at")
     readonly_fields = ("reminder_sent_at",)
+    formfield_overrides = short_text(2, 60)
 
 
 class UpcomingFilter(admin.SimpleListFilter):
@@ -124,14 +142,15 @@ class BookingAdmin(admin.ModelAdmin):
     search_fields = ("guest_name", "guest_email", "guest_company", "guest_phone", "guest_message")
     date_hierarchy = "start_at"
     list_per_page = 50
-    inlines = (BookingFileInline, BookingNoteInline, FollowUpInline, BookingAttendeeInline)
+    inlines = (BookingAttendeeInline, BookingFileInline, BookingNoteInline, FollowUpInline)
+    formfield_overrides = short_text()
     readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "language", "meet", "calendar",
                        "socials_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
-        ("Meeting", {"fields": ("event_type", "start_at", "end_at", "status", "source", "meet", "calendar")}),
-        ("Guest", {"fields": ("guest_name", "guest_company", "guest_email", "guest_phone", "socials_list",
-                              "guest_message", "guest_timezone", "language")}),
+        ("Meeting", {"fields": ("event_type", "status", "start_at", "end_at", "meet", "calendar", "source")}),
+        ("Guest", {"fields": (("guest_name", "guest_company"), ("guest_email", "guest_phone"), "guest_message",
+                              ("socials_list", "guest_timezone", "language"))}),
         ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )
@@ -243,7 +262,14 @@ class FollowUpAdmin(admin.ModelAdmin):
     list_display = ("due_at", "booking", "note", "is_done", "reminder_sent_at")
     list_filter = ("is_done",)
     list_editable = ("is_done",)
-    raw_id_fields = ("booking",)
+    autocomplete_fields = ("booking",)
+    formfield_overrides = short_text()
+    fields = ("booking", ("due_at", "is_done"), "note", "reminder_sent_at")
+    readonly_fields = ("reminder_sent_at",)
+
+    def get_fields(self, request, obj=None):
+        """A new follow-up is neither done nor reminded yet, so its form asks only what, when and for whom."""
+        return super().get_fields(request, obj) if obj else ("booking", "due_at", "note")
 
 
 @admin.register(GoogleAccount)
