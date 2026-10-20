@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "keel-booking"
-version = "0.4.0"
+version = "0.3.1"
 description = "Keel Booking: meeting types, a slot engine, Google Calendar and Meet sync, branded booking emails, reminders and owner follow-ups for a Django site."
 readme = "README.md"
 requires-python = ">=3.10"
