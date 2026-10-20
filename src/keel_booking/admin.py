@@ -43,7 +43,7 @@ class EventTypeTranslationInline(admin.StackedInline):
     extra = 0
     classes = ("collapse",)
     formfield_overrides = short_text()
-    fields = (("language", "name"), "tagline", ("description", "highlights"), "confirmation_note")
+    fields = (("language", "name"), ("tagline", "price"), ("description", "highlights"), "confirmation_note")
 
 
 class EventQuestionInline(admin.TabularInline):
@@ -82,7 +82,7 @@ class EventTypeAdmin(admin.ModelAdmin):
     formfield_overrides = short_text()
     fieldsets = (
         ("Page", {"description": "What visitors read in the list of meetings and at the top of this meeting's page.",
-                  "fields": (("name", "slug"), "tagline", ("description", "highlights"),
+                  "fields": (("name", "slug"), ("tagline", "price"), ("description", "highlights"),
                              ("icon", "sort_order", "is_active"))}),
         ("Length and booking window", {
             "description": "How long the meeting runs and which start times are offered. "

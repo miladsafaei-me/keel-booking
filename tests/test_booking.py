@@ -209,7 +209,7 @@ class LanguageTests(TestCase):
     def setUp(self):
         self.et = make_type()
         EventTypeTranslation.objects.create(event_type=self.et, language="fa", name="مشاوره‌ی سئو",
-                                            highlights="یک\nدو")
+                                            highlights="یک\nدو", price="۱۰۰ دلار")
 
     def reserve(self, prefix):
         body = {"start": "2026-11-02T07:00:00Z", "name": "Sara", "email": "sara@example.com", "timezone": "Asia/Tehran"}
@@ -269,6 +269,8 @@ class LanguageTests(TestCase):
         local = self.et.localized("fa")
         self.assertEqual((local.name, local.highlight_list(), local.tagline), ("مشاوره‌ی سئو", ["یک", "دو"], self.et.tagline))
         self.assertEqual(self.et.localized("tr").name, "SEO consultation")
+        self.et.price = "$100"
+        self.assertEqual((self.et.localized("fa").price, self.et.localized("tr").price), ("۱۰۰ دلار", "$100"))
         self.assertEqual(EventType.objects.get().name, "SEO consultation")
 
 

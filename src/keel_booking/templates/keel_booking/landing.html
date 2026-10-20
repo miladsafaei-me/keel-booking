@@ -9,6 +9,7 @@
     <li class="kb-type-card">
       <h2><a href="{% url 'keel_booking:event_type' type.slug %}">{{ type.name }}</a></h2>
       <p>{% with minutes=type.duration_minutes|local_digits %}{% blocktranslate %}{{ minutes }} min{% endblocktranslate %}{% endwith %}</p>
+      {% if type.price %}<p class="kb-type-price">{{ type.price }}</p>{% endif %}
       {% if type.tagline %}<p>{{ type.tagline }}</p>{% endif %}
     </li>
     {% empty %}

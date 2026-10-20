@@ -92,6 +92,8 @@ class EventType(models.Model):
     tagline = models.CharField(max_length=200, blank=True, help_text="One line for the list of meeting types.")
     description = models.TextField(blank=True, help_text="The paragraph at the top of the meeting's page.")
     highlights = models.TextField(blank=True, help_text="What the meeting covers, one point per line.")
+    price = models.CharField(max_length=60, blank=True,
+                             help_text="The price as visitors read it, such as Free or $100. Empty shows no price.")
     icon = models.CharField(max_length=40, blank=True, help_text="An icon name from the site's icon set.")
     is_active = models.BooleanField(default=True, help_text="Inactive types disappear from the list and cannot be booked.")
     sort_order = models.PositiveIntegerField(default=0)
@@ -165,7 +167,7 @@ def language_choices():
 class EventTypeTranslation(models.Model):
     """A meeting type's page and email texts in one more language. An empty text keeps the type's own."""
 
-    TEXT_FIELDS = ("name", "tagline", "description", "highlights", "confirmation_note")
+    TEXT_FIELDS = ("name", "tagline", "description", "highlights", "price", "confirmation_note")
 
     event_type = models.ForeignKey(EventType, on_delete=models.CASCADE, related_name="translations")
     language = models.CharField(max_length=10, choices=language_choices)
@@ -173,6 +175,7 @@ class EventTypeTranslation(models.Model):
     tagline = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True)
     highlights = models.TextField(blank=True, help_text="One point per line.")
+    price = models.CharField(max_length=60, blank=True)
     confirmation_note = models.TextField(blank=True)
 
     class Meta:
