@@ -185,6 +185,112 @@ class EventTypeTranslation(models.Model):
         return f"{self.event_type.slug} ({self.language})"
 
 
+class EventQuestion(models.Model):
+    """One more question on a meeting type's form: a short or long text, a list to pick from, or boxes to tick.
+
+    Answers are stored on the booking under the question's ``key``; for a choice question the
+    stored value is the option's key, so renaming an option's label never breaks old answers.
+    """
+
+    class Kind(models.TextChoices):
+        TEXT = "text", "Short text"
+        TEXTAREA = "textarea", "Long text"
+        SELECT = "select", "Dropdown, one answer"
+        RADIO = "radio", "Options, one answer"
+        CHECKBOX = "checkbox", "Boxes, several answers"
+
+    CHOICE_KINDS = (Kind.SELECT, Kind.RADIO, Kind.CHECKBOX)
+
+    event_type = models.ForeignKey(EventType, on_delete=models.CASCADE, related_name="questions")
+    key = models.SlugField(max_length=40, validators=[slug_validator],
+                           help_text="A stable name; the answers are stored under it. Never change it once used.")
+    label = models.CharField(max_length=200)
+    help_text = models.CharField(max_length=300, blank=True, help_text="A short line under the question.")
+    kind = models.CharField(max_length=12, choices=Kind.choices, default=Kind.TEXT)
+    options = models.TextField(blank=True, help_text="For a dropdown, options or boxes: one per line, as key: label.")
+    required = models.BooleanField(default=False)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "keel_booking_event_question"
+        unique_together = ("event_type", "key")
+        ordering = ("sort_order", "id")
+        verbose_name = "form question"
+
+    def __str__(self) -> str:
+        return f"{self.event_type.slug}: {self.label}"
+
+    @property
+    def field_name(self) -> str:
+        return f"q_{self.key}"
+
+    @property
+    def is_choice(self) -> bool:
+        return self.kind in self.CHOICE_KINDS
+
+    def option_list(self) -> list[tuple[str, str]]:
+        """The options as (key, label), in order. A line without a colon is its own key and label."""
+        rows = []
+        for line in self.options.splitlines():
+            if not line.strip():
+                continue
+            key, sep, label = line.partition(":")
+            rows.append((key.strip(), label.strip()) if sep else (line.strip(), line.strip()))
+        return rows
+
+    def clean(self) -> None:
+        if self.is_choice:
+            keys = [key for key, _label in self.option_list()]
+            if len(keys) < 2:
+                raise ValidationError({"options": "A choice question needs at least two options."})
+            if len(set(keys)) != len(keys):
+                raise ValidationError({"options": "Two options share one key."})
+
+    def localized(self, language: str | None = None) -> "EventQuestion":
+        """A copy with the label, hint and option labels in ``language``; a missing text keeps the original."""
+        language = (language or translation.get_language() or "").split("-")[0]
+        rows = getattr(self, "_prefetched_objects_cache", {}).get("translations")
+        row = (next((r for r in rows if r.language == language), None) if rows is not None
+               else self.translations.filter(language=language).first())
+        if row is None:
+            return self
+        local = copy.copy(self)
+        local.label = row.label or self.label
+        local.help_text = row.help_text or self.help_text
+        labels = [line.strip() for line in row.options.splitlines() if line.strip()]
+        options = self.option_list()
+        if labels and len(labels) == len(options):
+            local.options = "\n".join(f"{key}: {label}" for (key, _old), label in zip(options, labels))
+        return local
+
+    def answer_text(self, value) -> str:
+        """A stored answer as the reader sees it: option keys turned into their labels."""
+        if not self.is_choice:
+            return str(value)
+        labels = dict(self.option_list())
+        values = value if isinstance(value, list) else [value]
+        return ", ".join(labels.get(v, v) for v in values)
+
+
+class EventQuestionTranslation(models.Model):
+    """A question's texts in one more language. Options are labels only, one per line, in the question's order."""
+
+    question = models.ForeignKey(EventQuestion, on_delete=models.CASCADE, related_name="translations")
+    language = models.CharField(max_length=10, choices=language_choices)
+    label = models.CharField(max_length=200, blank=True)
+    help_text = models.CharField(max_length=300, blank=True)
+    options = models.TextField(blank=True, help_text="One label per line, in the same order as the question's options.")
+
+    class Meta:
+        db_table = "keel_booking_event_question_translation"
+        unique_together = ("question", "language")
+        ordering = ("language",)
+        verbose_name = "translation"
+
+    def __str__(self) -> str:
+        return f"{self.question.key} ({self.language})"
+
+
 class AvailabilityWindow(models.Model):
     """Weekly hours: a weekday and a time range. A weekday with no window is a day off."""
 
@@ -277,6 +383,8 @@ class Booking(models.Model):
     guest_socials = models.JSONField("social profiles", default=list, blank=True,
                                      help_text="A list of {network, handle} the guest gave.")
     guest_message = models.TextField("description", blank=True)
+    answers = models.JSONField(default=dict, blank=True,
+                               help_text="The answers to the meeting type's own questions, by question key.")
     guest_timezone = models.CharField(max_length=64, default="UTC", validators=[validate_timezone])
     language = models.CharField(max_length=10, blank=True,
                                 help_text="The language the guest booked in; their emails are written in it.")
@@ -331,6 +439,20 @@ class Booking(models.Model):
         names = dict(conf.get("SOCIAL_NETWORKS"))
         return [(names.get(item.get("network"), str(item.get("network", "")).capitalize()), item.get("handle", ""))
                 for item in self.guest_socials or [] if isinstance(item, dict)]
+
+    def answers_display(self, language: str | None = None) -> list[tuple[str, str]]:
+        """The answers as (question, answer) in ``language`` (the active one by default), in the form's order.
+
+        An answer whose question was since removed still shows, under its key.
+        """
+        answers = dict(self.answers or {})
+        rows = []
+        for question in self.event_type.questions.prefetch_related("translations"):
+            if question.key in answers:
+                local = question.localized(language)
+                rows.append((local.label, local.answer_text(answers.pop(question.key))))
+        rows += [(key, ", ".join(value) if isinstance(value, list) else str(value)) for key, value in answers.items()]
+        return rows
 
     def email_recipients(self) -> list[str]:
         """Everyone who gets the guest-side emails: the guest, the guests they added, and opted-in fixed attendees."""

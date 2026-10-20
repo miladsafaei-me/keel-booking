@@ -12,8 +12,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
 from keel_booking import availability, mail, services
-from keel_booking.models import (AvailabilityWindow, Booking, DateOverride, EventType, EventTypeTranslation,
-                                 FixedAttendee, FollowUp, BookingAttendee)
+from keel_booking.models import (AvailabilityWindow, Booking, DateOverride, EventQuestion, EventQuestionTranslation,
+                                 EventType, EventTypeTranslation, FixedAttendee, FollowUp, BookingAttendee)
 
 UTC = dt_timezone.utc
 IST = ZoneInfo("Europe/Istanbul")
@@ -156,6 +156,50 @@ class ReserveTests(TestCase):
     def test_slots_endpoint(self, _now):
         data = self.client.get("/book/seo/slots/?month=2026-11&tz=Europe/Istanbul").json()
         self.assertEqual(data["days"]["2026-11-02"], ["2026-11-02T07:00:00Z", "2026-11-02T07:30:00Z", "2026-11-02T08:00:00Z"])
+
+
+@mock.patch("keel_booking.availability.timezone.now", return_value=NOW)
+class QuestionTests(TestCase):
+    """A meeting type's own questions: shown on its page, checked, stored by key and shown to the owner."""
+
+    def setUp(self):
+        self.et = make_type()
+        stage = EventQuestion.objects.create(event_type=self.et, key="stage", label="Stage", kind="radio",
+                                             options="idea: Just an idea\nrunning: Running business", required=True,
+                                             sort_order=1)
+        EventQuestion.objects.create(event_type=self.et, key="goals", label="Goals", kind="checkbox",
+                                     options="growth: Grow sales\ncost: Save time\nproduct: Build a product",
+                                     required=True, sort_order=2)
+        EventQuestion.objects.create(event_type=self.et, key="team", label="Team size", kind="select",
+                                     options="solo: Just me\nsmall: 2 to 10", sort_order=3)
+        EventQuestionTranslation.objects.create(question=stage, language="fa", label="مرحله",
+                                                options="فقط ایده\nکسب‌وکار فعال")
+
+    def post(self, data):
+        body = {"start": "2026-11-02T07:00:00Z", "timezone": "Europe/Berlin", "name": "Sara",
+                "email": "sara@example.com", **data}
+        return self.client.post("/book/seo/reserve/", body)
+
+    def test_page_shows_the_questions_in_the_active_language(self, _now):
+        self.assertContains(self.client.get("/book/seo/"), 'name="q_goals" value="cost"')
+        page = self.client.get("/fa/book/seo/")
+        self.assertContains(page, "مرحله")
+        self.assertContains(page, "کسب‌وکار فعال")
+
+    def test_required_questions_and_unknown_options_are_refused(self, _now):
+        response = self.post({"q_stage": "bogus"})
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(set(response.json()["fields"]), {"q_stage", "q_goals"})
+
+    def test_answers_are_stored_by_key_and_shown_to_the_owner(self, _now):
+        response = self.post({"q_stage": "running", "q_goals": ["product", "growth", "nope"], "q_team": ""})
+        self.assertEqual(response.status_code, 201, response.content)
+        booking = Booking.objects.get()
+        self.assertEqual(booking.answers, {"stage": "running", "goals": ["growth", "product"]})
+        self.assertEqual(booking.answers_display(), [("Stage", "Running business"), ("Goals", "Grow sales, Build a product")])
+        self.assertEqual(booking.answers_display("fa")[0], ("مرحله", "کسب‌وکار فعال"))
+        owner = next(m for m in outbox.outbox if m.to == ["owner@example.com"])
+        self.assertIn("Goals: Grow sales, Build a product", owner.body)
 
 
 @mock.patch("keel_booking.availability.timezone.now", return_value=NOW)

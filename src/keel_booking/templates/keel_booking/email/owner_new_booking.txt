@@ -3,6 +3,7 @@
 {% translate "Guest" %}: {{ booking.guest_name }}{% if booking.guest_company %}, {{ booking.guest_company }}{% endif %} <{{ booking.guest_email }}>
 {% translate "Phone" %}: {{ booking.guest_phone|default:"-" }}
 {% for name, handle in booking.socials_display %}{{ name }}: {{ handle }}
+{% endfor %}{% for question, answer in booking.answers_display %}{{ question }}: {{ answer }}
 {% endfor %}{% translate "Their timezone" %}: {{ booking.guest_timezone }}
 {% blocktranslate trimmed with language=booking.language_name %}Booked in {{ language }}{% endblocktranslate %}
 {% translate "When" %}: {{ when.full }} ({{ when.timezone }})

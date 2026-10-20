@@ -41,6 +41,11 @@ def _active_types():
     return EventType.objects.filter(is_active=True).prefetch_related("translations")
 
 
+def _questions(event_type) -> list:
+    """The type's own form questions, in the active language."""
+    return [q.localized() for q in event_type.questions.prefetch_related("translations")]
+
+
 def _language() -> str:
     """The active language when the site offers it, for the booking's emails; else empty."""
     from django.conf import settings
@@ -105,6 +110,7 @@ def event_type_page(request, slug):
     }
     return render(request, "keel_booking/event_type.html", _context(
         event_type=event_type, config=config, required=set(conf.get("REQUIRED_FIELDS")),
+        questions=_questions(event_type),
         social_networks=conf.get("SOCIAL_NETWORKS"),
         accept=",".join(f".{ext}" for ext in conf.get("FILE_EXTENSIONS")),
         other_types=[t.localized() for t in _active_types().exclude(pk=event_type.pk)]))
@@ -197,6 +203,29 @@ def _clean_files(files, errors) -> list:
     return files
 
 
+def _clean_answers(event_type, data, post, errors) -> dict:
+    """The answers to the type's own questions, by key; a choice keeps only offered option keys."""
+    answers = {}
+    for question in event_type.questions.all():
+        name = question.field_name
+        keys = [key for key, _label in question.option_list()]
+        if question.kind == question.Kind.CHECKBOX:
+            raw = post.getlist(name) if post is not None else data.get(name) or []
+            raw = [raw] if isinstance(raw, str) else raw
+            picked = {str(v) for v in raw}
+            value = [key for key in keys if key in picked]
+        else:
+            value = str(data.get(name, "")).strip()[:4000 if question.kind == question.Kind.TEXTAREA else 300]
+            if question.is_choice and value and value not in keys:
+                errors[name] = _("Please pick one of the options.")
+                continue
+        if value:
+            answers[question.key] = value
+        elif question.required:
+            errors[name] = _("Please pick an option.") if question.is_choice else _("Please fill this in.")
+    return answers
+
+
 @require_POST
 def reserve(request, slug):
     event_type = get_object_or_404(EventType, slug=slug, is_active=True)
@@ -240,6 +269,8 @@ def reserve(request, slug):
     if len(additional) > limit:
         errors["guests"] = _("You can add up to {n} guests.").format(n=i18n.digits(limit))
     files = _clean_files(uploads, errors)
+    answers = _clean_answers(event_type, data, None if request.content_type == "application/json" else request.POST,
+                             errors)
     start = parse_datetime(str(data.get("start", "")))
     if not start or start.tzinfo is None:
         errors["start"] = _("Please pick a time.")
@@ -250,7 +281,8 @@ def reserve(request, slug):
 
     guest = services.GuestDetails(
         name=name, email=email, timezone=_zone(data.get("timezone"), event_type.timezone), company=company,
-        phone=phone, socials=socials, message=message, additional=additional, files=files, language=_language())
+        phone=phone, socials=socials, message=message, additional=additional, files=files, language=_language(),
+        answers=answers)
     try:
         booking = services.create_booking(event_type, start, guest)
     except services.SlotTaken:

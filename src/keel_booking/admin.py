@@ -12,8 +12,8 @@ from django.utils import timezone
 from django.utils.html import format_html, format_html_join
 
 from . import google, services
-from .models import (AvailabilityWindow, Booking, BookingAttendee, BookingFile, BookingNote, DateOverride, EventType,
-                     EventTypeTranslation, FixedAttendee, FollowUp, GoogleAccount)
+from .models import (AvailabilityWindow, Booking, BookingAttendee, BookingFile, BookingNote, DateOverride, EventQuestion,
+                     EventQuestionTranslation, EventType, EventTypeTranslation, FixedAttendee, FollowUp, GoogleAccount)
 
 
 def short_text(rows=3, cols=40):
@@ -46,12 +46,39 @@ class EventTypeTranslationInline(admin.StackedInline):
     fields = (("language", "name"), "tagline", ("description", "highlights"), "confirmation_note")
 
 
+class EventQuestionInline(admin.TabularInline):
+    """The type's own form questions; their texts in other languages are on each question's page."""
+
+    model = EventQuestion
+    extra = 0
+    show_change_link = True
+    formfield_overrides = short_text(2, 36)
+    fields = ("sort_order", "key", "label", "kind", "options", "required")
+
+
+class EventQuestionTranslationInline(admin.StackedInline):
+    model = EventQuestionTranslation
+    extra = 0
+    formfield_overrides = short_text()
+    fields = (("language", "label"), "help_text", "options")
+
+
+@admin.register(EventQuestion)
+class EventQuestionAdmin(admin.ModelAdmin):
+    list_display = ("label", "event_type", "kind", "required", "sort_order")
+    list_filter = ("event_type", "kind")
+    inlines = (EventQuestionTranslationInline,)
+    formfield_overrides = short_text()
+    fields = (("event_type", "sort_order"), ("key", "kind", "required"), "label", "help_text", "options")
+
+
 @admin.register(EventType)
 class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "duration_minutes", "timezone", "is_active", "sort_order", "page_link")
     list_editable = ("is_active", "sort_order")
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (AvailabilityWindowInline, DateOverrideInline, FixedAttendeeInline, EventTypeTranslationInline)
+    inlines = (AvailabilityWindowInline, DateOverrideInline, FixedAttendeeInline, EventQuestionInline,
+               EventTypeTranslationInline)
     formfield_overrides = short_text()
     fieldsets = (
         ("Page", {"description": "What visitors read in the list of meetings and at the top of this meeting's page.",
@@ -145,12 +172,12 @@ class BookingAdmin(admin.ModelAdmin):
     inlines = (BookingAttendeeInline, BookingFileInline, BookingNoteInline, FollowUpInline)
     formfield_overrides = short_text()
     readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "language", "meet", "calendar",
-                       "socials_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
+                       "socials_list", "answers_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
         ("Meeting", {"fields": ("event_type", "status", "start_at", "end_at", "meet", "calendar", "source")}),
-        ("Guest", {"fields": (("guest_name", "guest_company"), ("guest_email", "guest_phone"), "guest_message",
-                              ("socials_list", "guest_timezone", "language"))}),
+        ("Guest", {"fields": (("guest_name", "guest_company"), ("guest_email", "guest_phone"), "answers_list",
+                              "guest_message", ("socials_list", "guest_timezone", "language"))}),
         ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )
@@ -200,6 +227,13 @@ class BookingAdmin(admin.ModelAdmin):
         if not rows:
             return "-"
         return format_html_join("", "<div>{}: {}</div>", rows)
+
+    @admin.display(description="Answers")
+    def answers_list(self, obj):
+        rows = obj.answers_display()
+        if not rows:
+            return "-"
+        return format_html_join("", "<div><strong>{}</strong>: {}</div>", rows)
 
     @admin.display(description="Description")
     def description_short(self, obj):

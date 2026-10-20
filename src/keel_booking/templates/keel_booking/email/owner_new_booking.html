@@ -13,6 +13,10 @@
     {% endif %}{% endwith %}
 {% endblock %}
 {% block body_extra %}
+{% with answers=booking.answers_display %}{% if answers %}
+<p style="margin:16px 0 6px 0;font:500 12px/1.4 {{ theme.font_heading }};{{ caps }}color:{{ theme.muted }};">{% translate "Answers" %}</p>
+<p style="margin:0;padding:16px;background:{{ theme.ground }};border-radius:6px;font:400 15px/1.8 {{ theme.font_body }};color:{{ theme.text }};">{% for question, answer in answers %}<strong style="color:{{ theme.heading }};">{{ question }}</strong>: {{ answer }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</p>
+{% endif %}{% endwith %}
 {% if booking.guest_message %}
 <p style="margin:16px 0 6px 0;font:500 12px/1.4 {{ theme.font_heading }};{{ caps }}color:{{ theme.muted }};">{% translate "Description" %}</p>
 <p style="margin:0;padding:16px;background:{{ theme.ground }};border-radius:6px;font:400 15px/1.7 {{ theme.font_body }};color:{{ theme.text }};">{{ booking.guest_message|linebreaksbr }}</p>

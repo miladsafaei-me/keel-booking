@@ -202,6 +202,8 @@ def _event_body(booking, et, i18n) -> dict:
         lines.append(_("Phone: {phone}").format(phone=booking.guest_phone))
     for name, handle in booking.socials_display():
         lines.append(f"{name}: {handle}")
+    for question, answer in booking.answers_display():
+        lines.append(f"{question}: {answer}")
     if booking.files.exists():
         lines.append(_("Files: {count} attached (in the booking)").format(count=i18n.digits(booking.files.count())))
     if booking.guest_message:

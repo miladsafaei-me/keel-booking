@@ -1,0 +1,27 @@
+{% load i18n %}{% comment %}
+  The meeting type's own questions, neutral markup. A host overrides this file to style them;
+  each answer posts as q_<key> and its error lands in data-kb-field-error="q_<key>".
+{% endcomment %}
+{% for q in questions %}
+{% if q.kind == "radio" or q.kind == "checkbox" %}
+<fieldset data-kb-field="{{ q.field_name }}">
+  <legend>{{ q.label }}{% if q.required %} *{% endif %}</legend>
+  {% if q.help_text %}<p>{{ q.help_text }}</p>{% endif %}
+  {% for key, label in q.option_list %}<label><input type="{{ q.kind }}" name="{{ q.field_name }}" value="{{ key }}"> {{ label }}</label>{% endfor %}
+  <p data-kb-field-error="{{ q.field_name }}" hidden></p>
+</fieldset>
+{% elif q.kind == "select" %}
+<label>{{ q.label }}{% if q.required %} *{% endif %}
+  <select name="{{ q.field_name }}"><option value="">{% translate "Choose one" %}</option>{% for key, label in q.option_list %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></label>
+{% if q.help_text %}<p>{{ q.help_text }}</p>{% endif %}
+<p data-kb-field-error="{{ q.field_name }}" hidden></p>
+{% elif q.kind == "textarea" %}
+<label>{{ q.label }}{% if q.required %} *{% endif %} <textarea name="{{ q.field_name }}"></textarea></label>
+{% if q.help_text %}<p>{{ q.help_text }}</p>{% endif %}
+<p data-kb-field-error="{{ q.field_name }}" hidden></p>
+{% else %}
+<label>{{ q.label }}{% if q.required %} *{% endif %} <input name="{{ q.field_name }}"></label>
+{% if q.help_text %}<p>{{ q.help_text }}</p>{% endif %}
+<p data-kb-field-error="{{ q.field_name }}" hidden></p>
+{% endif %}
+{% endfor %}

@@ -12,6 +12,10 @@ owner's notes and follow-ups.
 - **Hours:** weekly windows per weekday (`AvailabilityWindow`, several per day) and date overrides
   (`DateOverride`: a closed day, or other hours on one date).
 - **Fixed attendees** (`FixedAttendee`): people invited to every meeting of a type.
+- **Form questions** (`EventQuestion`): a type's own questions on top of the standard fields: short or
+  long text, a dropdown, radio options or checkboxes, each optional or required, with translations
+  (`EventQuestionTranslation`). Answers are stored on the booking by question key (option keys for
+  choices) and shown in the admin, the owner's email and the calendar event.
 - **Slots:** weekly hours in the type's timezone, minus busy time on the connected Google
   calendars, minus every confirmed booking (all types, each with its buffers), within notice and
   window, under the daily limit. The reservation re-checks inside a Postgres advisory lock with
@@ -100,7 +104,9 @@ Slugs in `RESERVED_SLUGS` (`admin`, `static`, `confirmed`, `api`, `media`) are r
 Override `keel_booking/landing.html`, `event_type.html` and `confirmed.html` in the host. The
 widget script `keel_booking/booking.js` binds only to `data-kb-*` attributes and clones the host's
 `<template data-kb-template="weekday|blank|day|slot">` elements, so the host owns every element and
-class; keep the attributes from the package's `event_type.html`. Emails take their colours, fonts
+class; keep the attributes from the package's `event_type.html`. The questions render from
+`keel_booking/_questions.html`; override it to style them, keeping each input's `name="q_<key>"` and
+its `data-kb-field-error="q_<key>"`. Emails take their colours, fonts
 and logo from `EMAIL_THEME`, or override `keel_booking/email/*.html|txt`.
 
 ## Google setup (once per site)

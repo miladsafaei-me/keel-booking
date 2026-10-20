@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 21:23+0000\n"
+"POT-Creation-Date: 2026-10-20 21:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,6 @@ msgid "Language: {language}"
 msgstr "Dil: {language}"
 
 #, python-brace-format
-#| msgid "Brand or company"
 msgid "Brand: {brand}"
 msgstr "Marka: {brand}"
 
@@ -46,7 +45,6 @@ msgid "Files: {count} attached (in the booking)"
 msgstr "Dosyalar: {count} dosya eklendi (randevuda)"
 
 #, python-brace-format
-#| msgid "Join: {url}"
 msgid "Manage: {url}"
 msgstr "Yönet: {url}"
 
@@ -79,7 +77,6 @@ msgid "Confirmed: {meeting} with {owner}, {when}"
 msgstr "Onaylandı: {owner} ile {meeting}, {when}"
 
 #, python-brace-format
-#| msgid "Confirmed: {meeting} with {owner}, {when}"
 msgid "New booking: {meeting} with {guest}, {when}"
 msgstr "Yeni randevu: {guest} ile {meeting}, {when}"
 
@@ -94,6 +91,9 @@ msgstr "İptal edildi: {owner} ile {meeting}, {when}"
 #, python-brace-format
 msgid "Follow up: {guest} ({meeting})"
 msgstr "Takip: {guest} ({meeting})"
+
+msgid "Choose one"
+msgstr "Birini seçin"
 
 msgid "Book a meeting"
 msgstr "Görüşme planlayın"
@@ -195,8 +195,8 @@ msgstr "Randevuyu görüntüle"
 
 #, python-format
 msgid ""
-"Need to change the time? Reply to this email and %(owner_name)s will sort it"
-" out. A reminder with the link arrives %(minutes)s minutes before the start."
+"Need to change the time? Reply to this email and %(owner_name)s will sort it "
+"out. A reminder with the link arrives %(minutes)s minutes before the start."
 msgstr ""
 "Zamanı değiştirmeniz mi gerekiyor? Bu e-postayı yanıtlayın, %(owner_name)s "
 "sizin için düzenlesin. Bağlantıyı içeren hatırlatma, başlangıçtan "
@@ -230,27 +230,22 @@ msgstr "Zamanı: %(due)s"
 msgid "Guest"
 msgstr "Katılımcı"
 
-#| msgid "Your details"
 msgid "Your notes"
 msgstr "Notlarınız"
 
-#| msgid "View the booking"
 msgid "Open the booking"
 msgstr "Randevuyu aç"
 
 msgid "Note"
 msgstr "Not"
 
-#| msgid "Book a meeting"
 msgid "Booking"
 msgstr "Randevu"
 
 #, python-format
-#| msgid "%(meeting)s, %(date)s at %(time)s."
 msgid "%(guest)s, %(date)s at %(time)s."
 msgstr "%(guest)s, %(date)s, %(time)s."
 
-#| msgid "View the booking"
 msgid "New booking"
 msgstr "Yeni randevu"
 
@@ -262,10 +257,9 @@ msgid ""
 "A new meeting is on your calendar. Times below are in the meeting type's "
 "timezone."
 msgstr ""
-"Takviminize yeni bir görüşme eklendi. Aşağıdaki saatler görüşme türünün saat"
-" dilimindedir."
+"Takviminize yeni bir görüşme eklendi. Aşağıdaki saatler görüşme türünün saat "
+"dilimindedir."
 
-#| msgid "Timezone"
 msgid "Their timezone"
 msgstr "Saat dilimi"
 
@@ -281,6 +275,9 @@ msgstr "sabit davetli"
 
 msgid "added by the guest"
 msgstr "katılımcı ekledi"
+
+msgid "Answers"
+msgstr "Yanıtlar"
 
 msgid "Description"
 msgstr "Açıklama"
@@ -308,7 +305,6 @@ msgstr "Telefon"
 msgid "no Meet link yet"
 msgstr "henüz Meet bağlantısı yok"
 
-#| msgid "Files"
 msgid "File"
 msgstr "Dosya"
 
@@ -328,9 +324,6 @@ msgid "Your meeting with %(owner_name)s starts soon"
 msgstr "%(owner_name)s ile görüşmeniz birazdan başlıyor"
 
 #, python-format
-#| msgid ""
-#| "Hi %(guest)s, your %(meeting)s with %(owner_name)s starts in %(minutes)s "
-#| "minutes."
 msgid ""
 "Your meeting with %(guest)s starts in %(minutes)s minutes. The guest booked "
 "in %(language)s."
@@ -340,8 +333,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Hi %(guest)s, this is a reminder that your %(meeting)s starts in %(minutes)s"
-" minutes."
+"Hi %(guest)s, this is a reminder that your %(meeting)s starts in %(minutes)s "
+"minutes."
 msgstr ""
 "Merhaba %(guest)s, %(meeting)s görüşmenizin %(minutes)s dakika sonra "
 "başlayacağını hatırlatırız."
@@ -468,11 +461,17 @@ msgstr "{day}, {start} - {end}"
 msgid "You can add up to {n} profiles."
 msgstr "En fazla {n} profil ekleyebilirsiniz."
 
-msgid "The form could not be read."
-msgstr "Form okunamadı."
+msgid "Please pick one of the options."
+msgstr "Lütfen seçeneklerden birini seçin."
+
+msgid "Please pick an option."
+msgstr "Lütfen bir seçenek seçin."
 
 msgid "Please fill this in."
 msgstr "Lütfen bu alanı doldurun."
+
+msgid "The form could not be read."
+msgstr "Form okunamadı."
 
 msgid "Please enter a phone number with digits only."
 msgstr "Lütfen yalnızca rakamlardan oluşan bir telefon numarası girin."

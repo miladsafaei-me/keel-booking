@@ -40,6 +40,7 @@ class GuestDetails:
     additional: list[str] = field(default_factory=list)
     files: list = field(default_factory=list)
     language: str = ""
+    answers: dict = field(default_factory=dict)
 
 
 def _lock() -> None:
@@ -62,7 +63,7 @@ def create_booking(event_type: EventType, start: datetime, guest: GuestDetails) 
             event_type=event_type, start_at=start, end_at=start + timedelta(minutes=event_type.duration_minutes),
             guest_name=guest.name, guest_email=guest.email, guest_company=guest.company, guest_phone=guest.phone,
             guest_socials=guest.socials, guest_message=guest.message, guest_timezone=guest.timezone,
-            language=guest.language)
+            language=guest.language, answers=guest.answers)
         for upload in guest.files:
             BookingFile.objects.create(booking=booking, file=upload, original_name=upload.name[:255],
                                        size=upload.size or 0, content_type=(upload.content_type or "")[:120])
