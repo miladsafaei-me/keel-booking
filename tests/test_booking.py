@@ -87,6 +87,14 @@ class ReserveTests(TestCase):
                 "timezone": "Europe/Berlin", "guests": "colleague@example.com", **data}
         return self.client.post("/book/seo/reserve/", json.dumps(body), content_type="application/json")
 
+    def test_check_returns_the_problems_and_books_nothing(self, _now):
+        response = self.post(check="1", email="not-an-email")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.json()["fields"]), ["email"])
+        self.assertEqual(self.post(check="1").json(), {"fields": {}})
+        self.assertFalse(Booking.objects.exists())
+        self.assertEqual(outbox.outbox, [])
+
     def test_reserve_creates_booking_attendees_and_emails(self, _now):
         response = self.post()
         self.assertEqual(response.status_code, 201, response.content)

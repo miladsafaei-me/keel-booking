@@ -7,6 +7,12 @@
   State is shown with attributes the host styles: aria-pressed, aria-current="date", disabled,
   hidden, and the is-now / is-done classes on [data-kb-stepper-item].
 
+  Pages: a long details form can be split into [data-kb-page="name"] groups, shown one at a time.
+  [data-kb-page-next] checks the fields so far with the server (the reserve URL with check=1, so the
+  messages are the server's own) and moves on; [data-kb-page-back] steps back, to the calendar from
+  the first page. The submit button shows only on the last page and the next button on the others.
+  A stepper item named like a page tracks it; the stepper's order is the order of its items.
+
   Language: dates and numbers follow the page's <html lang> (always on the Gregorian calendar, which
   the month grid is), the week starts on config.weekStart (0 is Sunday), and every sentence comes
   from config.labels, which the view fills in the page's language.
@@ -210,16 +216,90 @@
       .then(function (data) { setLoading(false); return data; });
   }
 
+  var pages = Array.prototype.slice.call(app.querySelectorAll("[data-kb-page]"));
+  var pageAt = 0;
+
+  function pageName(i) { return pages.length ? pages[i].getAttribute("data-kb-page") : "details"; }
+
   function step(name) {
     app.querySelectorAll("[data-kb-step]").forEach(function (node) { node.hidden = node.getAttribute("data-kb-step") !== name; });
-    var order = ["pick", "details", "done"];
+    mark(name === "details" ? pageName(pageAt) : name);
+  }
+
+  function mark(name) {
+    var items = Array.prototype.slice.call(app.querySelectorAll("[data-kb-stepper-item]"));
+    var order = items.map(function (node) { return node.getAttribute("data-kb-stepper-item"); });
     var at = order.indexOf(name);
-    app.querySelectorAll("[data-kb-stepper-item]").forEach(function (node) {
-      var i = order.indexOf(node.getAttribute("data-kb-stepper-item"));
+    if (at < 0) { at = name === "done" ? order.length : order.indexOf("details"); }
+    items.forEach(function (node, i) {
       node.classList.toggle("is-done", i < at);
       node.classList.toggle("is-now", i === at);
       if (i === at) { node.setAttribute("aria-current", "step"); } else { node.removeAttribute("aria-current"); }
     });
+  }
+
+  function showPage(i, focus) {
+    pageAt = Math.max(0, Math.min(i, pages.length - 1));
+    pages.forEach(function (node, n) { node.hidden = n !== pageAt; });
+    var last = !pages.length || pageAt === pages.length - 1;
+    var next = $("page-next");
+    if (next) { next.hidden = last; }
+    $("submit").hidden = !last;
+    mark(pageName(pageAt));
+    if (!focus || !pages.length) { return; }
+    var first = pages[pageAt].querySelector("input:not([type=hidden]):not([tabindex='-1']), select, textarea");
+    if (first) { first.focus({ preventScroll: true }); }
+    app.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // The page holding a field's error message, or -1 when the field is outside every page.
+  function pageOf(field) {
+    var node = app.querySelector('[data-kb-field-error="' + field + '"]');
+    var page = node && node.closest("[data-kb-page]");
+    return page ? pages.indexOf(page) : -1;
+  }
+
+  function focusFirstError() {
+    var bad = $("form").querySelector('[aria-invalid="true"]');
+    if (!bad) { return; }
+    var target = bad.matches("input, select, textarea") ? bad : bad.querySelector("input, select, textarea");
+    (target || bad).scrollIntoView({ behavior: "smooth", block: "center" });
+    if (target) { target.focus({ preventScroll: true }); }
+  }
+
+  function clearErrors() {
+    app.querySelectorAll("[data-kb-field-error]").forEach(function (node) { node.hidden = true; });
+    $("form").querySelectorAll("[aria-invalid]").forEach(function (node) { node.removeAttribute("aria-invalid"); });
+  }
+
+  function nextPage() {
+    if (state.busy) { return; }
+    var form = $("form");
+    var payload = new FormData(form);
+    payload.delete("files");
+    payload.set("check", "1");
+    payload.set("start", state.slot || "");
+    payload.set("timezone", state.tz);
+    var button = $("page-next");
+    state.busy = true;
+    if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }
+    clearErrors();
+    showError("");
+    fetch(config.reserveUrl, { method: "POST", headers: { "X-CSRFToken": config.csrfToken || readCookie("csrftoken") }, body: payload })
+      .then(function (response) { return response.ok ? response.json() : { fields: {} }; })
+      .catch(function () { return { fields: {} }; })
+      .then(function (body) {
+        var fields = Object.keys(body.fields || {}).filter(function (field) {
+          var at = pageOf(field);
+          return at >= 0 && at <= pageAt;
+        });
+        if (!fields.length) { showPage(pageAt + 1, true); return; }
+        fields.forEach(function (field) { fieldError(field, body.fields[field]); });
+        showError(text("fixFields", "Please check the highlighted fields."));
+        showPage(Math.min.apply(null, fields.map(pageOf)), false);
+        focusFirstError();
+      })
+      .then(function () { state.busy = false; if (button) { button.disabled = false; button.removeAttribute("aria-busy"); } });
   }
 
   function showError(message) {
@@ -258,18 +338,28 @@
       summary();
       showError("");
       step("details");
+      showPage(0, false);
       var first = $("form").querySelector("input:not([type=hidden]):not([tabindex='-1'])");
       if (first) { first.focus(); }
     });
     var back = $("back");
     if (back) { back.addEventListener("click", function () { step("pick"); renderSlots(); }); }
+    var next = $("page-next");
+    if (next) { next.addEventListener("click", nextPage); }
+    var pageBack = $("page-back");
+    if (pageBack) {
+      pageBack.addEventListener("click", function () {
+        showError("");
+        if (pageAt > 0) { showPage(pageAt - 1, true); } else { step("pick"); renderSlots(); }
+      });
+    }
 
     $("form").addEventListener("submit", function (event) {
       event.preventDefault();
       if (state.busy) { return; }
+      if (pages.length && pageAt < pages.length - 1) { nextPage(); return; }
       var form = event.target;
-      app.querySelectorAll("[data-kb-field-error]").forEach(function (node) { node.hidden = true; });
-      form.querySelectorAll("[aria-invalid]").forEach(function (node) { node.removeAttribute("aria-invalid"); });
+      clearErrors();
       var payload = new FormData(form);
       payload.set("start", state.slot);
       payload.set("timezone", state.tz);
@@ -293,7 +383,10 @@
             return;
           }
           if (result.status === 422 && result.body.fields) {
-            Object.keys(result.body.fields).forEach(function (field) { fieldError(field, result.body.fields[field]); });
+            var bad = Object.keys(result.body.fields);
+            bad.forEach(function (field) { fieldError(field, result.body.fields[field]); });
+            var first = bad.map(pageOf).filter(function (at) { return at >= 0; });
+            if (first.length) { showPage(Math.min.apply(null, first), false); focusFirstError(); }
             if (result.body.fields.start) { step("pick"); }
             showError(text("fixFields", "Please check the highlighted fields."));
             return;

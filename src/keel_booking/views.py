@@ -274,6 +274,9 @@ def reserve(request, slug):
     start = parse_datetime(str(data.get("start", "")))
     if not start or start.tzinfo is None:
         errors["start"] = _("Please pick a time.")
+    if data.get("check"):
+        # A step of a form split into pages asks only for the problems so far; nothing is booked.
+        return _json({"fields": errors}, 200)
     if errors:
         return _json({"error": "invalid", "fields": errors}, 422)
     if _rate_limited(request):
