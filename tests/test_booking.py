@@ -91,6 +91,8 @@ class ReserveTests(TestCase):
         response = self.post(check="1", email="not-an-email")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.json()["fields"]), ["email"])
+        self.assertEqual(response.json()["fields"]["email"], "Please enter a valid email address, such as name@company.com.")
+        self.assertEqual(self.post(check="1", name="").json()["fields"]["name"], "Please enter your name.")
         self.assertEqual(self.post(check="1").json(), {"fields": {}})
         self.assertFalse(Booking.objects.exists())
         self.assertEqual(outbox.outbox, [])
@@ -267,7 +269,7 @@ class LanguageTests(TestCase):
     def test_turkish_errors_and_default_english(self, _now):
         response = self.client.post("/tr/book/seo/reserve/", json.dumps({"start": "2026-11-02T07:00:00Z"}),
                                     content_type="application/json")
-        self.assertEqual(response.json()["fields"]["email"], "Lütfen geçerli bir e-posta adresi girin.")
+        self.assertEqual(response.json()["fields"]["email"], "Lütfen e-posta adresinizi yazın.")
         self.assertEqual(self.reserve("").status_code, 201)
         self.assertEqual(Booking.objects.get().language, "en")
         self.assertContains(self.client.get("/book/seo/"), "SEO consultation")

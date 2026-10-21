@@ -13,6 +13,13 @@
   the first page. The submit button shows only on the last page and the next button on the others.
   A stepper item named like a page tracks it; the stepper's order is the order of its items.
 
+  Feedback: [data-kb-error] shows one message; when it holds a [data-kb-error-list], a failed step lists
+  every problem there instead, each a link to its field (cloned from <template data-kb-template="problem">
+  when the host has one). A field's error clears as soon as the visitor changes it. A busy button gets
+  aria-busy="true" and, when it holds a [data-kb-label], the words "Checking" or "Booking your session".
+  The month grid is drawn at once for the current month, every day closed, and always six weeks tall, so
+  nothing moves when the open times arrive.
+
   Language: dates and numbers follow the page's <html lang> (always on the Gregorian calendar, which
   the month grid is), the week starts on config.weekStart (0 is Sunday), and every sentence comes
   from config.labels, which the view fills in the page's language.
@@ -140,13 +147,39 @@
     }
   }
 
+  // The current month in the visitor's timezone, as YYYY-MM.
+  function currentMonth() {
+    try {
+      var parts = new Intl.DateTimeFormat("en-US", { timeZone: state.tz, year: "numeric", month: "2-digit" }).formatToParts(new Date());
+      var get = function (type) { return parts.filter(function (p) { return p.type === type; })[0].value; };
+      return get("year") + "-" + get("month");
+    } catch (e) {
+      var now = new Date();
+      return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+    }
+  }
+
+  // Before the first answer: this month, every day closed, so the calendar has its final size at once.
+  function renderPending() {
+    paint({ month: currentMonth(), days: {}, today: null });
+    $("prev").disabled = true;
+    $("next").disabled = true;
+  }
+
   function renderMonth() {
     var data = state.data;
+    paint(data);
+    $("prev").disabled = data.month <= data.firstMonth;
+    $("next").disabled = data.month >= data.lastMonth;
+    var empty = $("month-empty");
+    if (empty) { empty.hidden = Object.keys(data.days).length > 0; }
+  }
+
+  // Six weeks, always: a month never changes the calendar's height.
+  function paint(data) {
     var grid = $("days");
     grid.textContent = "";
     $("month-label").textContent = monthTitle(data.month);
-    $("prev").disabled = data.month <= data.firstMonth;
-    $("next").disabled = data.month >= data.lastMonth;
     var m = parseMonth(data.month);
     var first = new Date(Date.UTC(m.year, m.month - 1, 1));
     var lead = (first.getUTCDay() - weekStart + 7) % 7;
@@ -166,8 +199,7 @@
       if (iso === data.today) { button.setAttribute("aria-current", "date"); }
       grid.appendChild(button);
     }
-    var empty = $("month-empty");
-    if (empty) { empty.hidden = Object.keys(data.days).length > 0; }
+    for (var t = lead + count; t < 42; t++) { grid.appendChild(template("blank")); }
   }
 
   function renderSlots() {
@@ -272,6 +304,96 @@
     $("form").querySelectorAll("[aria-invalid]").forEach(function (node) { node.removeAttribute("aria-invalid"); });
   }
 
+  // The element that carries a field's invalid state: the input itself, or the group ([data-kb-field])
+  // around radios, boxes and the social rows.
+  function fieldTarget(field) {
+    var form = $("form");
+    var input = form.elements[field];
+    if (input && input.setAttribute && input.type !== "radio" && input.type !== "checkbox") { return input; }
+    return form.querySelector('[data-kb-field="' + field + '"]');
+  }
+
+  // A question's own words, as its label or legend shows them, without the required star.
+  function fieldLabel(field) {
+    var node = app.querySelector('[data-kb-field-error="' + field + '"]');
+    var box = node && node.closest("fieldset, label");
+    if (!box) { return ""; }
+    var label = box.matches("fieldset") ? box.querySelector("legend") : box.firstElementChild;
+    if (!label || label.matches("input, select, textarea")) { return ""; }
+    var copy = label.cloneNode(true);
+    copy.querySelectorAll("abbr").forEach(function (abbr) { abbr.remove(); });
+    return copy.textContent.trim();
+  }
+
+  // Every problem of a failed step, in the alert: a count, then one link per field, in the form's order.
+  // A question's line starts with the question, since its message ("Please pick an option.") does not name it.
+  function listProblems(fields, messages) {
+    var list = $("error-list");
+    if (!list) { showError(text("fixFields", "Please check the highlighted fields.")); return; }
+    list.textContent = "";
+    var where = function (field) { return app.querySelector('[data-kb-field-error="' + field + '"]'); };
+    fields = fields.slice().sort(function (a, b) {
+      var x = where(a), y = where(b);
+      return x && y && (x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1;
+    });
+    fields.forEach(function (field) {
+      var target = fieldTarget(field);
+      if (target && !target.id) { target.id = "kb-field-" + field; }
+      var item = app.querySelector('template[data-kb-template="problem"]') ? template("problem") : document.createElement("li");
+      var link = item.querySelector("a") || item.appendChild(document.createElement("a"));
+      var label = field.indexOf("q_") === 0 ? fieldLabel(field) : "";
+      // A label that is already a question ("What kind of site?") needs no colon before the message.
+      var joint = /[?\u061F:.]$/.test(label) ? " " : ": ";
+      link.textContent = label ? label + joint + messages[field] : messages[field];
+      if (target) { link.href = "#" + target.id; }
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (!target) { return; }
+        var input = target.matches("input, select, textarea") ? target : target.querySelector("input, select, textarea");
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (input) { input.focus({ preventScroll: true }); }
+      });
+      item.setAttribute("data-kb-problem", field);
+      list.appendChild(item);
+    });
+    showError(fields.length === 1 ? text("fixOne", "One answer needs your attention:")
+      : text("fixMany", "{n} answers need your attention:", { n: numbers.format(fields.length) }), true);
+  }
+
+  // A field the visitor changes loses its error at once, and its line in the list.
+  function clearField(field) {
+    var node = app.querySelector('[data-kb-field-error="' + field + '"]');
+    if (!node || node.hidden) { return; }
+    node.hidden = true;
+    var target = fieldTarget(field);
+    if (target) { target.removeAttribute("aria-invalid"); }
+    var list = $("error-list");
+    if (!list) { return; }
+    var item = list.querySelector('[data-kb-problem="' + field + '"]');
+    if (item) { item.remove(); }
+    var left = list.querySelectorAll("[data-kb-problem]").length;
+    if (!left) { showError(""); return; }
+    var body = $("error").querySelector("[data-kb-error-text]");
+    if (body) {
+      body.textContent = left === 1 ? text("fixOne", "One answer needs your attention:")
+        : text("fixMany", "{n} answers need your attention:", { n: numbers.format(left) });
+    }
+  }
+
+  // A button at work: disabled, aria-busy, and its words swapped while the request runs.
+  function busy(button, on, words) {
+    if (!button) { return; }
+    var label = button.querySelector("[data-kb-label]");
+    button.disabled = on;
+    if (on) {
+      button.setAttribute("aria-busy", "true");
+      if (label && words) { label.setAttribute("data-kb-idle", label.textContent); label.textContent = words; }
+    } else {
+      button.removeAttribute("aria-busy");
+      if (label && label.hasAttribute("data-kb-idle")) { label.textContent = label.getAttribute("data-kb-idle"); label.removeAttribute("data-kb-idle"); }
+    }
+  }
+
   function nextPage() {
     if (state.busy) { return; }
     var form = $("form");
@@ -282,7 +404,7 @@
     payload.set("timezone", state.tz);
     var button = $("page-next");
     state.busy = true;
-    if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }
+    busy(button, true, text("checking", "Checking"));
     clearErrors();
     showError("");
     fetch(config.reserveUrl, { method: "POST", headers: { "X-CSRFToken": config.csrfToken || readCookie("csrftoken") }, body: payload })
@@ -295,16 +417,18 @@
         });
         if (!fields.length) { showPage(pageAt + 1, true); return; }
         fields.forEach(function (field) { fieldError(field, body.fields[field]); });
-        showError(text("fixFields", "Please check the highlighted fields."));
         showPage(Math.min.apply(null, fields.map(pageOf)), false);
+        listProblems(fields, body.fields);
         focusFirstError();
       })
-      .then(function () { state.busy = false; if (button) { button.disabled = false; button.removeAttribute("aria-busy"); } });
+      .then(function () { state.busy = false; busy(button, false); });
   }
 
-  function showError(message) {
+  function showError(message, withList) {
     var node = $("error");
     if (!node) { return; }
+    var list = $("error-list");
+    if (list) { list.hidden = !withList; if (!withList) { list.textContent = ""; } }
     node.hidden = !message;
     var body = node.querySelector("[data-kb-error-text]") || node;
     body.textContent = message || "";
@@ -364,11 +488,12 @@
       payload.set("start", state.slot);
       payload.set("timezone", state.tz);
       var fileProblem = checkFiles(form);
-      if (fileProblem) { fieldError("files", fileProblem); showError(text("fixFields", "Please check the highlighted fields.")); return; }
+      if (fileProblem) { fieldError("files", fileProblem); listProblems(["files"], { files: fileProblem }); focusFirstError(); return; }
       var submit = $("submit");
+      var leaving = false;
       state.busy = true;
-      submit.disabled = true;
-      submit.setAttribute("aria-busy", "true");
+      busy(submit, true, text("booking", "Booking your session"));
+      form.setAttribute("aria-busy", "true");
       showError("");
       fetch(config.reserveUrl, {
         method: "POST",
@@ -378,7 +503,9 @@
         .then(function (response) { return response.json().then(function (body) { return { status: response.status, body: body }; }); })
         .then(function (result) {
           if (result.status === 201 && result.body.redirect) {
-            step("done");
+            // The button keeps working until the confirmation page replaces this one.
+            leaving = true;
+            mark("done");
             window.location.assign(result.body.redirect);
             return;
           }
@@ -386,9 +513,10 @@
             var bad = Object.keys(result.body.fields);
             bad.forEach(function (field) { fieldError(field, result.body.fields[field]); });
             var first = bad.map(pageOf).filter(function (at) { return at >= 0; });
-            if (first.length) { showPage(Math.min.apply(null, first), false); focusFirstError(); }
-            if (result.body.fields.start) { step("pick"); }
-            showError(text("fixFields", "Please check the highlighted fields."));
+            if (first.length) { showPage(Math.min.apply(null, first), false); }
+            if (result.body.fields.start) { step("pick"); showError(result.body.fields.start); return; }
+            listProblems(bad.filter(function (field) { return pageOf(field) >= 0; }), result.body.fields);
+            focusFirstError();
             return;
           }
           if (result.status === 409) {
@@ -400,16 +528,29 @@
           showError(result.body.message || text("failed", "The booking did not go through. Please try again."));
         })
         .catch(function () { showError(text("failed", "The booking did not go through. Please try again.")); })
-        .then(function () { state.busy = false; submit.disabled = false; submit.removeAttribute("aria-busy"); });
+        .then(function () {
+          if (leaving) { return; }
+          state.busy = false;
+          busy(submit, false);
+          form.removeAttribute("aria-busy");
+        });
     });
+
+    // A field the visitor changes loses its error at once.
+    function changed(event) {
+      var name = event.target.name || "";
+      if (!name) { return; }
+      clearField(name.indexOf("social_") === 0 ? "socials" : name);
+    }
+    $("form").addEventListener("input", changed);
+    $("form").addEventListener("change", changed);
   }
 
   function fieldError(field, message) {
-    var form = $("form");
     var node = app.querySelector('[data-kb-field-error="' + field + '"]');
-    var input = form.elements[field] || form.querySelector('[data-kb-field="' + field + '"]');
+    var target = fieldTarget(field);
     if (node) { node.hidden = false; (node.querySelector("[data-kb-error-text]") || node).textContent = message; }
-    if (input && input.setAttribute) { input.setAttribute("aria-invalid", "true"); }
+    if (target) { target.setAttribute("aria-invalid", "true"); }
   }
 
   function checkFiles(form) {
@@ -493,5 +634,6 @@
   bindFiles();
   bindSocials();
   step("pick");
+  renderPending();
   load(null);
 })();

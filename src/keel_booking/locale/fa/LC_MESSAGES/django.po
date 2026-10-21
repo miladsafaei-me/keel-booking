@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 21:56+0000\n"
+"POT-Creation-Date: 2026-10-21 20:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -437,6 +437,19 @@ msgstr "تقویم بارگیری نشد. لطفاً صفحه را دوباره 
 msgid "Please check the highlighted fields."
 msgstr "لطفاً فیلدهای مشخص‌شده را بررسی کنید."
 
+msgid "One answer needs your attention:"
+msgstr "یک مورد را باید اصلاح کنید:"
+
+#, python-brace-format
+msgid "{n} answers need your attention:"
+msgstr "{n} مورد را باید اصلاح کنید:"
+
+msgid "Checking"
+msgstr "در حال بررسی"
+
+msgid "Booking your session"
+msgstr "در حال ثبت جلسه‌ی شما"
+
 msgid "The booking did not go through. Please try again."
 msgstr "رزرو انجام نشد. لطفاً دوباره تلاش کنید."
 
@@ -463,6 +476,9 @@ msgstr "حداکثر {n} پروفایل می‌توانید اضافه کنید.
 msgid "Please pick one of the options."
 msgstr "لطفاً یکی از گزینه‌ها را انتخاب کنید."
 
+msgid "Please pick at least one option."
+msgstr "لطفاً دست‌کم یک گزینه را انتخاب کنید."
+
 msgid "Please pick an option."
 msgstr "لطفاً یک گزینه انتخاب کنید."
 
@@ -472,11 +488,29 @@ msgstr "لطفاً این فیلد را پر کنید."
 msgid "The form could not be read."
 msgstr "فرم خوانده نشد."
 
+msgid "Please enter your name."
+msgstr "لطفاً نام خود را بنویسید."
+
+msgid "Please enter your brand or company name."
+msgstr "لطفاً نام برند یا شرکت خود را بنویسید."
+
+msgid "Please enter your phone number."
+msgstr "لطفاً شماره‌ی تلفن خود را بنویسید."
+
+msgid "Please write a few words about what you need."
+msgstr "لطفاً در چند جمله بنویسید چه چیزی لازم دارید."
+
+msgid "Please add at least one social profile."
+msgstr "لطفاً دست‌کم یک حساب شبکه‌ی اجتماعی اضافه کنید."
+
 msgid "Please enter a phone number with digits only."
 msgstr "لطفاً شماره‌ی تلفن را فقط با عدد وارد کنید."
 
-msgid "Please enter a valid email address."
-msgstr "لطفاً یک ایمیل معتبر وارد کنید."
+msgid "Please enter your email address."
+msgstr "لطفاً ایمیل خود را بنویسید."
+
+msgid "Please enter a valid email address, such as name@company.com."
+msgstr "لطفاً یک ایمیل درست بنویسید، مثل name@company.com."
 
 #, python-brace-format
 msgid "{email} is not a valid email address."

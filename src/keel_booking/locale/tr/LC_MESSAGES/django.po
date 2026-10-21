@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 21:56+0000\n"
+"POT-Creation-Date: 2026-10-21 20:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -438,6 +438,19 @@ msgstr "Takvim yüklenmedi. Lütfen sayfayı yenileyin."
 msgid "Please check the highlighted fields."
 msgstr "Lütfen işaretli alanları kontrol edin."
 
+msgid "One answer needs your attention:"
+msgstr "Bir yanıtın düzeltilmesi gerekiyor:"
+
+#, python-brace-format
+msgid "{n} answers need your attention:"
+msgstr "{n} yanıtın düzeltilmesi gerekiyor:"
+
+msgid "Checking"
+msgstr "Kontrol ediliyor"
+
+msgid "Booking your session"
+msgstr "Randevunuz oluşturuluyor"
+
 msgid "The booking did not go through. Please try again."
 msgstr "Randevu tamamlanamadı. Lütfen tekrar deneyin."
 
@@ -464,6 +477,9 @@ msgstr "En fazla {n} profil ekleyebilirsiniz."
 msgid "Please pick one of the options."
 msgstr "Lütfen seçeneklerden birini seçin."
 
+msgid "Please pick at least one option."
+msgstr "Lütfen en az bir seçenek seçin."
+
 msgid "Please pick an option."
 msgstr "Lütfen bir seçenek seçin."
 
@@ -473,11 +489,29 @@ msgstr "Lütfen bu alanı doldurun."
 msgid "The form could not be read."
 msgstr "Form okunamadı."
 
+msgid "Please enter your name."
+msgstr "Lütfen adınızı yazın."
+
+msgid "Please enter your brand or company name."
+msgstr "Lütfen marka veya şirket adınızı yazın."
+
+msgid "Please enter your phone number."
+msgstr "Lütfen telefon numaranızı yazın."
+
+msgid "Please write a few words about what you need."
+msgstr "Lütfen neye ihtiyacınız olduğunu birkaç cümleyle yazın."
+
+msgid "Please add at least one social profile."
+msgstr "Lütfen en az bir sosyal medya profili ekleyin."
+
 msgid "Please enter a phone number with digits only."
 msgstr "Lütfen yalnızca rakamlardan oluşan bir telefon numarası girin."
 
-msgid "Please enter a valid email address."
-msgstr "Lütfen geçerli bir e-posta adresi girin."
+msgid "Please enter your email address."
+msgstr "Lütfen e-posta adresinizi yazın."
+
+msgid "Please enter a valid email address, such as name@company.com."
+msgstr "Lütfen geçerli bir e-posta adresi yazın, örneğin name@company.com."
 
 #, python-brace-format
 msgid "{email} is not a valid email address."

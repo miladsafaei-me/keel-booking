@@ -62,6 +62,10 @@ def _labels() -> dict:
         "pickDay": _("Pick a day"),
         "loadFailed": _("The calendar did not load. Please refresh the page."),
         "fixFields": _("Please check the highlighted fields."),
+        "fixOne": _("One answer needs your attention:"),
+        "fixMany": _("{n} answers need your attention:"),
+        "checking": _("Checking"),
+        "booking": _("Booking your session"),
         "failed": _("The booking did not go through. Please try again."),
         "tooManyFiles": _("You can attach up to {n} files."),
         "badFileType": _("{name}: this file type is not accepted."),
@@ -222,7 +226,12 @@ def _clean_answers(event_type, data, post, errors) -> dict:
         if value:
             answers[question.key] = value
         elif question.required:
-            errors[name] = _("Please pick an option.") if question.is_choice else _("Please fill this in.")
+            if question.kind == question.Kind.CHECKBOX:
+                errors[name] = _("Please pick at least one option.")
+            elif question.is_choice:
+                errors[name] = _("Please pick an option.")
+            else:
+                errors[name] = _("Please fill this in.")
     return answers
 
 
@@ -244,16 +253,25 @@ def reserve(request, slug):
     phone = str(data.get("phone", "")).strip()[:40]
     message = str(data.get("message", "")).strip()[:4000]
     socials = _clean_socials(data.get("socials"), errors)
-    missing = {"name": name, "company": company, "phone": phone, "message": message, "socials": socials}
-    for field_name, value in missing.items():
+    missing = {
+        "name": (name, _("Please enter your name.")),
+        "company": (company, _("Please enter your brand or company name.")),
+        "phone": (phone, _("Please enter your phone number.")),
+        "message": (message, _("Please write a few words about what you need.")),
+        "socials": (socials, _("Please add at least one social profile.")),
+    }
+    for field_name, (value, problem) in missing.items():
         if field_name in required and not value:
-            errors[field_name] = _("Please fill this in.")
+            errors[field_name] = problem
     if phone and not all(ch.isdigit() or ch in "+-() ." for ch in phone):
         errors["phone"] = _("Please enter a phone number with digits only.")
-    try:
-        validate_email(email)
-    except ValidationError:
-        errors["email"] = _("Please enter a valid email address.")
+    if not email:
+        errors["email"] = _("Please enter your email address.")
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = _("Please enter a valid email address, such as name@company.com.")
     additional = []
     limit = conf.get("MAX_ADDITIONAL_GUESTS") if event_type.allow_additional_guests else 0
     raw_guests = data.get("guests") or []
