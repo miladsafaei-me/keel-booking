@@ -72,20 +72,35 @@
 
   function zoneName(tz) { return tz.replace(/_/g, " "); }
 
+  function zoneOption(tz) {
+    var option = document.createElement("option");
+    option.value = tz;
+    option.textContent = zoneName(tz) + " (" + offsetLabel(tz) + ")";
+    if (tz === state.tz) { option.selected = true; }
+    return option;
+  }
+
+  // The picker starts with the visitor's own zone and fills the full list (about 400 zones) the first time
+  // it is focused or pressed, so the page loads light and the list is there before it opens.
   function fillTimezones() {
     var select = $("timezone");
     if (!select) { return; }
-    var zones = [];
-    try { zones = Intl.supportedValuesOf("timeZone"); } catch (e) { zones = []; }
-    [config.timezone, state.tz].forEach(function (tz) { if (zones.indexOf(tz) < 0) { zones.unshift(tz); } });
     select.textContent = "";
-    zones.forEach(function (tz) {
-      var option = document.createElement("option");
-      option.value = tz;
-      option.textContent = zoneName(tz) + " (" + offsetLabel(tz) + ")";
-      if (tz === state.tz) { option.selected = true; }
-      select.appendChild(option);
-    });
+    select.appendChild(zoneOption(state.tz));
+    var filled = false;
+    function fillAll() {
+      if (filled) { return; }
+      filled = true;
+      var zones = [];
+      try { zones = Intl.supportedValuesOf("timeZone"); } catch (e) { zones = []; }
+      [config.timezone, state.tz].forEach(function (tz) { if (zones.indexOf(tz) < 0) { zones.unshift(tz); } });
+      var list = document.createDocumentFragment();
+      zones.forEach(function (tz) { list.appendChild(zoneOption(tz)); });
+      select.textContent = "";
+      select.appendChild(list);
+      select.value = state.tz;
+    }
+    ["focus", "pointerdown", "keydown"].forEach(function (name) { select.addEventListener(name, fillAll); });
     select.addEventListener("change", function () {
       state.tz = select.value;
       state.date = null;
