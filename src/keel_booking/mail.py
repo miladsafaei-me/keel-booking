@@ -228,7 +228,7 @@ def send_declined(booking) -> None:
 def payment_due_text(booking, tz_name: str) -> str:
     """The payment deadline as words, in one timezone and the active language."""
     due = booking.payment_due_at.astimezone(zoneinfo.ZoneInfo(tz_name))
-    return f"{i18n.short_date(due)} ({tz_name.replace('_', ' ')})"
+    return f"{i18n.short_date(due)} ({tz_name.replace('_', ' ')}, {_fmt_offset(due)})"
 
 
 def payment_methods(event_type) -> list[dict]:
@@ -250,7 +250,7 @@ def send_payment_request(booking) -> None:
         context = _context(booking, booking.guest_timezone, methods=payment_methods(booking.event_type),
                            due=payment_due_text(booking, booking.guest_timezone),
                            price=booking.event_type.localized().price)
-        subject = _("Approved, one step left: {meeting} with {owner}").format(
+        subject = _("Approved, the payment step: {meeting} with {owner}").format(
             meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
         _send("payment_request", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
 

@@ -13,7 +13,7 @@
 {% for label, value in method.rows %}{% if label %}{{ label }}: {% endif %}{{ value }}
 {% endfor %}{% if method.note %}{{ method.note }}
 {% endif %}{% endfor %}
-{% translate "Once I see the receipt, I send you the confirmation with the Google Meet link." %}
+{% translate "Once the payment is confirmed, the confirmation email with the Google Meet link will be sent to you." %}
 
 {{ owner_name }}
 {{ site_url }}

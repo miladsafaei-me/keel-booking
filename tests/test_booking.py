@@ -570,6 +570,8 @@ class PaymentTests(TestCase):
         self.assertIn("The equivalent of $100 in lira", email.body)
         self.assertIn("0xabc", email.alternatives[0][0])
         self.assertIn("[>] 3. You pay", email.body)
+        self.assertIn("[x] 1. You sent the request", email.body)
+        self.assertIn("[x] 2. I approved the request", email.body)
         self.assertNotIn("meet.google", email.body)
         keyboard = json.dumps([d for m, d in self.calls if m == "editMessageText"][-1]["reply_markup"])
         self.assertIn("kb:paid:", keyboard)

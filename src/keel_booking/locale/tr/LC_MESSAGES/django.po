@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 21:37+0000\n"
+"POT-Creation-Date: 2026-11-02 21:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,8 +85,8 @@ msgid "About your request: {meeting} with {owner}"
 msgstr "Talebiniz hakkında: {owner} ile {meeting}"
 
 #, python-brace-format
-msgid "Approved, one step left: {meeting} with {owner}"
-msgstr "Onaylandı, tek adım kaldı: {owner} ile {meeting}"
+msgid "Approved, the payment step: {meeting} with {owner}"
+msgstr "Onaylandı, ödeme adımı: {owner} ile {meeting}"
 
 #, python-brace-format
 msgid "Time released: {meeting} with {owner}"
@@ -114,11 +114,23 @@ msgstr "Talebinizi gönderirsiniz"
 msgid "Pick a time and fill in the form. The time is held for you."
 msgstr "Bir saat seçip formu doldurursunuz. Saat sizin için ayrılır."
 
+msgid "You sent the request"
+msgstr "Talebinizi gönderdiniz"
+
+msgid "You picked a time and filled in the form."
+msgstr "Bir saat seçip formu doldurdunuz."
+
 msgid "I review it"
 msgstr "Talebi incelerim"
 
 msgid "I answer by email as soon as I can."
 msgstr "En kısa sürede e-postayla yanıt veririm."
+
+msgid "I approved the request"
+msgstr "Talebi onayladım"
+
+msgid "I reviewed your request and approved it."
+msgstr "Talebinizi inceleyip onayladım."
 
 msgid "You pay"
 msgstr "Ödemeyi yaparsınız"
@@ -126,11 +138,20 @@ msgstr "Ödemeyi yaparsınız"
 msgid "The email has the ways to pay. Reply to it with the receipt."
 msgstr "Ödeme yolları e-postadadır. Dekontu o e-postaya yanıt olarak gönderin."
 
+msgid "You paid"
+msgstr "Ödemeyi yaptınız"
+
+msgid "I received your payment."
+msgstr "Ödemenizi aldım."
+
 msgid "You get the Google Meet link"
 msgstr "Google Meet bağlantısını alırsınız"
 
 msgid "The confirmation email has the link and the calendar invitation."
 msgstr "Onay e-postasında bağlantı ve takvim daveti vardır."
+
+msgid "You got the Google Meet link"
+msgstr "Google Meet bağlantısını aldınız"
 
 msgid "New meeting request"
 msgstr "Yeni görüşme talebi"
@@ -149,7 +170,8 @@ msgid "Cancelled"
 msgstr "İptal edildi"
 
 msgid "Paid and confirmed. The Meet link went to the guest by email."
-msgstr "Ödendi ve kesinleşti. Meet bağlantısı katılımcıya e-postayla gönderildi."
+msgstr ""
+"Ödendi ve kesinleşti. Meet bağlantısı katılımcıya e-postayla gönderildi."
 
 msgid "The payment did not arrive in time. The time is free again."
 msgstr "Ödeme zamanında gelmedi. Saat yeniden boşta."
@@ -219,7 +241,9 @@ msgstr "Randevu alındı: %(owner_name)s ile %(meeting)s"
 msgid ""
 "Your request is approved. The ways to pay are in your email; reply to it "
 "with the receipt."
-msgstr "Talebiniz onaylandı. Ödeme yolları e-postanızda. Dekontu o e-postaya yanıt olarak gönderin."
+msgstr ""
+"Talebiniz onaylandı. Ödeme yolları e-postanızda. Dekontu o e-postaya yanıt "
+"olarak gönderin."
 
 msgid ""
 "I have received your request to set up a meeting. I will review it as soon "
@@ -468,7 +492,9 @@ msgstr "Saat serbest bırakıldı"
 msgid ""
 "The payment for this session did not arrive in time, so the time is free "
 "again. If you still want the session, reply to this email."
-msgstr "Bu görüşmenin ödemesi zamanında gelmediği için saat yeniden boşa çıktı. Görüşmeyi hâlâ istiyorsanız bu e-postayı yanıtlayın."
+msgstr ""
+"Bu görüşmenin ödemesi zamanında gelmediği için saat yeniden boşa çıktı. "
+"Görüşmeyi hâlâ istiyorsanız bu e-postayı yanıtlayın."
 
 #, python-format
 msgid "Your request is approved. Pay %(price)s to confirm the session."
@@ -477,26 +503,30 @@ msgstr "Talebiniz onaylandı. Görüşmeyi kesinleştirmek için %(price)s ödey
 msgid "Request approved"
 msgstr "Talep onaylandı"
 
-msgid "One step left: the payment"
-msgstr "Tek adım kaldı: ödeme"
+msgid "The payment step"
+msgstr "Ödeme adımı"
 
 #, python-format
 msgid ""
 "I have approved your request. To confirm the session, pay %(price)s in one "
 "of the ways below, then reply to this email with the receipt."
-msgstr "Talebinizi onayladım. Görüşmeyi kesinleştirmek için %(price)s tutarını aşağıdaki yollardan biriyle ödeyin, ardından dekontu bu e-postaya yanıt olarak gönderin."
+msgstr ""
+"Talebinizi onayladım. Görüşmeyi kesinleştirmek için %(price)s tutarını "
+"aşağıdaki yollardan biriyle ödeyin, ardından dekontu bu e-postaya yanıt "
+"olarak gönderin."
 
 #, python-format
 msgid "Please pay by %(due)s. After that, this time is released."
-msgstr "Lütfen %(due)s tarihine kadar ödeyin. Sonrasında bu saat serbest bırakılır."
+msgstr ""
+"Lütfen %(due)s tarihine kadar ödeyin. Sonrasında bu saat serbest bırakılır."
 
 msgid "Ways to pay"
 msgstr "Ödeme yolları"
 
 msgid ""
-"Once I see the receipt, I send you the confirmation with the Google Meet "
-"link."
-msgstr "Dekontu gördüğümde onayı Google Meet bağlantısıyla birlikte gönderirim."
+"Once the payment is confirmed, the confirmation email with the Google Meet "
+"link will be sent to you."
+msgstr "Ödeme onaylandıktan sonra Google Meet bağlantısını içeren onay e-postası size gönderilecek."
 
 #, python-format
 msgid "%(meeting)s starts at %(time)s."
@@ -747,3 +777,6 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "Bu zaman az önce doldu. Lütfen başka bir zaman seçin."
+
+#~ msgid "One step left: the payment"
+#~ msgstr "Tek adım kaldı: ödeme"

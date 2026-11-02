@@ -149,17 +149,26 @@ class EventType(models.Model):
         one line of what the guest does or gets, in the active language. Empty for a type booked at once."""
         if not self.requires_approval:
             return []
+        # Each step has its present form (now or next) and its past form (done).
         steps = [
             {"key": "request", "title": gettext("You send the request"),
-             "text": gettext("Pick a time and fill in the form. The time is held for you.")},
+             "text": gettext("Pick a time and fill in the form. The time is held for you."),
+             "title_done": gettext("You sent the request"),
+             "text_done": gettext("You picked a time and filled in the form.")},
             {"key": "review", "title": gettext("I review it"),
-             "text": gettext("I answer by email as soon as I can.")},
+             "text": gettext("I answer by email as soon as I can."),
+             "title_done": gettext("I approved the request"),
+             "text_done": gettext("I reviewed your request and approved it.")},
         ]
         if self.requires_payment:
             steps.append({"key": "payment", "title": gettext("You pay"),
-                          "text": gettext("The email has the ways to pay. Reply to it with the receipt.")})
+                          "text": gettext("The email has the ways to pay. Reply to it with the receipt."),
+                          "title_done": gettext("You paid"),
+                          "text_done": gettext("I received your payment.")})
         steps.append({"key": "meet", "title": gettext("You get the Google Meet link"),
-                      "text": gettext("The confirmation email has the link and the calendar invitation.")})
+                      "text": gettext("The confirmation email has the link and the calendar invitation."),
+                      "title_done": gettext("You got the Google Meet link"),
+                      "text_done": gettext("The confirmation email has the link and the calendar invitation.")})
         return steps
 
     @property
@@ -499,6 +508,8 @@ class Booking(models.Model):
         for index, step in enumerate(steps):
             step["number"] = index + 1
             step["state"] = "done" if index < at else ("now" if index == at else "next")
+            if step["state"] == "done":
+                step["title"], step["text"] = step["title_done"], step["text_done"]
         return steps if at >= 0 else []
 
     @property
