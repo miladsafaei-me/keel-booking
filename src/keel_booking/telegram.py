@@ -32,12 +32,12 @@ def is_configured() -> bool:
     return bool(conf.get("TELEGRAM_BOT_TOKEN") and conf.get("TELEGRAM_CHAT_ID"))
 
 
-def call(method: str, timeout: float = 15, **data):
+def call(method: str, http_timeout: float = 15, **data):
     token = conf.get("TELEGRAM_BOT_TOKEN")
     if not token:
         raise TelegramError("No TELEGRAM_BOT_TOKEN.")
     try:
-        response = requests.post(API.format(token=token, method=method), json=data, timeout=timeout)
+        response = requests.post(API.format(token=token, method=method), json=data, timeout=http_timeout)
         body = response.json()
     except (requests.RequestException, ValueError) as error:
         raise TelegramError(f"{method}: {error}") from error
@@ -174,7 +174,7 @@ def poll(offset: int | None, timeout: int) -> int | None:
     params = {"timeout": timeout, "allowed_updates": ["message", "callback_query"]}
     if offset is not None:
         params["offset"] = offset
-    for update in call("getUpdates", timeout=timeout + 10, **params) or []:
+    for update in call("getUpdates", http_timeout=timeout + 10, **params) or []:
         offset = update["update_id"] + 1
         try:
             handle_update(update)

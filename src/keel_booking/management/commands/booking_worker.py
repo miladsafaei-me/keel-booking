@@ -49,7 +49,7 @@ class Command(BaseCommand):
                         offset = telegram.poll(offset, timeout=max(1, min(10, int(deadline - time.monotonic()))))
                         close_old_connections()
                         continue
-                    except telegram.TelegramError as error:
+                    except Exception as error:
                         log.warning("Telegram poll failed: %s", error)
                         time.sleep(5)
                         continue

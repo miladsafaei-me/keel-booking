@@ -403,7 +403,7 @@ class ApprovalTests(TestCase):
         self.et = make_type(slug="intro", name="Intro call", requires_approval=True)
         self.calls = []
 
-        def fake_call(method, timeout=15, **data):
+        def fake_call(method, http_timeout=15, **data):
             self.calls.append((method, data))
             return {"message_id": 7} if method == "sendMessage" else True
 
@@ -488,6 +488,19 @@ class ApprovalTests(TestCase):
         self.press("approve", booking, chat=99)
         booking.refresh_from_db()
         self.assertEqual(booking.status, Booking.Status.PENDING)
+
+    def test_poll_hands_presses_to_the_handler(self, _now):
+        from keel_booking import telegram
+
+        self.post()
+        mock.patch.stopall()  # the real call(), over a fake HTTP layer
+        booking = Booking.objects.get()
+        update = {"update_id": 5, "callback_query": {"id": "q", "data": f"kb:approve:{booking.uid}",
+                                                     "message": {"message_id": 7, "chat": {"id": 42}}}}
+        with mock.patch("keel_booking.telegram.requests.post") as post:
+            post.return_value.json.return_value = {"ok": True, "result": [update]}
+            self.assertEqual(telegram.poll(None, timeout=1), 6)
+            self.assertEqual(post.call_args_list[0].kwargs["json"]["timeout"], 1)
 
     def test_undecided_request_lapses_at_its_start(self, _now):
         self.post()
