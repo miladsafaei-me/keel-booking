@@ -10,6 +10,7 @@ gets its own pages, its meeting-type translations, and a booking whose emails fo
 from __future__ import annotations
 
 import json
+import re
 import zoneinfo
 from datetime import date, datetime, time, timedelta
 
@@ -28,7 +29,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
 from . import availability, conf, i18n, mail, services
-from .models import Booking, EventType
+from .models import Booking, EventType, looks_like_phone
 
 NOINDEX = "noindex, nofollow"
 
@@ -192,6 +193,25 @@ def _clean_socials(raw, errors) -> list[dict]:
     return socials
 
 
+TELEGRAM_USERNAME = re.compile(r"^@?[A-Za-z][A-Za-z0-9_]{3,31}$")
+
+
+def _clean_messengers(event_type, data, errors) -> tuple[str, str]:
+    """Telegram (an ID, a t.me link or a number) and WhatsApp (a number). A type that requires
+    approval needs at least one, so the owner can reach the guest online."""
+    telegram = str(data.get("telegram", "")).strip()[:80]
+    whatsapp = str(data.get("whatsapp", "")).strip()[:40]
+    if telegram:
+        handle = re.sub(r"^(https?://)?(www\.)?(t|telegram)\.me/", "", telegram, flags=re.I).strip("/")
+        if not (looks_like_phone(telegram) or TELEGRAM_USERNAME.match(handle)):
+            errors["telegram"] = _("Please enter a Telegram ID, such as @name, or a number with the country code.")
+    if whatsapp and not looks_like_phone(whatsapp):
+        errors["whatsapp"] = _("Please enter a WhatsApp number with the country code, such as +90 555 123 4567.")
+    if event_type.requires_approval and not telegram and not whatsapp:
+        errors["messenger"] = _("Please enter your Telegram or WhatsApp, so I can reach you online.")
+    return telegram, whatsapp
+
+
 def _clean_files(files, errors) -> list:
     limit, max_mb = conf.get("MAX_FILES"), conf.get("MAX_FILE_MB")
     extensions = {ext.lower() for ext in conf.get("FILE_EXTENSIONS")}
@@ -253,6 +273,7 @@ def reserve(request, slug):
     phone = str(data.get("phone", "")).strip()[:40]
     message = str(data.get("message", "")).strip()[:4000]
     socials = _clean_socials(data.get("socials"), errors)
+    telegram, whatsapp = _clean_messengers(event_type, data, errors)
     missing = {
         "name": (name, _("Please enter your name.")),
         "company": (company, _("Please enter your brand or company name.")),
@@ -303,7 +324,7 @@ def reserve(request, slug):
     guest = services.GuestDetails(
         name=name, email=email, timezone=_zone(data.get("timezone"), event_type.timezone), company=company,
         phone=phone, socials=socials, message=message, additional=additional, files=files, language=_language(),
-        answers=answers)
+        answers=answers, telegram=telegram, whatsapp=whatsapp)
     try:
         booking = services.create_booking(event_type, start, guest)
     except services.SlotTaken:
@@ -314,7 +335,7 @@ def reserve(request, slug):
 @never_cache
 def confirmed(request, uid):
     booking = get_object_or_404(Booking.objects.select_related("event_type"), uid=uid)
-    if booking.status != Booking.Status.CONFIRMED:
+    if booking.status not in Booking.HOLDING:
         raise Http404
     response = render(request, "keel_booking/confirmed.html", _context(
         booking=booking, event_type=booking.event_type.localized(), when=mail.when(booking, booking.guest_timezone),

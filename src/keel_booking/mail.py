@@ -206,6 +206,24 @@ def send_confirmation(booking) -> None:
               reply_to=[conf.get("OWNER_EMAIL")])
 
 
+def send_request_received(booking) -> None:
+    """The guest's receipt for a request that waits for approval: no Meet link, no calendar file."""
+    with translation.override(booking.guest_language):
+        context = _context(booking, booking.guest_timezone)
+        subject = _("Request received: {meeting} with {owner}").format(
+            meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
+        _send("request_received", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
+
+
+def send_declined(booking) -> None:
+    """The guest's answer when the owner declines a request (or it lapses undecided)."""
+    with translation.override(booking.guest_language):
+        context = _context(booking, booking.guest_timezone)
+        subject = _("About your request: {meeting} with {owner}").format(
+            meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
+        _send("declined", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
+
+
 def notify_owner(booking) -> None:
     files = list(booking.files.all())
     attach = files if sum(f.size for f in files) <= conf.get("OWNER_ATTACH_MB") * 1024 * 1024 else []

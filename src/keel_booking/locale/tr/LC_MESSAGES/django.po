@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 20:24+0000\n"
+"POT-Creation-Date: 2026-11-02 20:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,6 +77,14 @@ msgid "Confirmed: {meeting} with {owner}, {when}"
 msgstr "Onaylandı: {owner} ile {meeting}, {when}"
 
 #, python-brace-format
+msgid "Request received: {meeting} with {owner}"
+msgstr "Talep alındı: {owner} ile {meeting}"
+
+#, python-brace-format
+msgid "About your request: {meeting} with {owner}"
+msgstr "Talebiniz hakkında: {owner} ile {meeting}"
+
+#, python-brace-format
 msgid "New booking: {meeting} with {guest}, {when}"
 msgstr "Yeni randevu: {guest} ile {meeting}, {when}"
 
@@ -92,22 +100,79 @@ msgstr "İptal edildi: {owner} ile {meeting}, {when}"
 msgid "Follow up: {guest} ({meeting})"
 msgstr "Takip: {guest} ({meeting})"
 
+msgid "New meeting request"
+msgstr "Yeni görüşme talebi"
+
+msgid "Approved. The Meet link went to the guest by email."
+msgstr "Onaylandı. Meet bağlantısı katılımcıya e-postayla gönderildi."
+
+msgid "Declined. The guest was told by email."
+msgstr "Reddedildi. Katılımcıya e-postayla bildirildi."
+
+msgid "Cancelled"
+msgstr "İptal edildi"
+
+#, python-brace-format
+msgid "{minutes} min"
+msgstr "{minutes} dakika"
+
+msgid "Guest time"
+msgstr "Katılımcının saati"
+
+msgid "Files"
+msgstr "Dosyalar"
+
+msgid "Language"
+msgstr "Dil"
+
+msgid "Approve"
+msgstr "Onayla"
+
+msgid "Decline"
+msgstr "Reddet"
+
+msgid "Open in the admin"
+msgstr "Yönetim panelinde aç"
+
+msgid "This bot answers its owner only."
+msgstr "Bu bot yalnızca sahibine yanıt verir."
+
+msgid "This request no longer exists."
+msgstr "Bu talep artık yok."
+
+msgid "Approved. The guest gets the Meet link by email."
+msgstr "Onaylandı. Katılımcı Meet bağlantısını e-postayla alacak."
+
+msgid "This request was already decided."
+msgstr "Bu talep için zaten karar verildi."
+
+msgid "Declined. The guest is told by email."
+msgstr "Reddedildi. Katılımcıya e-postayla bildirilecek."
+
 msgid "Choose one"
 msgstr "Birini seçin"
 
 msgid "Book a meeting"
 msgstr "Görüşme planlayın"
 
+msgid "Request received"
+msgstr "Talep alındı"
+
 #, python-format
 msgid "Booked: %(meeting)s with %(owner_name)s"
 msgstr "Randevu alındı: %(owner_name)s ile %(meeting)s"
 
-msgid "You are booked"
-msgstr "Randevunuz alındı"
+msgid ""
+"I have received your request to set up a meeting. I will review it as soon "
+"as I can and let you know by email."
+msgstr "Görüşme ayarlama talebinizi aldım. En kısa sürede inceleyip size e-postayla haber vereceğim."
 
 #, python-format
 msgid "%(meeting)s with %(owner_name)s"
 msgstr "%(owner_name)s ile %(meeting)s"
+
+msgid "You are booked"
+msgstr "Randevunuz alındı"
 
 #, python-format
 msgid "A confirmation is on its way to %(email)s."
@@ -141,9 +206,6 @@ msgstr "Google Meet ile katılın"
 #, python-format
 msgid "%(meeting)s on %(date)s is cancelled."
 msgstr "%(date)s tarihli %(meeting)s iptal edildi."
-
-msgid "Cancelled"
-msgstr "İptal edildi"
 
 msgid "Your meeting is cancelled"
 msgstr "Görüşmeniz iptal edildi"
@@ -208,6 +270,26 @@ msgstr "%(owner_name)s ile %(meeting)s randevunuz onaylandı."
 
 msgid "Timezone"
 msgstr "Saat dilimi"
+
+msgid "An answer to your meeting request."
+msgstr "Görüşme talebinize yanıt."
+
+msgid "Your request"
+msgstr "Talebiniz"
+
+msgid "This meeting will not go ahead"
+msgstr "Bu görüşme gerçekleşmeyecek"
+
+msgid ""
+"Thank you for your request. I reviewed it, and unfortunately I cannot hold "
+"this meeting. The time you picked is free again."
+msgstr "Talebiniz için teşekkür ederim. İnceledim ve maalesef bu görüşmeyi yapamıyorum. Seçtiğiniz saat yeniden boşa çıktı."
+
+msgid "Requested time"
+msgstr "Talep edilen saat"
+
+msgid "If you have a question, reply to this email."
+msgstr "Bir sorunuz varsa bu e-postayı yanıtlayın."
 
 #, python-format
 msgid "Follow up with %(guest)s."
@@ -285,9 +367,6 @@ msgstr "Açıklama"
 msgid "Files (also attached)"
 msgstr "Dosyalar (ekte de var)"
 
-msgid "Files"
-msgstr "Dosyalar"
-
 #, python-format
 msgid "Not on Google Calendar yet: %(error)s. The site retries every minute."
 msgstr ""
@@ -352,6 +431,17 @@ msgstr "Katılın"
 
 msgid "the link is in your calendar invitation"
 msgstr "bağlantı takvim davetinizde"
+
+msgid "I have received your request to set up a meeting."
+msgstr "Görüşme ayarlama talebinizi aldım."
+
+msgid "Your request has arrived"
+msgstr "Talebiniz ulaştı"
+
+msgid ""
+"This time is held for you until I answer. Want to add something? Reply to "
+"this email."
+msgstr "Bu saat, yanıt verene kadar sizin için ayrıldı. Eklemek istediğiniz bir şey varsa bu e-postayı yanıtlayın."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -473,6 +563,18 @@ msgstr "{day}, {start} - {end}"
 #, python-brace-format
 msgid "You can add up to {n} profiles."
 msgstr "En fazla {n} profil ekleyebilirsiniz."
+
+msgid ""
+"Please enter a Telegram ID, such as @name, or a number with the country code."
+msgstr "Lütfen @isim gibi bir Telegram kullanıcı adı ya da ülke koduyla bir numara girin."
+
+msgid ""
+"Please enter a WhatsApp number with the country code, such as +90 555 123 "
+"4567."
+msgstr "Lütfen WhatsApp numaranızı ülke koduyla girin, örneğin +90 555 123 4567."
+
+msgid "Please enter your Telegram or WhatsApp, so I can reach you online."
+msgstr "Size çevrimiçi ulaşabilmem için lütfen Telegram veya WhatsApp bilginizi girin."
 
 msgid "Please pick one of the options."
 msgstr "Lütfen seçeneklerden birini seçin."

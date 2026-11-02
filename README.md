@@ -25,10 +25,18 @@ owner's notes and follow-ups.
 - **Emails:** confirmation to the guest, the guests they added and fixed attendees (with an `.ics`),
   a notice to the owner, a reminder to everyone N minutes before, a follow-up reminder to the owner,
   and a cancellation. `keel_booking.mail.GmailBackend` sends them through the connected Gmail.
+- **Requests that need approval** (`EventType.requires_approval`, since v0.8.0): the booking is only a
+  request. Its slot is held, the form also asks for Telegram or WhatsApp (one is required), and the
+  guest gets a receipt with no Meet link. The owner gets the request on a Telegram bot
+  (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) with Approve and Decline buttons and links that open a
+  chat with the guest. Approve puts it on the calendar and sends the usual confirmation with the Meet
+  link; Decline frees the slot and tells the guest by email. A request nobody decided lapses at its
+  start. Without Telegram the request goes to `OWNER_EMAIL`, and the admin's actions decide it.
 - **Owner side:** Django admin. Notes and follow-ups are inlines on a booking; actions re-write to
   Google, resend the confirmation, or cancel.
 - **Background work:** `manage.py booking_worker` runs `services.tick()` every minute (calendar
-  retries, unsent emails, reminders, follow-ups). `booking_tick` runs one pass.
+  retries, unsent emails, reminders, follow-ups) and, with a Telegram bot set, long-polls it between
+  ticks for the owner's presses (no webhook URL; run one worker per bot). `booking_tick` runs one pass.
 
 ## Install
 

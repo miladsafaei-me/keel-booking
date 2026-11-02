@@ -1,0 +1,13 @@
+{% load i18n keel_booking %}{% autoescape off %}{% blocktranslate with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}
+
+{% translate "Thank you for your request. I reviewed it, and unfortunately I cannot hold this meeting. The time you picked is free again." %}
+
+{% translate "Meeting" %}: {% include "keel_booking/email/_meeting.txt" %}
+{% translate "Requested time" %}: {{ when.full }}
+{% translate "Timezone" %}: {{ when.timezone }}
+
+{% translate "If you have a question, reply to this email." %}
+
+{{ owner_name }}
+{{ site_url }}
+{% endautoescape %}

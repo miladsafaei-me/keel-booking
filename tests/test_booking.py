@@ -386,3 +386,113 @@ class TickTests(TestCase):
         self.assertEqual(done["follow_ups"], 1)
         self.assertEqual(sorted(m.to[0] for m in outbox.outbox), ["owner@example.com", "owner@example.com", "sara@example.com"])
         self.assertEqual(services.tick(now=NOW), {"synced": 0, "emails": 0, "reminders": 0, "follow_ups": 0})
+
+
+@mock.patch("keel_booking.availability.timezone.now", return_value=NOW)
+@override_settings(KEEL_BOOKING={"OWNER_NAME": "Test Owner", "OWNER_EMAIL": "owner@example.com",
+                                 "OWNER_TIMEZONE": "Europe/Istanbul", "SITE_URL": "https://example.com",
+                                 "TELEGRAM_BOT_TOKEN": "123:abc", "TELEGRAM_CHAT_ID": "42"})
+class ApprovalTests(TestCase):
+    """A type that requires approval: a held request, the owner's Telegram buttons, then the decision emails."""
+
+    def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        self.addCleanup(cache.clear)
+        self.et = make_type(slug="intro", name="Intro call", requires_approval=True)
+        self.calls = []
+
+        def fake_call(method, timeout=15, **data):
+            self.calls.append((method, data))
+            return {"message_id": 7} if method == "sendMessage" else True
+
+        patcher = mock.patch("keel_booking.telegram.call", side_effect=fake_call)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def post(self, **data):
+        body = {"start": "2026-11-02T07:00:00Z", "name": "Sara", "email": "sara@example.com",
+                "timezone": "Europe/Berlin", "telegram": "@sara_k", **data}
+        return self.client.post("/book/intro/reserve/", json.dumps(body), content_type="application/json")
+
+    def press(self, action, booking, chat=42):
+        from keel_booking import telegram
+
+        telegram.handle_update({"update_id": 1, "callback_query": {
+            "id": "q1", "data": f"kb:{action}:{booking.uid}", "message": {"message_id": 7, "chat": {"id": chat}}}})
+
+    def test_telegram_or_whatsapp_is_required(self, _now):
+        fields = self.post(check="1", telegram="").json()["fields"]
+        self.assertEqual(list(fields), ["messenger"])
+        self.assertEqual(self.post(check="1", telegram="", whatsapp="+90 555 123 4567").json(), {"fields": {}})
+        self.assertIn("whatsapp", self.post(check="1", whatsapp="call me").json()["fields"])
+        self.assertIn("telegram", self.post(check="1", telegram="a b").json()["fields"])
+
+    def test_request_is_held_and_announced_without_a_link(self, _now):
+        response = self.post(whatsapp="+90 555 123 4567")
+        self.assertEqual(response.status_code, 201, response.content)
+        booking = Booking.objects.get()
+        self.assertEqual(booking.status, Booking.Status.PENDING)
+        self.assertEqual(booking.telegram_message_id, 7)
+        self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
+        receipt = outbox.outbox[0]
+        self.assertIn("I have received your request to set up a meeting", receipt.body)
+        self.assertNotIn("meet.google", receipt.body + receipt.alternatives[0][0])
+        self.assertEqual(receipt.attachments, [])
+        method, data = self.calls[0]
+        self.assertEqual(method, "sendMessage")
+        self.assertIn("Intro call", data["text"])
+        self.assertIn('href="https://t.me/sara_k"', data["text"])
+        self.assertIn('href="https://wa.me/905551234567"', data["text"])
+        self.assertEqual(len(data["reply_markup"]["inline_keyboard"][0]), 2)
+        # The held slot is gone for the next visitor.
+        self.assertEqual(self.post(email="other@example.com").status_code, 409)
+        self.assertContains(self.client.get(response.json()["redirect"]), "Request received")
+
+    def test_approve_confirms_and_sends_the_link(self, _now):
+        self.post()
+        booking = Booking.objects.get()
+        outbox.outbox.clear()
+        booking.meet_url = "https://meet.google.com/abc-defg-hij"
+        booking.save()
+        self.press("approve", booking)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.CONFIRMED)
+        self.assertIsNotNone(booking.confirmation_sent_at)
+        guest = [m for m in outbox.outbox if m.to == ["sara@example.com"]]
+        self.assertEqual(len(guest), 1)
+        self.assertIn("https://meet.google.com/abc-defg-hij", guest[0].body)
+        edit = [data for method, data in self.calls if method == "editMessageText"][-1]
+        self.assertIn("Approved", edit["text"])
+        self.assertNotIn("callback_data", json.dumps(edit["reply_markup"]))
+        # A second press changes nothing.
+        self.press("decline", booking)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.CONFIRMED)
+
+    def test_decline_frees_the_slot_and_tells_the_guest(self, _now):
+        self.post()
+        booking = Booking.objects.get()
+        outbox.outbox.clear()
+        self.press("decline", booking)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.DECLINED)
+        self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
+        self.assertIn("cannot hold this meeting", outbox.outbox[0].body)
+        self.assertEqual(self.post(email="other@example.com").status_code, 201)
+
+    def test_presses_from_another_chat_are_ignored(self, _now):
+        self.post()
+        booking = Booking.objects.get()
+        self.press("approve", booking, chat=99)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.PENDING)
+
+    def test_undecided_request_lapses_at_its_start(self, _now):
+        self.post()
+        booking = Booking.objects.get()
+        services.tick(now=booking.start_at + timedelta(minutes=1))
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.DECLINED)
+        self.assertIsNotNone(booking.decision_sent_at)

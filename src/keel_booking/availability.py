@@ -48,9 +48,9 @@ def _overlaps(start: datetime, end: datetime, busy: list[tuple[datetime, datetim
 
 
 def local_busy(range_start: datetime, range_end: datetime, exclude_uid=None) -> list[tuple[datetime, datetime]]:
-    """Confirmed bookings of every type near the range, each widened by its own buffers."""
+    """Confirmed bookings and pending requests of every type near the range, each widened by its own buffers."""
     margin = timedelta(days=1)
-    qs = (Booking.objects.filter(status=Booking.Status.CONFIRMED,
+    qs = (Booking.objects.filter(status__in=Booking.HOLDING,
                                  start_at__lt=range_end + margin, end_at__gt=range_start - margin)
           .select_related("event_type"))
     if exclude_uid:
@@ -87,7 +87,7 @@ def compute_slots(event_type: EventType, range_start: datetime, range_end: datet
 
     per_day: dict[date, int] = {}
     if event_type.daily_limit:
-        for booking in Booking.objects.filter(event_type=event_type, status=Booking.Status.CONFIRMED,
+        for booking in Booking.objects.filter(event_type=event_type, status__in=Booking.HOLDING,
                                               start_at__gte=_local(first_day, time(0), tz),
                                               start_at__lt=_local(last_day + timedelta(days=1), time(0), tz)):
             key = booking.start_at.astimezone(tz).date()

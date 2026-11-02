@@ -113,6 +113,11 @@ class EventType(models.Model):
     create_meet_link = models.BooleanField(default=True, help_text="Create a Google Meet link for every meeting.")
     allow_additional_guests = models.BooleanField(default=True, help_text="Let the visitor invite other people by email.")
     confirmation_note = models.TextField(blank=True, help_text="An extra paragraph in the confirmation email.")
+    requires_approval = models.BooleanField(
+        default=False,
+        help_text="A booking is only a request until the owner approves it: the slot is held, the guest is told "
+                  "the request arrived, and the Meet link goes out only on approval. The form also asks for "
+                  "Telegram or WhatsApp.")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -363,10 +368,41 @@ class FixedAttendee(models.Model):
         return self.email
 
 
+def phone_digits(value: str) -> str:
+    """A phone number as digits only, its country code first: «+90 555 123 4567» is 905551234567."""
+    digits = "".join(ch for ch in value if ch.isdigit())
+    return digits[2:] if digits.startswith("00") else digits
+
+
+def looks_like_phone(value: str) -> bool:
+    text = value.strip()
+    return bool(text) and all(ch.isdigit() or ch in "+-() ." for ch in text) and len(phone_digits(text)) >= 7
+
+
+def telegram_link(value: str) -> str:
+    """A t.me link that opens a chat: by username (@name, name or a t.me link) or by phone number."""
+    text = value.strip()
+    if looks_like_phone(text):
+        return f"https://t.me/+{phone_digits(text)}"
+    for prefix in ("https://", "http://", "www.", "t.me/", "telegram.me/"):
+        if text.lower().startswith(prefix):
+            text = text[len(prefix):]
+    return "https://t.me/" + text.lstrip("@").split("/")[0].split("?")[0]
+
+
+def whatsapp_link(value: str) -> str:
+    return f"https://wa.me/{phone_digits(value)}"
+
+
 class Booking(models.Model):
     class Status(models.TextChoices):
+        PENDING = "pending", "Awaiting approval"
         CONFIRMED = "confirmed", "Confirmed"
+        DECLINED = "declined", "Declined"
         CANCELLED = "cancelled", "Cancelled"
+
+    # The statuses whose time is taken: a request waiting for the owner holds its slot.
+    HOLDING = (Status.PENDING, Status.CONFIRMED)
 
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     event_type = models.ForeignKey(EventType, on_delete=models.PROTECT, related_name="bookings")
@@ -386,6 +422,8 @@ class Booking(models.Model):
     guest_socials = models.JSONField("social profiles", default=list, blank=True,
                                      help_text="A list of {network, handle} the guest gave.")
     guest_message = models.TextField("description", blank=True)
+    guest_telegram = models.CharField("Telegram", max_length=80, blank=True, help_text="A Telegram ID or number.")
+    guest_whatsapp = models.CharField("WhatsApp", max_length=40, blank=True, help_text="A WhatsApp number.")
     answers = models.JSONField(default=dict, blank=True,
                                help_text="The answers to the meeting type's own questions, by question key.")
     guest_timezone = models.CharField(max_length=64, default="UTC", validators=[validate_timezone])
@@ -398,6 +436,11 @@ class Booking(models.Model):
     meet_access = models.CharField(max_length=12, blank=True, help_text="The Meet access type the site last set.")
     sync_attempts = models.PositiveSmallIntegerField(default=0)
     sync_error = models.TextField(blank=True)
+
+    decided_at = models.DateTimeField(null=True, blank=True, help_text="When the owner approved or declined the request.")
+    request_ack_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the guest was told the request arrived.")
+    decision_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the guest was told the request was declined.")
+    telegram_message_id = models.BigIntegerField(null=True, blank=True, help_text="The owner's Telegram message about this request.")
 
     confirmation_sent_at = models.DateTimeField(null=True, blank=True)
     owner_notified_at = models.DateTimeField(null=True, blank=True)
@@ -419,6 +462,11 @@ class Booking(models.Model):
     def is_upcoming(self) -> bool:
         return self.status == self.Status.CONFIRMED and self.end_at > timezone.now()
 
+    @property
+    def is_request(self) -> bool:
+        """True while the booking waits for the owner's approval."""
+        return self.status == self.Status.PENDING
+
     def busy_range(self):
         """The time this booking blocks, its type's buffers included."""
         et = self.event_type
@@ -436,6 +484,15 @@ class Booking(models.Model):
             return str(translation.get_language_info(self.guest_language)["name_translated"])
         except KeyError:
             return self.guest_language
+
+    def messenger_links(self) -> list[tuple[str, str, str]]:
+        """The guest's Telegram and WhatsApp as (network, what they typed, a link that opens a chat with them)."""
+        rows = []
+        if self.guest_telegram:
+            rows.append(("Telegram", self.guest_telegram, telegram_link(self.guest_telegram)))
+        if self.guest_whatsapp:
+            rows.append(("WhatsApp", self.guest_whatsapp, whatsapp_link(self.guest_whatsapp)))
+        return rows
 
     def socials_display(self) -> list[tuple[str, str]]:
         """The guest's social profiles as (network name, handle)."""

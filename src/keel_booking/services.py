@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from django.db import connection, transaction
 from django.utils import timezone
 
-from . import availability, conf, google, mail
+from . import availability, conf, google, mail, telegram
 from .models import Booking, BookingAttendee, BookingFile, EventType, FollowUp
 
 log = logging.getLogger(__name__)
@@ -41,6 +41,8 @@ class GuestDetails:
     files: list = field(default_factory=list)
     language: str = ""
     answers: dict = field(default_factory=dict)
+    telegram: str = ""
+    whatsapp: str = ""
 
 
 def _lock() -> None:
@@ -54,6 +56,8 @@ def create_booking(event_type: EventType, start: datetime, guest: GuestDetails) 
 
     The slot is checked again inside a lock with Google read fresh; ``SlotTaken`` means it went
     in the meantime. Google and email failures never lose the booking: the worker retries them.
+    A type that requires approval makes a pending request instead: the slot is held, the guest is
+    told the request arrived, the owner is asked on Telegram, and nothing goes to Google yet.
     """
     with transaction.atomic():
         _lock()
@@ -63,7 +67,9 @@ def create_booking(event_type: EventType, start: datetime, guest: GuestDetails) 
             event_type=event_type, start_at=start, end_at=start + timedelta(minutes=event_type.duration_minutes),
             guest_name=guest.name, guest_email=guest.email, guest_company=guest.company, guest_phone=guest.phone,
             guest_socials=guest.socials, guest_message=guest.message, guest_timezone=guest.timezone,
-            language=guest.language, answers=guest.answers)
+            language=guest.language, answers=guest.answers, guest_telegram=guest.telegram,
+            guest_whatsapp=guest.whatsapp,
+            status=Booking.Status.PENDING if event_type.requires_approval else Booking.Status.CONFIRMED)
         for upload in guest.files:
             BookingFile.objects.create(booking=booking, file=upload, original_name=upload.name[:255],
                                        size=upload.size or 0, content_type=(upload.content_type or "")[:120])
@@ -79,9 +85,81 @@ def create_booking(event_type: EventType, start: datetime, guest: GuestDetails) 
                 seen.add(fixed.email.lower())
                 BookingAttendee.objects.create(booking=booking, email=fixed.email, name=fixed.name,
                                                role=BookingAttendee.Role.FIXED, receive_emails=fixed.receive_emails)
+    if booking.is_request:
+        send_request_notices(booking)
+        return booking
     sync_to_google(booking)
     send_new_booking_emails(booking)
     return booking
+
+
+def send_request_notices(booking: Booking) -> None:
+    """A new request: the owner's Telegram message (email when Telegram is not set up) and the guest's receipt, each once."""
+    errors = []
+    if not booking.owner_notified_at:
+        try:
+            if telegram.is_configured():
+                telegram.send_request(booking)
+                booking.owner_notified_at = timezone.now()
+            elif mail.can_send():
+                mail.notify_owner(booking)
+                booking.owner_notified_at = timezone.now()
+        except Exception as error:
+            errors.append(f"owner: {error}")
+    if not booking.request_ack_sent_at and mail.can_send():
+        try:
+            mail.send_request_received(booking)
+            booking.request_ack_sent_at = timezone.now()
+        except Exception as error:
+            errors.append(f"guest: {error}")
+    if errors:
+        log.warning("request notices failed for %s: %s", booking.uid, errors)
+        booking.mail_attempts += 1
+        booking.mail_error = "; ".join(errors)[:2000]
+    elif booking.owner_notified_at and booking.request_ack_sent_at:
+        booking.mail_error = ""
+    booking.save(update_fields=["owner_notified_at", "request_ack_sent_at", "mail_attempts", "mail_error", "updated_at"])
+
+
+def _decide(booking: Booking, status: str) -> bool:
+    """Move a pending request to ``status`` once. False when it was already decided."""
+    with transaction.atomic():
+        changed = Booking.objects.filter(pk=booking.pk, status=Booking.Status.PENDING).update(
+            status=status, decided_at=timezone.now(), mail_attempts=0, mail_error="")
+    if changed:
+        booking.refresh_from_db()
+    return bool(changed)
+
+
+def approve_booking(booking: Booking) -> bool:
+    """Approve a request: it becomes a confirmed meeting, goes on the calendar with its Meet link,
+    and the guest gets the usual confirmation with that link. False when it was already decided."""
+    if not _decide(booking, Booking.Status.CONFIRMED):
+        return False
+    sync_to_google(booking)
+    send_new_booking_emails(booking)
+    return True
+
+
+def decline_booking(booking: Booking) -> bool:
+    """Decline a request: its slot opens again and the guest is told by email. False when already decided."""
+    if not _decide(booking, Booking.Status.DECLINED):
+        return False
+    send_decline_email(booking)
+    return True
+
+
+def send_decline_email(booking: Booking) -> None:
+    if booking.decision_sent_at or not mail.can_send():
+        return
+    try:
+        mail.send_declined(booking)
+    except Exception as error:
+        log.warning("decline email failed for %s: %s", booking.uid, error)
+        Booking.objects.filter(pk=booking.pk).update(mail_attempts=booking.mail_attempts + 1, mail_error=str(error)[:2000])
+        return
+    booking.decision_sent_at = timezone.now()
+    Booking.objects.filter(pk=booking.pk).update(decision_sent_at=booking.decision_sent_at, mail_error="")
 
 
 def sync_to_google(booking: Booking) -> bool:
@@ -156,7 +234,7 @@ def _waiting_for_meet(booking: Booking) -> bool:
         return False
     if not google.GoogleAccount.load().is_connected or booking.sync_attempts >= MAX_ATTEMPTS:
         return False
-    return timezone.now() - booking.created_at < MEET_WAIT
+    return timezone.now() - (booking.decided_at or booking.created_at) < MEET_WAIT
 
 
 def send_new_booking_emails(booking: Booking) -> None:
@@ -216,6 +294,20 @@ def tick(now: datetime | None = None) -> dict:
     if conf.get("MEET_ACCESS"):
         for booking in upcoming.exclude(meet_url="").exclude(meet_access=conf.get("MEET_ACCESS"))[:20]:
             apply_meet_access(booking)
+
+    requests = Booking.objects.filter(status=Booking.Status.PENDING).select_related("event_type")
+    for booking in requests.filter(start_at__lte=now):
+        # Nobody decided before the start: the request lapses, and the guest is told.
+        if decline_booking(booking):
+            telegram.refresh_request(Booking.objects.get(pk=booking.pk))
+    unsent = (requests.filter(mail_attempts__lt=MAX_ATTEMPTS, owner_notified_at__isnull=True)
+              | requests.filter(mail_attempts__lt=MAX_ATTEMPTS, request_ack_sent_at__isnull=True))
+    for booking in unsent.distinct():
+        send_request_notices(booking)
+        done["emails"] += 1
+    for booking in Booking.objects.filter(status=Booking.Status.DECLINED, decision_sent_at__isnull=True,
+                                          mail_attempts__lt=MAX_ATTEMPTS, start_at__gt=now - timedelta(days=1)):
+        send_decline_email(booking)
 
     pending = upcoming.filter(mail_attempts__lt=MAX_ATTEMPTS).filter(
         confirmation_sent_at__isnull=True) | upcoming.filter(mail_attempts__lt=MAX_ATTEMPTS, owner_notified_at__isnull=True)

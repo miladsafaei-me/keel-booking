@@ -1,14 +1,21 @@
 {% extends base_template %}
 {% load i18n %}
-{% block title %}{% blocktranslate with meeting=event_type.name %}Booked: {{ meeting }} with {{ owner_name }}{% endblocktranslate %}{% endblock %}
+{% block title %}{% if booking.is_request %}{% translate "Request received" %}{% else %}{% blocktranslate with meeting=event_type.name %}Booked: {{ meeting }} with {{ owner_name }}{% endblocktranslate %}{% endif %}{% endblock %}
 {% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 {% block content %}
 <section class="kb-confirmed" aria-labelledby="kb-confirmed-title">
+  {% if booking.is_request %}
+  <h1 id="kb-confirmed-title">{% translate "Request received" %}</h1>
+  <p>{% translate "I have received your request to set up a meeting. I will review it as soon as I can and let you know by email." %}</p>
+  <p>{% blocktranslate with meeting=event_type.name %}{{ meeting }} with {{ owner_name }}{% endblocktranslate %}</p>
+  <p>{{ when.full }} (<span dir="ltr">{{ when.timezone }}</span>)</p>
+  {% else %}
   <h1 id="kb-confirmed-title">{% translate "You are booked" %}</h1>
   <p>{% blocktranslate with meeting=event_type.name %}{{ meeting }} with {{ owner_name }}{% endblocktranslate %}</p>
   <p>{{ when.full }} (<span dir="ltr">{{ when.timezone }}</span>)</p>
   {% if booking.meet_url %}<p><a href="{{ booking.meet_url }}" dir="ltr">{{ booking.meet_url }}</a></p>{% endif %}
   <p>{% blocktranslate with email=booking.guest_email %}A confirmation is on its way to {{ email }}.{% endblocktranslate %}</p>
   <p><a href="{{ calendar_link }}" rel="noopener" target="_blank">{% translate "Add to Google Calendar" %}</a></p>
+  {% endif %}
 </section>
 {% endblock %}

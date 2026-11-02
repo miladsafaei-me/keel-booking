@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 20:24+0000\n"
+"POT-Creation-Date: 2026-11-02 20:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,6 +77,14 @@ msgid "Confirmed: {meeting} with {owner}, {when}"
 msgstr "تأیید شد: {meeting} با {owner}، {when}"
 
 #, python-brace-format
+msgid "Request received: {meeting} with {owner}"
+msgstr "درخواست دریافت شد: {meeting} با {owner}"
+
+#, python-brace-format
+msgid "About your request: {meeting} with {owner}"
+msgstr "درباره‌ی درخواست شما: {meeting} با {owner}"
+
+#, python-brace-format
 msgid "New booking: {meeting} with {guest}, {when}"
 msgstr "رزرو تازه: {meeting} با {guest}، {when}"
 
@@ -92,22 +100,79 @@ msgstr "لغو شد: {meeting} با {owner}، {when}"
 msgid "Follow up: {guest} ({meeting})"
 msgstr "پیگیری: {guest} ({meeting})"
 
+msgid "New meeting request"
+msgstr "درخواست جلسه‌ی جدید"
+
+msgid "Approved. The Meet link went to the guest by email."
+msgstr "تأیید شد. لینک Meet با ایمیل برای مهمان فرستاده شد."
+
+msgid "Declined. The guest was told by email."
+msgstr "رد شد. با ایمیل به مهمان خبر داده شد."
+
+msgid "Cancelled"
+msgstr "لغو شد"
+
+#, python-brace-format
+msgid "{minutes} min"
+msgstr "{minutes} دقیقه"
+
+msgid "Guest time"
+msgstr "ساعت مهمان"
+
+msgid "Files"
+msgstr "فایل‌ها"
+
+msgid "Language"
+msgstr "زبان"
+
+msgid "Approve"
+msgstr "تأیید"
+
+msgid "Decline"
+msgstr "رد"
+
+msgid "Open in the admin"
+msgstr "باز کردن در پنل مدیریت"
+
+msgid "This bot answers its owner only."
+msgstr "این ربات فقط به صاحبش جواب می‌دهد."
+
+msgid "This request no longer exists."
+msgstr "این درخواست دیگر وجود ندارد."
+
+msgid "Approved. The guest gets the Meet link by email."
+msgstr "تأیید شد. لینک Meet با ایمیل برای مهمان فرستاده می‌شود."
+
+msgid "This request was already decided."
+msgstr "درباره‌ی این درخواست قبلاً تصمیم گرفته شده است."
+
+msgid "Declined. The guest is told by email."
+msgstr "رد شد. با ایمیل به مهمان خبر داده می‌شود."
+
 msgid "Choose one"
 msgstr "یکی را انتخاب کنید"
 
 msgid "Book a meeting"
 msgstr "رزرو جلسه"
 
+msgid "Request received"
+msgstr "درخواست دریافت شد"
+
 #, python-format
 msgid "Booked: %(meeting)s with %(owner_name)s"
 msgstr "رزرو شد: %(meeting)s با %(owner_name)s"
 
-msgid "You are booked"
-msgstr "جلسه‌ی شما رزرو شد"
+msgid ""
+"I have received your request to set up a meeting. I will review it as soon "
+"as I can and let you know by email."
+msgstr "درخواست شما را برای تنظیم جلسه دریافت کردم. در اولین فرصت بررسی می‌کنم و از طریق ایمیل به شما اطلاع می‌دهم."
 
 #, python-format
 msgid "%(meeting)s with %(owner_name)s"
 msgstr "%(meeting)s با %(owner_name)s"
+
+msgid "You are booked"
+msgstr "جلسه‌ی شما رزرو شد"
 
 #, python-format
 msgid "A confirmation is on its way to %(email)s."
@@ -141,9 +206,6 @@ msgstr "ورود با Google Meet"
 #, python-format
 msgid "%(meeting)s on %(date)s is cancelled."
 msgstr "%(meeting)s در %(date)s لغو شد."
-
-msgid "Cancelled"
-msgstr "لغو شد"
 
 msgid "Your meeting is cancelled"
 msgstr "جلسه‌ی شما لغو شد"
@@ -206,6 +268,26 @@ msgstr "جلسه‌ی «%(meeting)s» شما با %(owner_name)s تأیید شد
 
 msgid "Timezone"
 msgstr "منطقه‌ی زمانی"
+
+msgid "An answer to your meeting request."
+msgstr "پاسخ درخواست جلسه‌ی شما."
+
+msgid "Your request"
+msgstr "درخواست شما"
+
+msgid "This meeting will not go ahead"
+msgstr "این جلسه برگزار نمی‌شود"
+
+msgid ""
+"Thank you for your request. I reviewed it, and unfortunately I cannot hold "
+"this meeting. The time you picked is free again."
+msgstr "از درخواست شما ممنونم. آن را بررسی کردم و متأسفانه نمی‌توانم این جلسه را برگزار کنم. زمانی که انتخاب کرده بودید دوباره آزاد شد."
+
+msgid "Requested time"
+msgstr "زمان درخواستی"
+
+msgid "If you have a question, reply to this email."
+msgstr "اگر سؤالی دارید، به همین ایمیل جواب بدهید."
 
 #, python-format
 msgid "Follow up with %(guest)s."
@@ -283,9 +365,6 @@ msgstr "توضیحات"
 msgid "Files (also attached)"
 msgstr "فایل‌ها (پیوست هم شده‌اند)"
 
-msgid "Files"
-msgstr "فایل‌ها"
-
 #, python-format
 msgid "Not on Google Calendar yet: %(error)s. The site retries every minute."
 msgstr ""
@@ -351,6 +430,17 @@ msgstr "ورود به جلسه"
 
 msgid "the link is in your calendar invitation"
 msgstr "لینک در دعوت‌نامه‌ی تقویم شماست"
+
+msgid "I have received your request to set up a meeting."
+msgstr "درخواست شما را برای تنظیم جلسه دریافت کردم."
+
+msgid "Your request has arrived"
+msgstr "درخواست شما به دستم رسید"
+
+msgid ""
+"This time is held for you until I answer. Want to add something? Reply to "
+"this email."
+msgstr "این زمان تا پاسخ من برای شما نگه داشته می‌شود. اگر نکته‌ای می‌خواهید اضافه کنید، به همین ایمیل جواب بدهید."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -472,6 +562,18 @@ msgstr "{day}، {start} تا {end}"
 #, python-brace-format
 msgid "You can add up to {n} profiles."
 msgstr "حداکثر {n} پروفایل می‌توانید اضافه کنید."
+
+msgid ""
+"Please enter a Telegram ID, such as @name, or a number with the country code."
+msgstr "لطفاً آیدی تلگرام مثل @name یا شماره با کد کشور را وارد کنید."
+
+msgid ""
+"Please enter a WhatsApp number with the country code, such as +90 555 123 "
+"4567."
+msgstr "لطفاً شماره‌ی واتس‌اپ را با کد کشور وارد کنید، مثل +90 555 123 4567."
+
+msgid "Please enter your Telegram or WhatsApp, so I can reach you online."
+msgstr "لطفاً تلگرام یا واتس‌اپ خود را وارد کنید تا بتوانم آنلاین با شما در تماس باشم."
 
 msgid "Please pick one of the options."
 msgstr "لطفاً یکی از گزینه‌ها را انتخاب کنید."

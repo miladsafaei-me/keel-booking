@@ -1,0 +1,13 @@
+{% load i18n keel_booking %}{% autoescape off %}{% blocktranslate with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}
+
+{% translate "I have received your request to set up a meeting. I will review it as soon as I can and let you know by email." %}
+
+{% translate "Meeting" %}: {% include "keel_booking/email/_meeting.txt" %}
+{% translate "Requested time" %}: {{ when.full }}
+{% translate "Timezone" %}: {{ when.timezone }}
+
+{% translate "This time is held for you until I answer. Want to add something? Reply to this email." %}
+
+{{ owner_name }}
+{{ site_url }}
+{% endautoescape %}

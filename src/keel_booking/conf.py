@@ -41,6 +41,14 @@ DEFAULTS = {
     # The owner's emails (new booking, reminder, follow-up) and the calendar event's text follow the
     # language the guest booked in, as the guest's emails do. False keeps them in LANGUAGE_CODE.
     "OWNER_EMAILS_IN_BOOKING_LANGUAGE": False,
+    # The owner's Telegram bot for meeting requests (meeting types with requires_approval): each request
+    # arrives there with Approve and Decline buttons. TELEGRAM_CHAT_ID is the owner's own chat with the
+    # bot; only presses from that chat count. The booking worker reads the presses by long polling, so
+    # no webhook URL is needed. Empty token: requests go to OWNER_EMAIL and are decided in the admin.
+    "TELEGRAM_BOT_TOKEN": "",
+    "TELEGRAM_CHAT_ID": "",
+    # The language of the Telegram messages. Empty means LANGUAGE_CODE.
+    "TELEGRAM_LANGUAGE": "",
     # Seconds a free/busy answer from Google is reused for the slot pages.
     "FREEBUSY_CACHE_SECONDS": 60,
     # How many extra guest emails a visitor may add to one booking.

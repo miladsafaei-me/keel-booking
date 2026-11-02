@@ -92,7 +92,7 @@ class EventTypeAdmin(admin.ModelAdmin):
                        ("min_notice_minutes", "max_days_ahead"),
                        ("timezone", "detect_visitor_timezone"))}),
         ("Meeting and emails", {"fields": (("create_meet_link", "allow_additional_guests", "reminder_minutes"),
-                                           "confirmation_note")}),
+                                           "requires_approval", "confirmation_note")}),
     )
 
     @admin.display(description="Page")
@@ -172,16 +172,18 @@ class BookingAdmin(admin.ModelAdmin):
     inlines = (BookingAttendeeInline, BookingFileInline, BookingNoteInline, FollowUpInline)
     formfield_overrides = short_text()
     readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "language", "meet", "calendar",
-                       "socials_list", "answers_list", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
+                       "socials_list", "answers_list", "messengers", "decided_at", "request_ack_sent_at", "decision_sent_at", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
         ("Meeting", {"fields": ("event_type", "status", "start_at", "end_at", "meet", "calendar", "source")}),
-        ("Guest", {"fields": (("guest_name", "guest_company"), ("guest_email", "guest_phone"), "answers_list",
+        ("Guest", {"fields": (("guest_name", "guest_company"), ("guest_email", "guest_phone"),
+                              ("guest_telegram", "guest_whatsapp"), "messengers", "answers_list",
                               "guest_message", ("socials_list", "guest_timezone", "language"))}),
-        ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
+        ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "decided_at", "request_ack_sent_at",
+                                                          "decision_sent_at", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )
-    actions = ("resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
+    actions = ("approve_requests", "decline_requests", "resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
 
     def has_add_permission(self, request):
         return False
@@ -216,6 +218,36 @@ class BookingAdmin(admin.ModelAdmin):
         except FileNotFoundError:
             raise Http404
         return FileResponse(handle, as_attachment=True, filename=item.original_name)
+
+    @admin.display(description="Message them")
+    def messengers(self, obj):
+        rows = obj.messenger_links()
+        if not rows:
+            return "-"
+        return format_html_join("", '<div>{}: <a href="{}" target="_blank" rel="noopener">{}</a></div>',
+                                ((network, link, value) for network, value, link in rows))
+
+    @admin.action(description="Approve the requests (calendar, Meet link, confirmation email)")
+    def approve_requests(self, request, queryset):
+        from . import telegram
+
+        done = 0
+        for booking in queryset.filter(status=Booking.Status.PENDING):
+            if services.approve_booking(booking):
+                done += 1
+                telegram.refresh_request(booking)
+        self.message_user(request, f"{done} requests approved.")
+
+    @admin.action(description="Decline the requests (the guests are told by email)")
+    def decline_requests(self, request, queryset):
+        from . import telegram
+
+        done = 0
+        for booking in queryset.filter(status=Booking.Status.PENDING):
+            if services.decline_booking(booking):
+                done += 1
+                telegram.refresh_request(booking)
+        self.message_user(request, f"{done} requests declined.")
 
     @admin.display(description="Social")
     def socials_short(self, obj):
