@@ -21,7 +21,8 @@
   nothing moves when the open times arrive.
 
   Language: dates and numbers follow the page's <html lang> (always on the Gregorian calendar, which
-  the month grid is), the week starts on config.weekStart (0 is Sunday), and every sentence comes
+  the month grid is; the chosen day's title adds the language's own calendar where that differs), the
+  week starts on config.weekStart (0 is Sunday), and every sentence comes
   from config.labels, which the view fills in the page's language.
 */
 (function () {
@@ -126,10 +127,22 @@
       .format(new Date(Date.UTC(m.year, m.month - 1, 1)));
   }
 
+  // A language whose own calendar is not the Gregorian one (Persian: the Solar Hijri) also names the
+  // chosen day on that calendar: "دوشنبه ۲ نوامبر - ۱۱ آبان".
+  var native = nativeCalendar(pageLocale);
+
+  function nativeCalendar(tag) {
+    try {
+      var format = new Intl.DateTimeFormat(tag, { day: "numeric", month: "long", timeZone: "UTC" });
+      return format.resolvedOptions().calendar === "gregory" ? null : format;
+    } catch (e) { return null; }
+  }
+
   function dayTitle(iso) {
     var bits = iso.split("-");
-    return new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
-      .format(new Date(Date.UTC(+bits[0], +bits[1] - 1, +bits[2])));
+    var date = new Date(Date.UTC(+bits[0], +bits[1] - 1, +bits[2]));
+    var title = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(date);
+    return native ? title + " - " + native.format(date) : title;
   }
 
   function timeOf(isoUtc) {
