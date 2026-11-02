@@ -60,6 +60,7 @@ def request_text(booking) -> str:
     from .models import Booking
 
     event_type = booking.event_type.localized()
+    comma = "، " if i18n.is_rtl() else ", "
     owner_when = mail.when(booking, booking.event_type.timezone)
     status_line = {
         Booking.Status.PENDING: "🆕 " + _("New meeting request"),
@@ -72,8 +73,8 @@ def request_text(booking) -> str:
              f"🕒 {_e(owner_when['full'])}", f"     {_e(owner_when['timezone'])}"]
     if booking.guest_timezone != booking.event_type.timezone:
         guest_when = mail.when(booking, booking.guest_timezone)
-        lines.append(f"     {_e(_('Guest time'))}: {_e(guest_when['time'])}, {_e(guest_when['timezone'])}")
-    lines += ["", f"👤 <b>{_e(booking.guest_name)}</b>" + (f", {_e(booking.guest_company)}" if booking.guest_company else ""),
+        lines.append(f"     {_e(_('Guest time'))}: {_e(guest_when['time'])}{comma}{_e(guest_when['timezone'])}")
+    lines += ["", f"👤 <b>{_e(booking.guest_name)}</b>" + (f"{comma}{_e(booking.guest_company)}" if booking.guest_company else ""),
               f"✉️ {_e(booking.guest_email)}"]
     if booking.guest_phone:
         lines.append(f"📞 {_e(booking.guest_phone)}")
