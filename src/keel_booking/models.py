@@ -16,6 +16,7 @@ from django.core.validators import RegexValidator
 from django.conf import settings
 from django.db import models
 from django.utils import timezone, translation
+from django.utils.translation import gettext
 
 from . import conf
 
@@ -118,6 +119,11 @@ class EventType(models.Model):
         help_text="A booking is only a request until the owner approves it: the slot is held, the guest is told "
                   "the request arrived, and the Meet link goes out only on approval. The form also asks for "
                   "Telegram or WhatsApp.")
+    requires_payment = models.BooleanField(
+        default=False,
+        help_text="With approval on: approving asks the guest to pay first. The payment email lists the active "
+                  "payment methods; the guest replies with the receipt, and the owner's 'payment received' sends "
+                  "the confirmation with the Meet link. Unpaid by the deadline, the time is released.")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -137,6 +143,24 @@ class EventType(models.Model):
             raise ValidationError({"duration_minutes": "A meeting needs a length."})
         if not self.slot_step_minutes:
             raise ValidationError({"slot_step_minutes": "The step must be at least one minute."})
+
+    def journey(self) -> list[dict]:
+        """What happens after the form, step by step, for a type that requires approval: each step's title and
+        one line of what the guest does or gets, in the active language. Empty for a type booked at once."""
+        if not self.requires_approval:
+            return []
+        steps = [
+            {"key": "request", "title": gettext("You send the request"),
+             "text": gettext("Pick a time and fill in the form. The time is held for you.")},
+            {"key": "review", "title": gettext("I review it"),
+             "text": gettext("I answer by email as soon as I can.")},
+        ]
+        if self.requires_payment:
+            steps.append({"key": "payment", "title": gettext("You pay"),
+                          "text": gettext("The email has the ways to pay. Reply to it with the receipt.")})
+        steps.append({"key": "meet", "title": gettext("You get the Google Meet link"),
+                      "text": gettext("The confirmation email has the link and the calendar invitation.")})
+        return steps
 
     @property
     def tz(self) -> zoneinfo.ZoneInfo:
@@ -397,12 +421,13 @@ def whatsapp_link(value: str) -> str:
 class Booking(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "Awaiting approval"
+        PAYMENT = "payment", "Approved, awaiting payment"
         CONFIRMED = "confirmed", "Confirmed"
         DECLINED = "declined", "Declined"
         CANCELLED = "cancelled", "Cancelled"
 
     # The statuses whose time is taken: a request waiting for the owner holds its slot.
-    HOLDING = (Status.PENDING, Status.CONFIRMED)
+    HOLDING = (Status.PENDING, Status.PAYMENT, Status.CONFIRMED)
 
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     event_type = models.ForeignKey(EventType, on_delete=models.PROTECT, related_name="bookings")
@@ -440,6 +465,9 @@ class Booking(models.Model):
     decided_at = models.DateTimeField(null=True, blank=True, help_text="When the owner approved or declined the request.")
     request_ack_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the guest was told the request arrived.")
     decision_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the guest was told the request was declined.")
+    payment_due_at = models.DateTimeField(null=True, blank=True, help_text="The guest must pay by then, or the time is released.")
+    payment_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the payment details went to the guest.")
+    paid_at = models.DateTimeField(null=True, blank=True, help_text="When the owner marked the payment received.")
     telegram_message_id = models.BigIntegerField(null=True, blank=True, help_text="The owner's Telegram message about this request.")
 
     confirmation_sent_at = models.DateTimeField(null=True, blank=True)
@@ -462,10 +490,21 @@ class Booking(models.Model):
     def is_upcoming(self) -> bool:
         return self.status == self.Status.CONFIRMED and self.end_at > timezone.now()
 
+    def journey(self) -> list[dict]:
+        """The type's steps (``EventType.journey``), each marked done, now or next for this booking."""
+        steps = self.event_type.localized().journey()
+        current = {self.Status.PENDING: "review", self.Status.PAYMENT: "payment"}.get(self.status)
+        keys = [step["key"] for step in steps]
+        at = keys.index(current) if current in keys else (len(keys) if self.status == self.Status.CONFIRMED else -1)
+        for index, step in enumerate(steps):
+            step["number"] = index + 1
+            step["state"] = "done" if index < at else ("now" if index == at else "next")
+        return steps if at >= 0 else []
+
     @property
     def is_request(self) -> bool:
-        """True while the booking waits for the owner's approval."""
-        return self.status == self.Status.PENDING
+        """True while the booking is not yet a confirmed meeting: waiting for approval, or for the payment."""
+        return self.status in (self.Status.PENDING, self.Status.PAYMENT)
 
     def busy_range(self):
         """The time this booking blocks, its type's buffers included."""
@@ -520,6 +559,81 @@ class Booking(models.Model):
         emails += [a.email for a in self.attendees.all() if a.role == BookingAttendee.Role.ADDITIONAL]
         emails += [a.email for a in self.attendees.all() if a.role == BookingAttendee.Role.FIXED and a.receive_emails]
         return list(dict.fromkeys(e.lower() for e in emails if e))
+
+
+class PaymentMethod(models.Model):
+    """One way to pay for a paid meeting, shown as a card in the payment email.
+
+    ``amount_text`` may use {price} (the meeting's price as written in the email's language) and
+    {amount} (the number in the type's own price, such as 100 for $100). ``details`` is one
+    "Label: value" per line; each value is shown large and easy to copy.
+    """
+
+    name = models.CharField(max_length=120, help_text="The card's title, such as Bank transfer in lira.")
+    amount_text = models.CharField(max_length=200, blank=True, help_text="Such as: The equivalent of {price} in lira.")
+    details = models.TextField(help_text="One 'Label: value' per line, such as IBAN: TR00 0000 ...")
+    note = models.CharField(max_length=300, blank=True, help_text="A short line under the card.")
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "keel_booking_payment_method"
+        ordering = ("sort_order", "id")
+        verbose_name = "payment method"
+
+    def __str__(self) -> str:
+        return self.name
+
+    def localized(self, language: str | None = None) -> "PaymentMethod":
+        language = (language or translation.get_language() or "").split("-")[0]
+        rows = getattr(self, "_prefetched_objects_cache", {}).get("translations")
+        row = (next((r for r in rows if r.language == language), None) if rows is not None
+               else self.translations.filter(language=language).first())
+        if row is None:
+            return self
+        local = copy.copy(self)
+        for name in ("name", "amount_text", "details", "note"):
+            value = getattr(row, name)
+            if value:
+                setattr(local, name, value)
+        return local
+
+    def detail_rows(self) -> list[tuple[str, str]]:
+        rows = []
+        for line in self.details.splitlines():
+            if line.strip():
+                label, sep, value = line.partition(":")
+                rows.append((label.strip(), value.strip()) if sep else ("", line.strip()))
+        return rows
+
+    def amount_for(self, event_type) -> str:
+        """The amount line for one meeting type, in the active language."""
+        digits = "".join(ch for ch in event_type.price if ch.isdigit() or ch == ".")
+        local_price = event_type.localized().price or event_type.price
+        try:
+            return self.amount_text.format(price=local_price, amount=digits)
+        except (KeyError, IndexError, ValueError):
+            return self.amount_text
+
+
+class PaymentMethodTranslation(models.Model):
+    """A payment method's texts in one more language. An empty text keeps the method's own."""
+
+    method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE, related_name="translations")
+    language = models.CharField(max_length=10, choices=language_choices)
+    name = models.CharField(max_length=120, blank=True)
+    amount_text = models.CharField(max_length=200, blank=True)
+    details = models.TextField(blank=True, help_text="One 'Label: value' per line; empty keeps the method's own.")
+    note = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        db_table = "keel_booking_payment_method_translation"
+        unique_together = ("method", "language")
+        ordering = ("language",)
+        verbose_name = "translation"
+
+    def __str__(self) -> str:
+        return f"{self.method} ({self.language})"
 
 
 class BookingAttendee(models.Model):

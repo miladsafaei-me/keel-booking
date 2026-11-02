@@ -1,0 +1,36 @@
+{% extends "keel_booking/email/base.html" %}
+{% load i18n %}
+{% comment %}
+  After the owner approves a paid meeting: the price, the deadline, and each payment method as a quiet card
+  (its name, the amount on a tinted pill, then each detail as a small label over a large value that reads left to
+  right and copies cleanly). No Meet link and no calendar file until the payment arrives.
+{% endcomment %}
+{% block preheader %}{% blocktranslate trimmed with price=price %}Your request is approved. Pay {{ price }} to confirm the session.{% endblocktranslate %}{% endblock %}
+{% block eyebrow %}{% translate "Request approved" %}{% endblock %}
+{% block title %}{% translate "One step left: the payment" %}{% endblock %}
+{% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}</p>
+<p style="margin:12px 0 0 0;">{% blocktranslate trimmed with price=price %}I have approved your request. To confirm the session, pay {{ price }} in one of the ways below, then reply to this email with the receipt.{% endblocktranslate %}</p>{% endblock %}
+{% block details %}{% include "keel_booking/email/_request_details.html" %}{% endblock %}
+{% block cta %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;"><tr>
+  <td style="background:{{ theme.ground }};border-{{ start }}:3px solid {{ theme.primary }};border-radius:8px;padding:14px 18px;font:500 15px/1.7 {{ theme.font_body }};color:{{ theme.heading }};">{% blocktranslate trimmed with due=due %}Please pay by {{ due }}. After that, this time is released.{% endblocktranslate %}</td>
+</tr></table>
+{% include "keel_booking/email/_journey.html" %}
+<p style="margin:0 0 14px 0;font:500 12px/1.4 {{ theme.font_heading }};{{ caps_wide }}color:{{ theme.muted }};">{% translate "Ways to pay" %}</p>
+{% for method in methods %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 14px 0;border:1px solid {{ theme.rule }};border-radius:12px;border-collapse:separate;">
+  <tr><td style="padding:16px 16px 6px 16px;">
+    <p style="margin:0;font:600 16px/1.5 {{ theme.font_heading }};color:{{ theme.heading }};">{{ method.name }}</p>
+    {% if method.amount %}<p style="margin:8px 0 0 0;"><span style="display:inline-block;padding:4px 12px;border-radius:999px;background:{{ theme.ground }};font:500 13px/1.6 {{ theme.font_body }};color:{{ theme.primary }};">{{ method.amount }}</span></p>{% endif %}
+  </td></tr>
+  {% for label, value in method.rows %}
+  <tr><td style="padding:10px 16px;{% if not forloop.last %}border-bottom:1px solid {{ theme.rule }};{% endif %}">
+    {% if label %}<p style="margin:0 0 4px 0;font:400 12px/1.4 {{ theme.font_body }};color:{{ theme.muted }};">{{ label }}</p>{% endif %}
+    <p dir="auto" style="margin:0;font:600 14px/1.6 'SFMono-Regular',Menlo,Consolas,'Courier New',monospace;color:{{ theme.heading }};word-break:break-all;">{{ value }}</p>
+  </td></tr>
+  {% endfor %}
+  {% if method.note %}<tr><td style="padding:4px 16px 14px 16px;font:400 13px/1.6 {{ theme.font_body }};color:{{ theme.muted }};">{{ method.note }}</td></tr>{% else %}<tr><td style="padding:0 0 8px 0;font-size:0;line-height:0;">&nbsp;</td></tr>{% endif %}
+</table>
+{% endfor %}
+{% endblock %}
+{% block body_extra %}<p style="margin:14px 0 0 0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};">{% translate "Once I see the receipt, I send you the confirmation with the Google Meet link." %}</p>{% endblock %}

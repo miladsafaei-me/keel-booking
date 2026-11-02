@@ -509,3 +509,87 @@ class ApprovalTests(TestCase):
         booking.refresh_from_db()
         self.assertEqual(booking.status, Booking.Status.DECLINED)
         self.assertIsNotNone(booking.decision_sent_at)
+
+
+@mock.patch("keel_booking.availability.timezone.now", return_value=NOW)
+@override_settings(KEEL_BOOKING={"OWNER_NAME": "Test Owner", "OWNER_EMAIL": "owner@example.com",
+                                 "OWNER_TIMEZONE": "Europe/Istanbul", "SITE_URL": "https://example.com",
+                                 "TELEGRAM_BOT_TOKEN": "123:abc", "TELEGRAM_CHAT_ID": "42"})
+class PaymentTests(TestCase):
+    """A paid type: approval asks for the payment; the owner's 'payment received' sends the Meet link."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        from keel_booking.models import PaymentMethod
+
+        cache.clear()
+        self.addCleanup(cache.clear)
+        clock = mock.patch("keel_booking.availability.timezone.now", return_value=NOW)
+        clock.start()
+        self.addCleanup(clock.stop)
+        self.et = make_type(slug="paid", name="Paid call", price="$100", requires_approval=True, requires_payment=True)
+        PaymentMethod.objects.create(name="USDT", amount_text="{amount} USDT", details="Network: ERC20\nAddress: 0xabc",
+                                     note="Only ERC20.")
+        PaymentMethod.objects.create(name="Lira", amount_text="The equivalent of {price} in lira",
+                                     details="IBAN: TR00 1234")
+        self.calls = []
+
+        def fake_call(method, http_timeout=15, **data):
+            self.calls.append((method, data))
+            return {"message_id": 7} if method == "sendMessage" else True
+
+        patcher = mock.patch("keel_booking.telegram.call", side_effect=fake_call)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        body = {"start": "2026-11-02T07:00:00Z", "name": "Sara", "email": "sara@example.com",
+                "timezone": "Europe/Istanbul", "telegram": "@sara_k"}
+        self.assertEqual(self.client.post("/book/paid/reserve/", json.dumps(body),
+                                          content_type="application/json").status_code, 201)
+        self.booking = Booking.objects.get()
+
+    def press(self, action):
+        from keel_booking import telegram
+
+        telegram.handle_update({"update_id": 1, "callback_query": {
+            "id": "q", "data": f"kb:{action}:{self.booking.uid}", "message": {"message_id": 7, "chat": {"id": 42}}}})
+        self.booking.refresh_from_db()
+
+    def test_receipt_shows_the_steps(self, _now):
+        body = outbox.outbox[0].body
+        self.assertIn("[>] 2. I review it", body)
+        self.assertIn("3. You pay", body)
+
+    def test_approve_sends_payment_details_without_a_link(self, _now):
+        outbox.outbox.clear()
+        self.press("approve")
+        self.assertEqual(self.booking.status, Booking.Status.PAYMENT)
+        self.assertEqual(self.booking.payment_due_at, self.booking.start_at)  # the start is sooner than 24 hours
+        self.assertEqual(len(outbox.outbox), 1)
+        email = outbox.outbox[0]
+        self.assertIn("100 USDT", email.body)
+        self.assertIn("The equivalent of $100 in lira", email.body)
+        self.assertIn("0xabc", email.alternatives[0][0])
+        self.assertIn("[>] 3. You pay", email.body)
+        self.assertNotIn("meet.google", email.body)
+        keyboard = json.dumps([d for m, d in self.calls if m == "editMessageText"][-1]["reply_markup"])
+        self.assertIn("kb:paid:", keyboard)
+        self.assertEqual(self.client.post("/book/paid/reserve/", json.dumps({}), content_type="application/json").status_code, 422)
+
+    def test_payment_received_confirms_with_the_link(self, _now):
+        self.press("approve")
+        self.booking.meet_url = "https://meet.google.com/abc-defg-hij"
+        self.booking.save()
+        outbox.outbox.clear()
+        self.press("paid")
+        self.assertEqual(self.booking.status, Booking.Status.CONFIRMED)
+        self.assertIsNotNone(self.booking.paid_at)
+        guest = [m for m in outbox.outbox if m.to == ["sara@example.com"]]
+        self.assertIn("https://meet.google.com/abc-defg-hij", guest[0].body)
+
+    def test_unpaid_time_is_released(self, _now):
+        self.press("approve")
+        outbox.outbox.clear()
+        services.tick(now=self.booking.payment_due_at + timedelta(minutes=1))
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, Booking.Status.CANCELLED)
+        self.assertIn("did not arrive in time", outbox.outbox[0].body)

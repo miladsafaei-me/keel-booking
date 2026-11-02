@@ -32,6 +32,11 @@ owner's notes and follow-ups.
   chat with the guest. Approve puts it on the calendar and sends the usual confirmation with the Meet
   link; Decline frees the slot and tells the guest by email. A request nobody decided lapses at its
   start. Without Telegram the request goes to `OWNER_EMAIL`, and the admin's actions decide it.
+- **Paid requests** (`EventType.requires_payment`, since v0.9.0): approving sends the guest the price, a
+  deadline (`PAYMENT_HOURS`, never past the start) and every active `PaymentMethod` as a card; the guest
+  replies with the receipt. The owner's "Payment received" button confirms the meeting and sends the Meet
+  link; an unpaid request is released at its deadline. Every request email and page shows the guest's
+  steps (`EventType.journey`, `Booking.journey`) with the one they are on.
 - **Owner side:** Django admin. Notes and follow-ups are inlines on a booking; actions re-write to
   Google, resend the confirmation, or cancel.
 - **Background work:** `manage.py booking_worker` runs `services.tick()` every minute (calendar

@@ -5,6 +5,7 @@
 {% block title %}{% blocktranslate trimmed %}You are booked with {{ owner_name }}{% endblocktranslate %}{% endblock %}
 {% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name meeting=event_type.name %}Hi {{ guest }}, your {{ meeting }} is confirmed. The details are below, and the calendar file attached adds it to your calendar.{% endblocktranslate %}</p>{% endblock %}
 {% block body_extra %}
+{% if journey %}<div style="margin:24px 0 0 0;">{% include "keel_booking/email/_journey.html" %}</div>{% endif %}
 {% if event_type.confirmation_note %}<p style="margin:24px 0 0 0;font:400 16px/1.8 {{ theme.font_body }};color:{{ theme.text }};">{{ event_type.confirmation_note|linebreaksbr }}</p>{% endif %}
 <p style="margin:24px 0 0 0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};"><a href="{{ calendar_link }}" style="color:{{ theme.primary }};">{% translate "Add to Google Calendar" %}</a> · <a href="{{ page_url }}" style="color:{{ theme.primary }};">{% translate "View the booking" %}</a></p>
 <p style="margin:12px 0 0 0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};">{% with minutes=event_type.reminder_minutes|local_digits %}{% blocktranslate trimmed %}Need to change the time? Reply to this email and {{ owner_name }} will sort it out. A reminder with the link arrives {{ minutes }} minutes before the start.{% endblocktranslate %}{% endwith %}</p>

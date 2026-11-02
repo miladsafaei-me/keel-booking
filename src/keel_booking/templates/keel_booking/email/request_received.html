@@ -17,5 +17,5 @@
       <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ when.date }}<br>{{ when.time }}<br><span dir="ltr" style="color:{{ theme.muted }};font-size:14px;">{{ when.timezone }}</span></td></tr>
 </table>
 {% endblock %}
-{% block cta %}{% endblock %}
+{% block cta %}{% include "keel_booking/email/_journey.html" %}{% endblock %}
 {% block body_extra %}<p style="margin:0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};">{% translate "This time is held for you until I answer. Want to add something? Reply to this email." %}</p>{% endblock %}

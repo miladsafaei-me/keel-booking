@@ -13,7 +13,8 @@ from django.utils.html import format_html, format_html_join
 
 from . import google, services
 from .models import (AvailabilityWindow, Booking, BookingAttendee, BookingFile, BookingNote, DateOverride, EventQuestion,
-                     EventQuestionTranslation, EventType, EventTypeTranslation, FixedAttendee, FollowUp, GoogleAccount)
+                     EventQuestionTranslation, EventType, EventTypeTranslation, FixedAttendee, FollowUp, GoogleAccount,
+                     PaymentMethod, PaymentMethodTranslation)
 
 
 def short_text(rows=3, cols=40):
@@ -92,7 +93,7 @@ class EventTypeAdmin(admin.ModelAdmin):
                        ("min_notice_minutes", "max_days_ahead"),
                        ("timezone", "detect_visitor_timezone"))}),
         ("Meeting and emails", {"fields": (("create_meet_link", "allow_additional_guests", "reminder_minutes"),
-                                           "requires_approval", "confirmation_note")}),
+                                           ("requires_approval", "requires_payment"), "confirmation_note")}),
     )
 
     @admin.display(description="Page")
@@ -172,18 +173,19 @@ class BookingAdmin(admin.ModelAdmin):
     inlines = (BookingAttendeeInline, BookingFileInline, BookingNoteInline, FollowUpInline)
     formfield_overrides = short_text()
     readonly_fields = ("uid", "event_type", "start_at", "end_at", "status", "source", "meet_access", "guest_timezone", "language", "meet", "calendar",
-                       "socials_list", "answers_list", "messengers", "decided_at", "request_ack_sent_at", "decision_sent_at", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
+                       "socials_list", "answers_list", "messengers", "decided_at", "request_ack_sent_at", "decision_sent_at", "payment_due_at", "payment_sent_at", "paid_at", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at", "sync_error",
                        "mail_error", "created_at")
     fieldsets = (
         ("Meeting", {"fields": ("event_type", "status", "start_at", "end_at", "meet", "calendar", "source")}),
         ("Guest", {"fields": (("guest_name", "guest_company"), ("guest_email", "guest_phone"),
                               ("guest_telegram", "guest_whatsapp"), "messengers", "answers_list",
                               "guest_message", ("socials_list", "guest_timezone", "language"))}),
+        ("Payment", {"classes": ("collapse",), "fields": ("payment_due_at", "payment_sent_at", "paid_at")}),
         ("Delivery", {"classes": ("collapse",), "fields": ("meet_access", "decided_at", "request_ack_sent_at",
                                                           "decision_sent_at", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )
-    actions = ("approve_requests", "decline_requests", "resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
+    actions = ("approve_requests", "mark_payments_received", "decline_requests", "resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
 
     def has_add_permission(self, request):
         return False
@@ -238,12 +240,23 @@ class BookingAdmin(admin.ModelAdmin):
                 telegram.refresh_request(booking)
         self.message_user(request, f"{done} requests approved.")
 
+    @admin.action(description="Payment received (calendar, Meet link, confirmation email)")
+    def mark_payments_received(self, request, queryset):
+        from . import telegram
+
+        done = 0
+        for booking in queryset.filter(status=Booking.Status.PAYMENT):
+            if services.mark_paid(booking):
+                done += 1
+                telegram.refresh_request(booking)
+        self.message_user(request, f"{done} payments marked received.")
+
     @admin.action(description="Decline the requests (the guests are told by email)")
     def decline_requests(self, request, queryset):
         from . import telegram
 
         done = 0
-        for booking in queryset.filter(status=Booking.Status.PENDING):
+        for booking in queryset.filter(status__in=(Booking.Status.PENDING, Booking.Status.PAYMENT)):
             if services.decline_booking(booking):
                 done += 1
                 telegram.refresh_request(booking)
@@ -321,6 +334,24 @@ class BookingAdmin(admin.ModelAdmin):
         for booking in queryset:
             services.cancel_booking(booking)
         self.message_user(request, f"{queryset.count()} meetings cancelled.")
+
+
+class PaymentMethodTranslationInline(admin.StackedInline):
+    model = PaymentMethodTranslation
+    extra = 0
+    formfield_overrides = short_text()
+    fields = (("language", "name"), "amount_text", "details", "note")
+
+
+@admin.register(PaymentMethod)
+class PaymentMethodAdmin(admin.ModelAdmin):
+    """The ways to pay, listed as cards in the payment email of an approved paid meeting."""
+
+    list_display = ("name", "amount_text", "is_active", "sort_order")
+    list_editable = ("is_active", "sort_order")
+    inlines = (PaymentMethodTranslationInline,)
+    formfield_overrides = short_text(4, 60)
+    fields = (("name", "is_active", "sort_order"), "amount_text", "details", "note")
 
 
 @admin.register(FollowUp)

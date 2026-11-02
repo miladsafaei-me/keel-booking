@@ -1,0 +1,10 @@
+{% extends "keel_booking/email/base.html" %}
+{% load i18n %}
+{% comment %}The payment for an approved paid meeting did not arrive by its deadline, so its time was released.{% endcomment %}
+{% block preheader %}{% translate "The payment did not arrive in time, so the time is free again." %}{% endblock %}
+{% block eyebrow %}{% translate "Your request" %}{% endblock %}
+{% block title %}{% translate "The time was released" %}{% endblock %}
+{% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}</p>
+<p style="margin:12px 0 0 0;">{% translate "The payment for this session did not arrive in time, so the time is free again. If you still want the session, reply to this email." %}</p>{% endblock %}
+{% block details %}{% include "keel_booking/email/_request_details.html" %}{% endblock %}
+{% block cta %}{% endblock %}

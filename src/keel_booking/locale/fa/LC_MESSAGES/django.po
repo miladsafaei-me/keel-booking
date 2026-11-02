@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 20:41+0000\n"
+"POT-Creation-Date: 2026-11-02 21:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,6 +85,14 @@ msgid "About your request: {meeting} with {owner}"
 msgstr "درباره‌ی درخواست شما: {meeting} با {owner}"
 
 #, python-brace-format
+msgid "Approved, one step left: {meeting} with {owner}"
+msgstr "تأیید شد، فقط یک قدم مانده: {meeting} با {owner}"
+
+#, python-brace-format
+msgid "Time released: {meeting} with {owner}"
+msgstr "زمان آزاد شد: {meeting} با {owner}"
+
+#, python-brace-format
 msgid "New booking: {meeting} with {guest}, {when}"
 msgstr "رزرو تازه: {meeting} با {guest}، {when}"
 
@@ -100,8 +108,36 @@ msgstr "لغو شد: {meeting} با {owner}، {when}"
 msgid "Follow up: {guest} ({meeting})"
 msgstr "پیگیری: {guest} ({meeting})"
 
+msgid "You send the request"
+msgstr "شما درخواست را می‌فرستید"
+
+msgid "Pick a time and fill in the form. The time is held for you."
+msgstr "زمان را انتخاب می‌کنید و فرم را پر می‌کنید. این زمان برای شما نگه داشته می‌شود."
+
+msgid "I review it"
+msgstr "من درخواست را بررسی می‌کنم"
+
+msgid "I answer by email as soon as I can."
+msgstr "در اولین فرصت با ایمیل جواب می‌دهم."
+
+msgid "You pay"
+msgstr "شما پرداخت می‌کنید"
+
+msgid "The email has the ways to pay. Reply to it with the receipt."
+msgstr "راه‌های پرداخت در ایمیل آمده است. رسید را در پاسخ همان ایمیل بفرستید."
+
+msgid "You get the Google Meet link"
+msgstr "لینک Google Meet را دریافت می‌کنید"
+
+msgid "The confirmation email has the link and the calendar invitation."
+msgstr "ایمیل تأیید، لینک جلسه و دعوت‌نامه‌ی تقویم را دارد."
+
 msgid "New meeting request"
 msgstr "درخواست جلسه‌ی جدید"
+
+#, python-brace-format
+msgid "Approved. Waiting for the payment until {due}."
+msgstr "تأیید شد. منتظر پرداخت تا {due}."
 
 msgid "Approved. The Meet link went to the guest by email."
 msgstr "تأیید شد. لینک Meet با ایمیل برای مهمان فرستاده شد."
@@ -111,6 +147,12 @@ msgstr "رد شد. با ایمیل به مهمان خبر داده شد."
 
 msgid "Cancelled"
 msgstr "لغو شد"
+
+msgid "Paid and confirmed. The Meet link went to the guest by email."
+msgstr "پرداخت شد و جلسه قطعی است. لینک Meet با ایمیل برای مهمان فرستاده شد."
+
+msgid "The payment did not arrive in time. The time is free again."
+msgstr "پرداخت به‌موقع انجام نشد. این زمان دوباره آزاد شد."
 
 #, python-brace-format
 msgid "{minutes} min"
@@ -131,6 +173,12 @@ msgstr "تأیید"
 msgid "Decline"
 msgstr "رد"
 
+msgid "Payment received"
+msgstr "پرداخت دریافت شد"
+
+msgid "Cancel"
+msgstr "لغو"
+
 msgid "Open in the admin"
 msgstr "باز کردن در پنل مدیریت"
 
@@ -140,11 +188,17 @@ msgstr "این ربات فقط به صاحبش جواب می‌دهد."
 msgid "This request no longer exists."
 msgstr "این درخواست دیگر وجود ندارد."
 
+msgid "Approved. The guest gets the payment details by email."
+msgstr "تأیید شد. اطلاعات پرداخت با ایمیل برای مهمان فرستاده می‌شود."
+
 msgid "Approved. The guest gets the Meet link by email."
 msgstr "تأیید شد. لینک Meet با ایمیل برای مهمان فرستاده می‌شود."
 
 msgid "This request was already decided."
 msgstr "درباره‌ی این درخواست قبلاً تصمیم گرفته شده است."
+
+msgid "Payment received. The guest gets the Meet link by email."
+msgstr "پرداخت ثبت شد. لینک Meet با ایمیل برای مهمان فرستاده می‌شود."
 
 msgid "Declined. The guest is told by email."
 msgstr "رد شد. با ایمیل به مهمان خبر داده می‌شود."
@@ -163,9 +217,16 @@ msgid "Booked: %(meeting)s with %(owner_name)s"
 msgstr "رزرو شد: %(meeting)s با %(owner_name)s"
 
 msgid ""
+"Your request is approved. The ways to pay are in your email; reply to it "
+"with the receipt."
+msgstr "درخواست شما تأیید شد. راه‌های پرداخت در ایمیل شماست. رسید را در پاسخ همان ایمیل بفرستید."
+
+msgid ""
 "I have received your request to set up a meeting. I will review it as soon "
 "as I can and let you know by email."
-msgstr "درخواست شما را برای تنظیم جلسه دریافت کردم. در اولین فرصت بررسی می‌کنم و از طریق ایمیل به شما اطلاع می‌دهم."
+msgstr ""
+"درخواست شما را برای تنظیم جلسه دریافت کردم. در اولین فرصت بررسی می‌کنم و از "
+"طریق ایمیل به شما اطلاع می‌دهم."
 
 #, python-format
 msgid "%(meeting)s with %(owner_name)s"
@@ -181,12 +242,21 @@ msgstr "ایمیل تأیید به %(email)s فرستاده می‌شود."
 msgid "Add to Google Calendar"
 msgstr "افزودن به Google Calendar"
 
+msgid "Where things stand"
+msgstr "کار به کجا رسیده"
+
+msgid "now"
+msgstr "الان"
+
 #, python-format
 msgid "%(meeting)s (%(minutes)s min)"
 msgstr "%(meeting)s (%(minutes)s دقیقه)"
 
 msgid "Meeting"
 msgstr "جلسه"
+
+msgid "Requested time"
+msgstr "زمان درخواستی"
 
 msgid "When"
 msgstr "زمان"
@@ -281,10 +351,9 @@ msgstr "این جلسه برگزار نمی‌شود"
 msgid ""
 "Thank you for your request. I reviewed it, and unfortunately I cannot hold "
 "this meeting. The time you picked is free again."
-msgstr "از درخواست شما ممنونم. آن را بررسی کردم و متأسفانه نمی‌توانم این جلسه را برگزار کنم. زمانی که انتخاب کرده بودید دوباره آزاد شد."
-
-msgid "Requested time"
-msgstr "زمان درخواستی"
+msgstr ""
+"از درخواست شما ممنونم. آن را بررسی کردم و متأسفانه نمی‌توانم این جلسه را "
+"برگزار کنم. زمانی که انتخاب کرده بودید دوباره آزاد شد."
 
 msgid "If you have a question, reply to this email."
 msgstr "اگر سؤالی دارید، به همین ایمیل جواب بدهید."
@@ -389,6 +458,45 @@ msgstr "فایل"
 msgid "Notes and follow-up"
 msgstr "یادداشت‌ها و پیگیری"
 
+msgid "The payment did not arrive in time, so the time is free again."
+msgstr "پرداخت به‌موقع انجام نشد و این زمان دوباره آزاد شد."
+
+msgid "The time was released"
+msgstr "زمان جلسه آزاد شد"
+
+msgid ""
+"The payment for this session did not arrive in time, so the time is free "
+"again. If you still want the session, reply to this email."
+msgstr "پرداخت این جلسه به‌موقع انجام نشد و زمان آن دوباره آزاد شد. اگر هنوز این جلسه را می‌خواهید، به همین ایمیل جواب بدهید."
+
+#, python-format
+msgid "Your request is approved. Pay %(price)s to confirm the session."
+msgstr "درخواست شما تأیید شد. برای قطعی شدن جلسه، %(price)s پرداخت کنید."
+
+msgid "Request approved"
+msgstr "درخواست تأیید شد"
+
+msgid "One step left: the payment"
+msgstr "فقط یک قدم مانده: پرداخت"
+
+#, python-format
+msgid ""
+"I have approved your request. To confirm the session, pay %(price)s in one "
+"of the ways below, then reply to this email with the receipt."
+msgstr "درخواست شما را تأیید کردم. برای قطعی شدن جلسه، مبلغ %(price)s را از یکی از راه‌های زیر پرداخت کنید. بعد رسید را در پاسخ همین ایمیل بفرستید."
+
+#, python-format
+msgid "Please pay by %(due)s. After that, this time is released."
+msgstr "لطفاً تا %(due)s پرداخت کنید. بعد از آن، این زمان آزاد می‌شود."
+
+msgid "Ways to pay"
+msgstr "راه‌های پرداخت"
+
+msgid ""
+"Once I see the receipt, I send you the confirmation with the Google Meet "
+"link."
+msgstr "وقتی رسید را دیدم، ایمیل تأیید را همراه لینک Google Meet برایتان می‌فرستم."
+
 #, python-format
 msgid "%(meeting)s starts at %(time)s."
 msgstr "%(meeting)s ساعت %(time)s شروع می‌شود."
@@ -440,7 +548,9 @@ msgstr "درخواست شما به دستم رسید"
 msgid ""
 "This time is held for you until I answer. Want to add something? Reply to "
 "this email."
-msgstr "این زمان تا پاسخ من برای شما نگه داشته می‌شود. اگر نکته‌ای می‌خواهید اضافه کنید، به همین ایمیل جواب بدهید."
+msgstr ""
+"این زمان تا پاسخ من برای شما نگه داشته می‌شود. اگر نکته‌ای می‌خواهید اضافه "
+"کنید، به همین ایمیل جواب بدهید."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -573,7 +683,8 @@ msgid ""
 msgstr "لطفاً شماره‌ی واتس‌اپ را با کد کشور وارد کنید، مثل +90 555 123 4567."
 
 msgid "Please enter your Telegram or WhatsApp, so I can reach you online."
-msgstr "لطفاً تلگرام یا واتس‌اپ خود را وارد کنید تا بتوانم آنلاین با شما در تماس باشم."
+msgstr ""
+"لطفاً تلگرام یا واتس‌اپ خود را وارد کنید تا بتوانم آنلاین با شما در تماس باشم."
 
 msgid "Please pick one of the options."
 msgstr "لطفاً یکی از گزینه‌ها را انتخاب کنید."

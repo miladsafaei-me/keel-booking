@@ -21,7 +21,7 @@ from . import conf, i18n
 log = logging.getLogger(__name__)
 
 API = "https://api.telegram.org/bot{token}/{method}"
-APPROVE, DECLINE = "approve", "decline"
+APPROVE, DECLINE, PAID = "approve", "decline", "paid"
 
 
 class TelegramError(Exception):
@@ -62,14 +62,21 @@ def request_text(booking) -> str:
     event_type = booking.event_type.localized()
     comma = "، " if i18n.is_rtl() else ", "
     owner_when = mail.when(booking, booking.event_type.timezone)
+    due = mail.payment_due_text(booking, booking.event_type.timezone) if booking.payment_due_at else ""
     status_line = {
         Booking.Status.PENDING: "🆕 " + _("New meeting request"),
+        Booking.Status.PAYMENT: "💳 " + _("Approved. Waiting for the payment until {due}.").format(due=due),
         Booking.Status.CONFIRMED: "✅ " + _("Approved. The Meet link went to the guest by email."),
         Booking.Status.DECLINED: "❌ " + _("Declined. The guest was told by email."),
         Booking.Status.CANCELLED: "🚫 " + _("Cancelled"),
     }[booking.status]
+    if booking.status == Booking.Status.CONFIRMED and booking.paid_at:
+        status_line = "✅ " + _("Paid and confirmed. The Meet link went to the guest by email.")
+    elif booking.status == Booking.Status.CANCELLED and booking.payment_due_at and not booking.paid_at:
+        status_line = "⌛ " + _("The payment did not arrive in time. The time is free again.")
     duration = _("{minutes} min").format(minutes=i18n.digits(event_type.duration_minutes))
-    lines = [f"<b>{_e(status_line)}</b>", "", f"📌 <b>{_e(event_type.name)}</b> ({_e(duration)})",
+    price = f"{comma}{_e(event_type.price)}" if event_type.price else ""
+    lines = [f"<b>{_e(status_line)}</b>", "", f"📌 <b>{_e(event_type.name)}</b> ({_e(duration)}{price})",
              f"🕒 {_e(owner_when['full'])}", f"     {_e(owner_when['timezone'])}"]
     if booking.guest_timezone != booking.event_type.timezone:
         guest_when = mail.when(booking, booking.guest_timezone)
@@ -98,9 +105,12 @@ def request_text(booking) -> str:
 def _keyboard(booking) -> dict:
     admin = conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk]))
     rows = []
-    if booking.is_request:
+    if booking.status == booking.Status.PENDING:
         rows.append([{"text": "✅ " + _("Approve"), "callback_data": f"kb:{APPROVE}:{booking.uid}"},
                      {"text": "❌ " + _("Decline"), "callback_data": f"kb:{DECLINE}:{booking.uid}"}])
+    elif booking.status == booking.Status.PAYMENT:
+        rows.append([{"text": "💰 " + _("Payment received"), "callback_data": f"kb:{PAID}:{booking.uid}"},
+                     {"text": "❌ " + _("Cancel"), "callback_data": f"kb:{DECLINE}:{booking.uid}"}])
     if admin.startswith("https://"):
         rows.append([{"text": _("Open in the admin"), "url": admin}])
     return {"inline_keyboard": rows}
@@ -151,14 +161,22 @@ def handle_update(update: dict) -> None:
             return
         parts = str(press.get("data", "")).split(":")
         booking = None
-        if len(parts) == 3 and parts[0] == "kb" and parts[1] in (APPROVE, DECLINE):
+        if len(parts) == 3 and parts[0] == "kb" and parts[1] in (APPROVE, DECLINE, PAID):
             booking = Booking.objects.select_related("event_type").filter(uid=parts[2]).first()
         if booking is None:
             call("answerCallbackQuery", callback_query_id=press["id"], text=_("This request no longer exists."))
             return
         if parts[1] == APPROVE:
             done = services.approve_booking(booking)
-            note = _("Approved. The guest gets the Meet link by email.") if done else _("This request was already decided.")
+            if booking.event_type.requires_payment:
+                note = _("Approved. The guest gets the payment details by email.")
+            else:
+                note = _("Approved. The guest gets the Meet link by email.")
+            note = note if done else _("This request was already decided.")
+        elif parts[1] == PAID:
+            done = services.mark_paid(booking)
+            note = (_("Payment received. The guest gets the Meet link by email.") if done
+                    else _("This request was already decided."))
         else:
             done = services.decline_booking(booking)
             note = _("Declined. The guest is told by email.") if done else _("This request was already decided.")

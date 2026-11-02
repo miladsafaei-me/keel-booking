@@ -1,0 +1,20 @@
+{% load i18n keel_booking %}{% autoescape off %}{% blocktranslate with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}
+
+{% blocktranslate trimmed with price=price %}I have approved your request. To confirm the session, pay {{ price }} in one of the ways below, then reply to this email with the receipt.{% endblocktranslate %}
+
+{% translate "Meeting" %}: {% include "keel_booking/email/_meeting.txt" %}
+{% translate "Requested time" %}: {{ when.full }}
+{% translate "Timezone" %}: {{ when.timezone }}
+
+{% blocktranslate trimmed with due=due %}Please pay by {{ due }}. After that, this time is released.{% endblocktranslate %}
+
+{% include "keel_booking/email/_journey.txt" %}{% for method in methods %}
+{{ method.name }}{% if method.amount %} ({{ method.amount }}){% endif %}
+{% for label, value in method.rows %}{% if label %}{{ label }}: {% endif %}{{ value }}
+{% endfor %}{% if method.note %}{{ method.note }}
+{% endif %}{% endfor %}
+{% translate "Once I see the receipt, I send you the confirmation with the Google Meet link." %}
+
+{{ owner_name }}
+{{ site_url }}
+{% endautoescape %}

@@ -121,20 +121,38 @@ def send_request_notices(booking: Booking) -> None:
     booking.save(update_fields=["owner_notified_at", "request_ack_sent_at", "mail_attempts", "mail_error", "updated_at"])
 
 
-def _decide(booking: Booking, status: str) -> bool:
-    """Move a pending request to ``status`` once. False when it was already decided."""
+def _move(booking: Booking, sources: tuple, status: str, **fields) -> bool:
+    """Move a booking from one of ``sources`` to ``status`` once. False when another press got there first."""
     with transaction.atomic():
-        changed = Booking.objects.filter(pk=booking.pk, status=Booking.Status.PENDING).update(
-            status=status, decided_at=timezone.now(), mail_attempts=0, mail_error="")
+        changed = Booking.objects.filter(pk=booking.pk, status__in=sources).update(
+            status=status, mail_attempts=0, mail_error="", **fields)
     if changed:
         booking.refresh_from_db()
     return bool(changed)
 
 
 def approve_booking(booking: Booking) -> bool:
-    """Approve a request: it becomes a confirmed meeting, goes on the calendar with its Meet link,
-    and the guest gets the usual confirmation with that link. False when it was already decided."""
-    if not _decide(booking, Booking.Status.CONFIRMED):
+    """Approve a request. A free one becomes a confirmed meeting with its Meet link by email; a paid one
+    (``requires_payment``) waits for the payment, and the guest gets the payment details with a deadline.
+    False when it was already decided."""
+    now = timezone.now()
+    if booking.event_type.requires_payment:
+        due = min(now + timedelta(hours=conf.get("PAYMENT_HOURS")), booking.start_at)
+        if not _move(booking, (Booking.Status.PENDING,), Booking.Status.PAYMENT, decided_at=now, payment_due_at=due):
+            return False
+        send_payment_email(booking)
+        return True
+    if not _move(booking, (Booking.Status.PENDING,), Booking.Status.CONFIRMED, decided_at=now):
+        return False
+    sync_to_google(booking)
+    send_new_booking_emails(booking)
+    return True
+
+
+def mark_paid(booking: Booking) -> bool:
+    """The owner saw the receipt: the meeting is confirmed, goes on the calendar, and the guest gets the
+    confirmation with the Meet link. False when it was not waiting for a payment."""
+    if not _move(booking, (Booking.Status.PAYMENT,), Booking.Status.CONFIRMED, paid_at=timezone.now()):
         return False
     sync_to_google(booking)
     send_new_booking_emails(booking)
@@ -142,11 +160,36 @@ def approve_booking(booking: Booking) -> bool:
 
 
 def decline_booking(booking: Booking) -> bool:
-    """Decline a request: its slot opens again and the guest is told by email. False when already decided."""
-    if not _decide(booking, Booking.Status.DECLINED):
+    """Decline a request (or one still waiting for its payment): the slot opens again and the guest is told."""
+    if not _move(booking, (Booking.Status.PENDING, Booking.Status.PAYMENT), Booking.Status.DECLINED,
+                 decided_at=booking.decided_at or timezone.now()):
         return False
     send_decline_email(booking)
     return True
+
+
+def expire_payment(booking: Booking) -> bool:
+    """The payment did not arrive by its deadline: the time is released and the guest is told."""
+    if not _move(booking, (Booking.Status.PAYMENT,), Booking.Status.CANCELLED):
+        return False
+    try:
+        mail.send_payment_expired(booking)
+    except Exception as error:
+        log.warning("payment-expired email failed for %s: %s", booking.uid, error)
+    return True
+
+
+def send_payment_email(booking: Booking) -> None:
+    if booking.payment_sent_at or not mail.can_send():
+        return
+    try:
+        mail.send_payment_request(booking)
+    except Exception as error:
+        log.warning("payment email failed for %s: %s", booking.uid, error)
+        Booking.objects.filter(pk=booking.pk).update(mail_attempts=booking.mail_attempts + 1, mail_error=str(error)[:2000])
+        return
+    booking.payment_sent_at = timezone.now()
+    Booking.objects.filter(pk=booking.pk).update(payment_sent_at=booking.payment_sent_at, mail_error="")
 
 
 def send_decline_email(booking: Booking) -> None:
@@ -234,7 +277,7 @@ def _waiting_for_meet(booking: Booking) -> bool:
         return False
     if not google.GoogleAccount.load().is_connected or booking.sync_attempts >= MAX_ATTEMPTS:
         return False
-    return timezone.now() - (booking.decided_at or booking.created_at) < MEET_WAIT
+    return timezone.now() - (booking.paid_at or booking.decided_at or booking.created_at) < MEET_WAIT
 
 
 def send_new_booking_emails(booking: Booking) -> None:
@@ -305,6 +348,12 @@ def tick(now: datetime | None = None) -> dict:
     for booking in unsent.distinct():
         send_request_notices(booking)
         done["emails"] += 1
+    for booking in Booking.objects.filter(status=Booking.Status.PAYMENT, payment_due_at__lte=now):
+        if expire_payment(booking):
+            telegram.refresh_request(Booking.objects.get(pk=booking.pk))
+    for booking in Booking.objects.filter(status=Booking.Status.PAYMENT, payment_sent_at__isnull=True,
+                                          mail_attempts__lt=MAX_ATTEMPTS):
+        send_payment_email(booking)
     for booking in Booking.objects.filter(status=Booking.Status.DECLINED, decision_sent_at__isnull=True,
                                           mail_attempts__lt=MAX_ATTEMPTS, start_at__gt=now - timedelta(days=1)):
         send_decline_email(booking)

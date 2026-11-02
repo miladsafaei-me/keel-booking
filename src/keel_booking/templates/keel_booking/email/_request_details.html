@@ -1,0 +1,7 @@
+{% load i18n %}{% comment %}The session and its asked-for time, without a place: a request has no Meet link yet.{% endcomment %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;border-top:1px solid {{ theme.rule }};">
+  <tr><td style="padding:14px 0;padding-{{ end }}:12px;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};{{ caps }}color:{{ theme.muted }};width:110px;vertical-align:top;">{% translate "Meeting" %}</td>
+      <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:500 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{% include "keel_booking/email/_meeting.txt" %}</td></tr>
+  <tr><td style="padding:14px 0;padding-{{ end }}:12px;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};{{ caps }}color:{{ theme.muted }};vertical-align:top;">{% translate "Requested time" %}</td>
+      <td style="padding:14px 0;border-bottom:1px solid {{ theme.rule }};font:400 16px/1.5 {{ theme.font_body }};color:{{ theme.heading }};">{{ when.date }}<br>{{ when.time }}<br><span dir="ltr" style="color:{{ theme.muted }};font-size:14px;">{{ when.timezone }}</span></td></tr>
+</table>

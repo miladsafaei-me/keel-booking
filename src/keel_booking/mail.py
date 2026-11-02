@@ -167,6 +167,7 @@ def _context(booking, tz_name: str, **extra) -> dict:
         "page_url": conf.absolute(reverse("keel_booking:confirmed", args=[booking.uid])),
         "book_url": conf.absolute(reverse("keel_booking:event_type", args=[booking.event_type.slug])),
         "calendar_link": google_calendar_link(booking),
+        "journey": booking.journey(),
         **extra,
     }
 
@@ -222,6 +223,44 @@ def send_declined(booking) -> None:
         subject = _("About your request: {meeting} with {owner}").format(
             meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
         _send("declined", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
+
+
+def payment_due_text(booking, tz_name: str) -> str:
+    """The payment deadline as words, in one timezone and the active language."""
+    due = booking.payment_due_at.astimezone(zoneinfo.ZoneInfo(tz_name))
+    return f"{i18n.short_date(due)} ({tz_name.replace('_', ' ')})"
+
+
+def payment_methods(event_type) -> list[dict]:
+    """The active payment methods in the active language, each with its amount for this meeting type."""
+    from .models import PaymentMethod
+
+    rows = []
+    for method in PaymentMethod.objects.filter(is_active=True).prefetch_related("translations"):
+        local = method.localized()
+        rows.append({"name": local.name, "amount": i18n.digits(local.amount_for(event_type)), "note": local.note,
+                     "rows": local.detail_rows()})
+    return rows
+
+
+def send_payment_request(booking) -> None:
+    """The guest's email after the owner approves a paid meeting: the price, the deadline, and how to pay.
+    No Meet link and no calendar file: those come with the confirmation once the payment arrives."""
+    with translation.override(booking.guest_language):
+        context = _context(booking, booking.guest_timezone, methods=payment_methods(booking.event_type),
+                           due=payment_due_text(booking, booking.guest_timezone),
+                           price=booking.event_type.localized().price)
+        subject = _("Approved, one step left: {meeting} with {owner}").format(
+            meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
+        _send("payment_request", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
+
+
+def send_payment_expired(booking) -> None:
+    with translation.override(booking.guest_language):
+        context = _context(booking, booking.guest_timezone)
+        subject = _("Time released: {meeting} with {owner}").format(
+            meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
+        _send("payment_expired", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
 
 
 def notify_owner(booking) -> None:

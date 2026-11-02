@@ -6,7 +6,9 @@
 <section class="kb-confirmed" aria-labelledby="kb-confirmed-title">
   {% if booking.is_request %}
   <h1 id="kb-confirmed-title">{% translate "Request received" %}</h1>
-  <p>{% translate "I have received your request to set up a meeting. I will review it as soon as I can and let you know by email." %}</p>
+  {% if booking.status == "payment" %}<p>{% translate "Your request is approved. The ways to pay are in your email; reply to it with the receipt." %}</p>
+  {% else %}<p>{% translate "I have received your request to set up a meeting. I will review it as soon as I can and let you know by email." %}</p>{% endif %}
+  <ol class="kb-journey">{% for step in booking.journey %}<li data-state="{{ step.state }}"><strong>{{ step.title }}</strong> {{ step.text }}</li>{% endfor %}</ol>
   <p>{% blocktranslate with meeting=event_type.name %}{{ meeting }} with {{ owner_name }}{% endblocktranslate %}</p>
   <p>{{ when.full }} (<span dir="ltr">{{ when.timezone }}</span>)</p>
   {% else %}

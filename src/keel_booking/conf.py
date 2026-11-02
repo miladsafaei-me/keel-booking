@@ -49,6 +49,8 @@ DEFAULTS = {
     "TELEGRAM_CHAT_ID": "",
     # The language of the Telegram messages. Empty means LANGUAGE_CODE.
     "TELEGRAM_LANGUAGE": "",
+    # Hours a guest has to pay for an approved paid meeting before its time is released (never past the start).
+    "PAYMENT_HOURS": 24,
     # Seconds a free/busy answer from Google is reused for the slot pages.
     "FREEBUSY_CACHE_SECONDS": 60,
     # How many extra guest emails a visitor may add to one booking.
@@ -82,6 +84,8 @@ DEFAULTS = {
         "text": "#374151",
         "muted": "#6B7280",
         "primary": "#4F46E5",
+        # The tick of a done step.
+        "success": "#059669",
         "on_primary": "#FFFFFF",
         "font_heading": "Arial, Helvetica, sans-serif",
         "font_body": "Arial, Helvetica, sans-serif",

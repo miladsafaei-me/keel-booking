@@ -1,0 +1,21 @@
+{% load i18n keel_booking %}{% comment %}
+  Where the guest stands in a request's steps: done steps carry a tick, the step now is filled with the brand
+  colour, the next ones are outlined. One row per step, so it reads the same on a phone. Takes journey.
+{% endcomment %}{% if journey %}
+<p style="margin:0 0 12px 0;font:500 12px/1.4 {{ theme.font_heading }};{{ caps_wide }}color:{{ theme.muted }};">{% translate "Where things stand" %}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+{% for step in journey %}
+  <tr>
+    <td style="width:40px;vertical-align:top;padding:0 0 {% if forloop.last %}0{% else %}14px{% endif %} 0;">
+      {% if step.state == "done" %}<div style="width:28px;height:28px;border-radius:50%;background:{{ theme.success }};color:{{ theme.on_primary }};font:700 14px/28px Arial,sans-serif;text-align:center;">&#10003;</div>
+      {% elif step.state == "now" %}<div style="width:28px;height:28px;border-radius:50%;background:{{ theme.primary }};color:{{ theme.on_primary }};font:700 13px/28px {{ theme.font_heading }};text-align:center;">{{ step.number|local_digits }}</div>
+      {% else %}<div style="width:26px;height:26px;border-radius:50%;border:1px solid {{ theme.rule }};color:{{ theme.muted }};font:500 13px/26px {{ theme.font_heading }};text-align:center;">{{ step.number|local_digits }}</div>{% endif %}
+    </td>
+    <td style="vertical-align:top;padding:3px 0 {% if forloop.last %}0{% else %}14px{% endif %} 0;">
+      <p style="margin:0;font:{% if step.state == "now" %}700{% else %}500{% endif %} 15px/1.5 {{ theme.font_heading }};color:{% if step.state == "next" %}{{ theme.muted }}{% else %}{{ theme.heading }}{% endif %};">{{ step.title }}{% if step.state == "now" %} <span style="font-weight:500;font-size:12px;color:{{ theme.primary }};">({% translate "now" %})</span>{% endif %}</p>
+      <p style="margin:2px 0 0 0;font:400 13px/1.6 {{ theme.font_body }};color:{{ theme.muted }};">{{ step.text }}</p>
+    </td>
+  </tr>
+{% endfor %}
+</table>
+{% endif %}
