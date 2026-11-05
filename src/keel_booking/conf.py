@@ -51,6 +51,21 @@ DEFAULTS = {
     "TELEGRAM_LANGUAGE": "",
     # Hours a guest has to pay for an approved paid meeting before its time is released (never past the start).
     "PAYMENT_HOURS": 24,
+    # The booking assistant (assistant.py, view assistant_chat, mounted by the host): a chat that answers questions
+    # about the active meeting types, finds a time with the visitor and books it through create_booking, so its
+    # bookings take the same road as the form's (Telegram request, emails, payment). Empty key: the view answers
+    # 503 and the host's chat shows its "not available" line.
+    "ASSISTANT_GEMINI_KEY": "",
+    # Gemini models, best first; the next one answers when one is out of quota, busy or slow (gemini.py).
+    "ASSISTANT_MODELS": ("gemini-3.8-flash", "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-3.5-flash-lite",
+                         "gemini-3.1-flash-lite"),
+    # What the assistant may tell visitors about the owner and his services beyond the meeting types themselves.
+    "ASSISTANT_BRIEF": "",
+    # Messages one IP address may send the assistant per minute, and bookings it may make for one IP per day.
+    "ASSISTANT_RATE_PER_MINUTE": 10,
+    "ASSISTANT_BOOKINGS_PER_DAY": 3,
+    # Also email the owner about a booking the assistant made; the Telegram request goes out either way.
+    "ASSISTANT_EMAIL_OWNER": True,
     # Seconds a free/busy answer from Google is reused for the slot pages.
     "FREEBUSY_CACHE_SECONDS": 60,
     # How many extra guest emails a visitor may add to one booking.
@@ -72,7 +87,7 @@ DEFAULTS = {
     # Reservations one IP address may make per hour.
     "RESERVE_RATE_PER_HOUR": 10,
     # Paths under the booking root that can never be a meeting type's slug.
-    "RESERVED_SLUGS": ("admin", "static", "confirmed", "api", "media"),
+    "RESERVED_SLUGS": ("admin", "static", "confirmed", "api", "media", "assistant"),
     # The template every booking page extends. A host points it at its own layout.
     "BASE_TEMPLATE": "keel_booking/base.html",
     # Inline colours and fonts of the HTML emails (email clients ignore CSS variables).

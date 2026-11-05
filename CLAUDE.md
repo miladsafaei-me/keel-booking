@@ -15,7 +15,10 @@ Remaining and follow-up work is tracked in [TODO.md](TODO.md), not in chat memor
 
 - **Here (generic):** models, `availability.py` (slot engine), `google.py` (OAuth + REST),
   `mail.py` (rendering, `.ics`, `GmailBackend`), `services.py` (create, sync, emails, cancel,
-  `tick`), views + JSON endpoints, the admin, `booking_worker`, neutral templates, `booking.js`.
+  `tick`), views + JSON endpoints, the admin, `booking_worker`, neutral templates, `booking.js`, and the booking
+  assistant: `assistant.py` (instructions, the `find_times` and `book_session` tools, the tool loop) over
+  `gemini.py` (the package's one Gemini client: model fallback, timeouts, usage log) and the view
+  `assistant_chat`, which the host mounts itself (`ASSISTANT_*` settings in `conf.py`).
 - **Stays in the host:** the look (its own templates and CSS on top of the `data-kb-*` contract),
   the meeting types themselves (seeded by a host data migration or the admin), `KEEL_BOOKING`
   values, the email theme, where the app is mounted and how it is deployed.

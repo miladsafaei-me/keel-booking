@@ -28,7 +28,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
-from . import availability, conf, i18n, mail, services
+from . import assistant, availability, conf, gemini, i18n, mail, services
 from .models import Booking, EventType, looks_like_phone
 
 NOINDEX = "noindex, nofollow"
@@ -342,3 +342,49 @@ def confirmed(request, uid):
         calendar_link=mail.google_calendar_link(booking), guests=booking.attendees.exclude(role="guest")))
     response["X-Robots-Tag"] = NOINDEX
     return response
+
+
+ASSISTANT_MAX_TURNS = 41
+ASSISTANT_MAX_CHARS = {"user": 2000, "model": 8000}
+
+
+@require_POST
+def assistant_chat(request):
+    """The booking assistant (assistant.py). POST JSON {"messages": [{"role": "assistant"|"user", "text"}],
+    "timezone": "Area/City"}: the whole conversation, the assistant's greeting first and the visitor's newest message
+    last. 200 {"reply", "booked"}; 422 malformed or too long; 429 too fast; 503 {"error": "unavailable"} when no
+    model answers. The host mounts it (it is not in urls.py), in its language prefixes."""
+    ip = request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
+    key = f"keel_booking:assistant:{ip}"
+    count = cache.get(key, 0)
+    if count >= conf.get("ASSISTANT_RATE_PER_MINUTE"):
+        return _json({"error": "slow_down"}, 429)
+    cache.set(key, count + 1, 60)
+    try:
+        data = json.loads(request.body or b"{}")
+        messages = data["messages"]
+        assert isinstance(messages, list) and 1 <= len(messages) <= ASSISTANT_MAX_TURNS
+    except (ValueError, KeyError, TypeError, AssertionError):
+        return _json({"error": "invalid"}, 422)
+    turns, total = [], 0
+    for message in messages:
+        if not isinstance(message, dict) or not isinstance(message.get("text"), str):
+            return _json({"error": "invalid"}, 422)
+        role = {"assistant": "model", "user": "user"}.get(message.get("role"))
+        text = message["text"].replace("\x00", "").strip()
+        if not role or not text or len(text) > ASSISTANT_MAX_CHARS[role] or (turns and turns[-1][0] == role):
+            return _json({"error": "invalid"}, 422)
+        total += len(text)
+        turns.append((role, text))
+    if turns[-1][0] != "user" or total > 80000:
+        return _json({"error": "invalid"}, 422)
+    owner_tz = conf.get("OWNER_TIMEZONE")
+    tz_name = _zone(str(data.get("timezone") or ""), owner_tz)
+    try:
+        answer = assistant.reply(turns, _language() or i18n.base(), tz_name, ip)
+    except gemini.Unavailable:
+        return _json({"error": "unavailable"}, 503)
+    answer["reply"] = answer["reply"].replace(chr(0x2014), " - ")
+    if any(ch in answer["reply"] for ch in "\u067e\u0686\u0698\u06af\u06cc"):  # Persian: its own yeh and kaf
+        answer["reply"] = answer["reply"].replace("\u064a", "\u06cc").replace("\u0643", "\u06a9")
+    return _json(answer)
