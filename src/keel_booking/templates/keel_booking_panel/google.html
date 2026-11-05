@@ -1,0 +1,46 @@
+{% extends "keel_web_admin/base_admin.html" %}
+{% load keel_icons %}
+
+{% block content %}
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <section id="google-status" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-5 lg:p-6">
+    <header class="mb-4 flex items-center justify-between gap-3">
+      <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Connection</h3>
+      {% if account.is_connected %}{% include "keel_web_admin/panel/_badge.html" with text="Connected" tone="success" %}{% elif google_configured %}{% include "keel_web_admin/panel/_badge.html" with text="Not connected" tone="warning" %}{% else %}{% include "keel_web_admin/panel/_badge.html" with text="Not ready" tone="error" %}{% endif %}
+    </header>
+    <div class="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+      {% if account.is_connected %}
+      <p><strong>{{ account.email|default:"(email unknown)" }}</strong>, since {{ account.connected_at|date:"Y-m-d H:i" }}.</p>
+      <p>New meetings are written to the calendar below with a Google Meet link. Busy time on the listed calendars blocks slots. Booking emails are sent from this account's Gmail.</p>
+      {% elif not google_configured %}
+      <p>The site has no Google OAuth client yet. Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the server's environment.</p>
+      {% else %}
+      <p>Until Google is connected, slots are checked against this site's bookings only, and meetings get no Meet link.</p>
+      {% endif %}
+      {% if account.last_error %}<p class="rounded-lg bg-error-50 px-4 py-3 text-error-700 dark:bg-error-500/15 dark:text-error-400">Last error: {{ account.last_error }}</p>{% endif %}
+    </div>
+    <div class="mt-5 flex flex-wrap gap-3 border-t border-gray-200 pt-5 dark:border-gray-800">
+      {% if google_configured %}<a href="{% url 'keel_booking_panel:google_connect' %}" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "plug" class="h-4 w-4" %} {% if account.is_connected %}Reconnect Google{% else %}Connect Google{% endif %}</a>{% endif %}
+      {% if account.is_connected %}
+      <form method="post" action="{% url 'keel_booking_panel:google_disconnect' %}" @submit="if (!confirm('Disconnect Google? New meetings will get no calendar event or Meet link.')) $event.preventDefault()">{% csrf_token %}<button type="submit" class="inline-flex items-center gap-2 rounded-full border border-error-500/40 px-4 py-2.5 text-sm font-medium text-error-600 hover:bg-error-50 dark:text-error-500 dark:hover:bg-error-500/10">Disconnect</button></form>
+      {% endif %}
+    </div>
+  </section>
+
+  <form id="google-calendars" method="post" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] space-y-4 p-5 lg:p-6">
+    {% csrf_token %}
+    <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Calendars</h3>
+    {% include "keel_web_admin/panel/_form_errors.html" %}
+    {% for field in form %}{% include "keel_web_admin/panel/_field.html" %}{% endfor %}
+    <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "check" class="h-4 w-4" %} Save the calendars</button>
+  </form>
+
+  <section id="google-setup" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-5 lg:col-span-2 lg:p-6">
+    <h3 class="mb-3 text-base font-semibold text-gray-800 dark:text-white/90">For the Google Cloud OAuth client</h3>
+    <dl class="space-y-3 text-sm">
+      <div><dt class="text-gray-500 dark:text-gray-400">Authorized redirect URI</dt><dd class="mt-1 break-all"><code class="rounded-md bg-gray-100 px-2 py-1 text-gray-800 dark:bg-gray-800 dark:text-white/90">{{ redirect_uri }}</code></dd></div>
+      <div><dt class="text-gray-500 dark:text-gray-400">Permissions asked for</dt><dd class="mt-1 flex flex-wrap gap-2">{% for scope in scopes %}<code class="break-all rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">{{ scope }}</code>{% endfor %}</dd></div>
+    </dl>
+  </section>
+</div>
+{% endblock %}

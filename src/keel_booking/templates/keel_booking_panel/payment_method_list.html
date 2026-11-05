@@ -1,0 +1,22 @@
+{% extends "keel_web_admin/base_admin.html" %}
+{% load keel_icons %}
+
+{% block page_actions %}
+<a href="{% url 'keel_booking_panel:payment_method_new' %}" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "plus" class="h-4 w-4" %} New payment method</a>
+{% endblock %}
+
+{% block content %}
+<p class="mb-5 text-sm text-gray-500 dark:text-gray-400">Each method is a card in the payment email of an approved paid meeting.</p>
+<section id="payment-method-list" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+  <ul class="divide-y divide-gray-100 dark:divide-gray-800">
+    {% for row in rows %}
+    <li class="flex items-center justify-between gap-3 px-5 py-4 md:px-6">
+      <a href="{% url 'keel_booking_panel:payment_method' row.pk %}" class="min-w-0 text-sm font-medium text-gray-800 hover:text-brand-500 dark:text-white/90">{{ row.name }}<span class="block truncate text-xs font-normal text-gray-500 dark:text-gray-400">{{ row.amount_text|default:"" }}</span></a>
+      {% if row.is_active %}{% include "keel_web_admin/panel/_badge.html" with text="On" tone="success" %}{% else %}{% include "keel_web_admin/panel/_badge.html" with text="Off" tone="gray" %}{% endif %}
+    </li>
+    {% empty %}
+    <li class="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No payment methods yet.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

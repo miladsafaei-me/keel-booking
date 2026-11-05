@@ -1,0 +1,33 @@
+{% extends "keel_web_admin/base_admin.html" %}
+{% load keel_icons %}
+
+{% block page_actions %}
+<a href="{% url 'keel_booking_panel:event_types' %}" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5">{% icon "arrow-left" class="h-4 w-4" %} Meeting types</a>
+<button type="submit" form="event-type-form" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "check" class="h-4 w-4" %} Save</button>
+{% endblock %}
+
+{% block content %}
+<form id="event-type-form" method="post" class="space-y-6">
+  {% csrf_token %}
+  {% include "keel_web_admin/panel/_form_errors.html" %}
+  {% for title, note, fields in form.section_fields %}
+  <section class="event-type-section rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-5 lg:p-6">
+    <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">{{ title }}</h3>
+    {% if note %}<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ note }}</p>{% endif %}
+    <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {% for field in fields %}<div class="{% if field.widget_type == 'textarea' %}md:col-span-2 xl:col-span-3{% endif %}">{% include "keel_web_admin/panel/_field.html" %}</div>{% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+  {% for s in sets %}{% include "keel_web_admin/panel/_formset.html" with formset=s.formset title=s.title note=s.note anchor=s.anchor %}{% endfor %}
+  {% if not row %}<p class="text-sm text-gray-500 dark:text-gray-400">Save first; then the weekly hours, questions and translations open here.</p>{% endif %}
+  <div class="flex flex-wrap gap-3">
+    <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "check" class="h-4 w-4" %} Save</button>
+    {% if row %}{% if booking_total and not delete_with_bookings %}
+    <p class="self-center text-sm text-gray-500 dark:text-gray-400">It has {{ booking_total }} bookings, so it cannot be deleted. Switch it off instead.</p>
+    {% else %}
+    <button type="submit" name="part" value="delete" formnovalidate class="inline-flex items-center gap-2 rounded-full border border-error-500/40 px-4 py-2.5 text-sm font-medium text-error-600 hover:bg-error-50 dark:text-error-500 dark:hover:bg-error-500/10" @click="if (!confirm('Delete this meeting type{% if booking_total %} and its {{ booking_total }} bookings{% endif %} for good?')) $event.preventDefault()">{% icon "trash" class="h-4 w-4" %} Delete{% if booking_total %} with its {{ booking_total }} bookings{% endif %}</button>
+    {% endif %}{% endif %}
+  </div>
+</form>
+{% endblock %}

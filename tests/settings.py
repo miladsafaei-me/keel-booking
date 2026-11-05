@@ -6,6 +6,7 @@ TIME_ZONE = "UTC"
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "keel_booking",
+    "keel_web.admin_shell", "keel_web.client",
 ]
 MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware", "django.middleware.locale.LocaleMiddleware",

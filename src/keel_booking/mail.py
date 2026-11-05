@@ -268,8 +268,8 @@ def notify_owner(booking) -> None:
     attach = files if sum(f.size for f in files) <= conf.get("OWNER_ATTACH_MB") * 1024 * 1024 else []
     with _owner_language(booking):
         context = _context(booking, booking.event_type.timezone, files=files, files_attached=bool(attach),
-                           file_links=[(f, conf.absolute(reverse("admin:keel_booking_booking_file", args=[f.pk]))) for f in files],
-                           admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))
+                           file_links=[(f, conf.file_url(f)) for f in files],
+                           admin_url=conf.manage_url(booking))
         subject = _("New booking: {meeting} with {guest}, {when}").format(
             meeting=context["event_type"].name, guest=booking.guest_name, when=context["when"]["short"])
         _send("owner_new_booking", subject, [conf.get("OWNER_EMAIL")], context, attach_ics=ics(booking),
@@ -285,7 +285,7 @@ def send_reminder(booking) -> None:
         _send("reminder", subject, booking.email_recipients(), guest_context, reply_to=[conf.get("OWNER_EMAIL")])
     with _owner_language(booking):
         owner_context = _context(booking, booking.event_type.timezone, minutes=i18n.digits(minutes), for_owner=True,
-                                 admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))
+                                 admin_url=conf.manage_url(booking))
         subject = _("Starts in {minutes} minutes: {meeting} with {owner}").format(
             minutes=i18n.digits(minutes), meeting=owner_context["event_type"].name, owner=booking.guest_name)
         _send("reminder", subject, [conf.get("OWNER_EMAIL")], owner_context,
@@ -306,7 +306,7 @@ def send_follow_up_reminder(follow_up) -> None:
     with _owner_language(booking):
         context = _context(booking, booking.event_type.timezone, follow_up=follow_up,
                            due=i18n.short_date(follow_up.due_at.astimezone(tz)),
-                           admin_url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])),
+                           admin_url=conf.manage_url(booking),
                            notes=list(booking.notes.all()))
         subject = _("Follow up: {guest} ({meeting})").format(guest=booking.guest_name, meeting=context["event_type"].name)
         _send("follow_up", subject,

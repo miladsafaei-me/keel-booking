@@ -1,0 +1,24 @@
+{% extends "keel_web_admin/base_admin.html" %}
+{% load keel_icons %}
+
+{% block page_actions %}
+<a href="{% url 'keel_booking_panel:payment_methods' %}" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5">{% icon "arrow-left" class="h-4 w-4" %} Payment methods</a>
+<button type="submit" form="payment-method-form" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "check" class="h-4 w-4" %} Save</button>
+{% endblock %}
+
+{% block content %}
+<form id="payment-method-form" method="post" class="space-y-6">
+  {% csrf_token %}
+  <section class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-5 lg:p-6">
+    {% include "keel_web_admin/panel/_form_errors.html" %}
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {% for field in form %}<div class="{% if field.widget_type == 'textarea' or field.name == 'amount_text' or field.name == 'note' %}md:col-span-3{% endif %}">{% include "keel_web_admin/panel/_field.html" %}</div>{% endfor %}
+    </div>
+  </section>
+  {% if translations %}{% include "keel_web_admin/panel/_formset.html" with formset=translations title="Translations" note="The card in each other language; an empty text keeps the method's own." anchor="payment-translations" %}{% endif %}
+  <div class="flex flex-wrap gap-3">
+    <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{% icon "check" class="h-4 w-4" %} Save</button>
+    {% if row %}<button type="submit" name="part" value="delete" formnovalidate class="inline-flex items-center gap-2 rounded-full border border-error-500/40 px-4 py-2.5 text-sm font-medium text-error-600 hover:bg-error-50 dark:text-error-500 dark:hover:bg-error-500/10" @click="if (!confirm('Delete this payment method?')) $event.preventDefault()">{% icon "trash" class="h-4 w-4" %} Delete</button>{% endif %}
+  </div>
+</form>
+{% endblock %}

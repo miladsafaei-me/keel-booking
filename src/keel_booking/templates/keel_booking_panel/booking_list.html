@@ -1,0 +1,60 @@
+{% extends "keel_web_admin/base_admin.html" %}
+{% load keel_icons %}
+
+{% block content %}
+<nav id="booking-tabs" class="mb-5 flex flex-wrap gap-2" aria-label="Which bookings">
+  {% for key, label in whens %}
+  <a href="?when={{ key }}" class="rounded-full px-4 py-2 text-sm font-medium {% if when == key %}bg-brand-500 text-white{% else %}border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5{% endif %}"{% if when == key %} aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+<section id="booking-list" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+  <form id="booking-filters" method="get" class="flex flex-wrap items-center gap-3 border-b border-gray-200 p-4 dark:border-gray-800 md:p-5">
+    <input type="hidden" name="when" value="{{ when }}">
+    <label class="relative w-full max-w-sm">
+      <span class="sr-only">Search</span>
+      <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">{% icon "search" class="h-4 w-4" %}</span>
+      <input type="search" name="q" value="{{ q }}" placeholder="Guest, company, email or phone" class="panel-input h-11 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 w-full pl-9">
+    </label>
+    <label class="sr-only" for="booking-status">Status</label>
+    <select id="booking-status" name="status" class="panel-input h-11 w-full min-w-0 rounded-lg sm:w-auto sm:max-w-64 border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+      <option value="">Any status</option>
+      {% for value, label in statuses %}<option value="{{ value }}"{% if status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <label class="sr-only" for="booking-type">Meeting type</label>
+    <select id="booking-type" name="type" class="panel-input h-11 w-full min-w-0 rounded-lg sm:w-auto sm:max-w-64 border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+      <option value="">Any meeting type</option>
+      {% for t in types %}<option value="{{ t.pk }}"{% if type == t.pk|stringformat:"s" %} selected{% endif %}>{{ t.name }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5">Filter</button>
+  </form>
+  <div class="overflow-x-auto">
+    <table class="min-w-full">
+      <thead class="border-b border-gray-200 dark:border-gray-800">
+        <tr class="text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <th class="px-5 py-3 md:px-6">When</th>
+          <th class="px-5 py-3">Guest</th>
+          <th class="px-5 py-3">Meeting</th>
+          <th class="px-5 py-3">Status</th>
+          <th class="px-5 py-3">Contact</th>
+          <th class="px-5 py-3 text-center">Files</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+        {% for b in page_obj %}
+        <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+          <td class="whitespace-nowrap px-5 py-4 text-sm text-gray-800 dark:text-white/90 md:px-6">{{ b.start_at|date:"D d M Y" }}<span class="block text-xs text-gray-500 dark:text-gray-400">{{ b.start_at|date:"H:i" }} · {{ b.language|default:"en" }}</span></td>
+          <td class="min-w-40 px-5 py-4"><a href="{% url 'keel_booking_panel:booking' b.pk %}" class="text-sm font-medium text-gray-800 hover:text-brand-500 dark:text-white/90">{{ b.guest_name }}</a>{% if b.guest_company %}<span class="block text-xs text-gray-500 dark:text-gray-400">{{ b.guest_company }}</span>{% endif %}</td>
+          <td class="min-w-48 px-5 py-4 text-sm text-gray-600 dark:text-gray-400">{{ b.event_type.name }}</td>
+          <td class="px-5 py-4">{% include "keel_web_admin/panel/_badge.html" with text=b.get_status_display tone=b.tone %}</td>
+          <td class="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">{{ b.guest_email|default:"-" }}{% if b.guest_phone %}<span class="block text-xs">{{ b.guest_phone }}</span>{% endif %}</td>
+          <td class="px-5 py-4 text-center text-sm text-gray-600 dark:text-gray-400">{{ b.files_total|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No bookings here.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "keel_web_admin/panel/_pager.html" %}
+</section>
+{% endblock %}

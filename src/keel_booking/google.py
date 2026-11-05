@@ -16,7 +16,6 @@ from urllib.parse import urlencode
 
 import requests
 from django.core.cache import cache
-from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext as _
@@ -208,7 +207,7 @@ def _event_body(booking, et, i18n) -> dict:
         lines.append(_("Files: {count} attached (in the booking)").format(count=i18n.digits(booking.files.count())))
     if booking.guest_message:
         lines += ["", booking.guest_message]
-    lines += ["", _("Manage: {url}").format(url=conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk])))]
+    lines += ["", _("Manage: {url}").format(url=conf.manage_url(booking))]
     body = {
         "summary": f"{et.name}: {booking.guest_name}",
         "description": "\n".join(lines),

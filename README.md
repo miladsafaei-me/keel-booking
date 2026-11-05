@@ -136,3 +136,23 @@ and logo from `EMAIL_THEME`, or override `keel_booking/email/*.html|txt`.
 ```
 PYTHONPATH=src:. DJANGO_SETTINGS_MODULE=tests.settings django-admin test tests
 ```
+
+## The staff panel (keel-web 0.10 or later)
+
+`keel_booking.panel` draws the owner's side inside keel-web's staff panel instead of the Django admin:
+bookings (tabs Upcoming, Requests, Past, All; search and filters), one booking with its actions (approve,
+payment received, decline, write to the calendar again, copy the guests, resend the confirmation, cancel),
+guest details and invited people, files, notes and follow-ups; the follow-ups list; meeting types with
+their weekly hours, date exceptions, fixed attendees, questions and translations; each question with its
+translations; payment methods; and the Google connection with its calendars.
+
+```python
+path("book/admin/bookings/", include("keel_booking.panel.urls")),  # namespace keel_booking_panel
+```
+
+Place `keel_booking.panel.nav.booking_section` in the host's `KEEL_WEB["admin_shell"]["nav"]`, and
+`keel_booking.panel.dashboard.cards` / `.panels` in its dashboard hooks. Once mounted, the owner's emails
+and Telegram messages link to the panel (`conf.manage_url`, `conf.file_url`), else to the Django admin.
+Settings: `PANEL_GOOGLE_CALLBACK` (the URL name of the OAuth callback, for a host that keeps an older
+registered redirect URI as an alias) and `PANEL_DELETE_TYPE_WITH_BOOKINGS` (False refuses to delete a
+meeting type that has bookings; True deletes them with it).

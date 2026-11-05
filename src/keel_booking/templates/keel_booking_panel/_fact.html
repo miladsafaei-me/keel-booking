@@ -1,0 +1,5 @@
+{% comment %}One label and value in a booking's facts list. Input: label, value (may hold HTML from the caller's block).{% endcomment %}
+<div class="booking-fact grid grid-cols-[9rem_minmax(0,1fr)] gap-3 py-2 text-sm">
+  <dt class="text-gray-500 dark:text-gray-400">{{ label }}</dt>
+  <dd class="min-w-0 break-words text-gray-800 dark:text-white/90">{{ value|default:"-" }}</dd>
+</div>

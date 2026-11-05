@@ -30,6 +30,12 @@ DEFAULTS = {
     # Google OAuth web client. The redirect URI to register is shown on the admin's Google page.
     "GOOGLE_CLIENT_ID": "",
     "GOOGLE_CLIENT_SECRET": "",
+    # The URL name of the staff panel's OAuth callback (the redirect URI registered on the
+    # Google client). A host that keeps an older registered address names its alias here.
+    "PANEL_GOOGLE_CALLBACK": "keel_booking_panel:google_callback",
+    # Deleting a meeting type in the staff panel: False refuses while it has bookings (they are
+    # protected); True deletes its bookings with it, their files, notes and follow-ups included.
+    "PANEL_DELETE_TYPE_WITH_BOOKINGS": False,
     # Google's own invitation emails: "none" because the package sends its own branded ones;
     # "all" makes Google email every attendee as well.
     "GOOGLE_SEND_UPDATES": "none",
@@ -132,3 +138,24 @@ def from_email() -> str:
 def absolute(path: str) -> str:
     """An absolute URL for a site path, for links that leave the browser (emails, Google)."""
     return get("SITE_URL").rstrip("/") + path
+
+
+def owner_url(panel_name: str, admin_name: str, *args) -> str:
+    """The owner's page for an object, as an absolute URL: the staff panel's when the host
+    mounts ``keel_booking.panel``, else the Django admin's. Used by the owner's emails and Telegram."""
+    from django.urls import NoReverseMatch, reverse
+
+    for name in (f"keel_booking_panel:{panel_name}", f"admin:{admin_name}"):
+        try:
+            return absolute(reverse(name, args=args))
+        except NoReverseMatch:
+            continue
+    return absolute("/")
+
+
+def manage_url(booking) -> str:
+    return owner_url("booking", "keel_booking_booking_change", booking.pk)
+
+
+def file_url(item) -> str:
+    return owner_url("booking_file", "keel_booking_booking_file", item.pk)

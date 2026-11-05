@@ -12,7 +12,6 @@ import logging
 
 import requests
 from django.conf import settings
-from django.urls import reverse
 from django.utils import translation
 from django.utils.translation import gettext as _
 
@@ -103,7 +102,7 @@ def request_text(booking) -> str:
 
 
 def _keyboard(booking) -> dict:
-    admin = conf.absolute(reverse("admin:keel_booking_booking_change", args=[booking.pk]))
+    admin = conf.manage_url(booking)
     rows = []
     if booking.status == booking.Status.PENDING:
         rows.append([{"text": "✅ " + _("Approve"), "callback_data": f"kb:{APPROVE}:{booking.uid}"},
