@@ -129,3 +129,25 @@ class AssistantTests(TestCase):
         self.assertEqual(answer["error"], "taken")
         self.assertEqual(answer["nearby"][0]["time"], "10:00")
         self.assertFalse(Booking.objects.exists())
+
+
+class GeminiKeyFallbackTests(TestCase):
+    def test_a_key_at_its_limit_hands_over_to_the_next_key_before_the_next_model(self):
+        gemini._resting.clear()
+        calls = []
+
+        def post(model, key, payload):
+            calls.append((model, key))
+            if key == "first":
+                return 429, {"error": {"details": [{"retryDelay": "40s"}]}}
+            return 200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+
+        settings_keys = {**settings.KEEL_BOOKING, "ASSISTANT_GEMINI_KEY": "first, second",
+                         "ASSISTANT_MODELS": ("best", "next")}
+        with override_settings(KEEL_BOOKING=settings_keys), mock.patch("keel_booking.gemini._post", side_effect=post):
+            self.assertEqual(gemini.generate("s", [])["parts"][0]["text"], "ok")
+            self.assertEqual(calls, [("best", "first"), ("best", "second")])
+            calls.clear()
+            gemini.generate("s", [])
+            self.assertEqual(calls, [("best", "second")])  # the first key rests until its retryDelay
+        gemini._resting.clear()

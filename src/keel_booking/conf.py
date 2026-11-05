@@ -54,7 +54,8 @@ DEFAULTS = {
     # The booking assistant (assistant.py, view assistant_chat, mounted by the host): a chat that answers questions
     # about the active meeting types, finds a time with the visitor and books it through create_booking, so its
     # bookings take the same road as the form's (Telegram request, emails, payment). Empty key: the view answers
-    # 503 and the host's chat shows its "not available" line.
+    # 503 and the host's chat shows its "not available" line. Several keys (a list, or commas) are tried in order for
+    # each model, so a key at its free limit hands over to the next without the visitor noticing.
     "ASSISTANT_GEMINI_KEY": "",
     # Gemini models, best first; the next one answers when one is out of quota, busy or slow (gemini.py).
     "ASSISTANT_MODELS": ("gemini-3.8-flash", "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-3.5-flash-lite",
