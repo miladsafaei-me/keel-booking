@@ -111,6 +111,50 @@ class ReserveTests(TestCase):
         page = self.client.get(response.json()["redirect"])
         self.assertContains(page, "You are booked")
 
+    def test_a_failing_guest_address_never_blocks_the_fixed_attendee(self, _now):
+        from django.core.mail.backends.locmem import EmailBackend
+
+        real = EmailBackend.send_messages
+
+        def flaky(backend, messages):
+            if any("sara@example.com" in m.to for m in messages):
+                raise OSError("mailbox unavailable")
+            return real(backend, messages)
+
+        with mock.patch.object(EmailBackend, "send_messages", flaky):
+            self.assertEqual(self.post().status_code, 201)
+        booking = Booking.objects.get()
+        sent = sorted(m.to[0] for m in outbox.outbox)
+        self.assertEqual(sent, ["colleague@example.com", "owner@example.com", "partner@example.com"])
+        self.assertIsNone(booking.confirmation_sent_at)
+        self.assertEqual(booking.mail_attempts, 1)
+        # The retry reaches only the address that failed: nobody gets a second copy.
+        outbox.outbox.clear()
+        services.tick()
+        booking.refresh_from_db()
+        self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
+        self.assertIsNotNone(booking.confirmation_sent_at)
+
+    def test_fixed_attendee_added_later_still_gets_the_confirmation(self, _now):
+        FixedAttendee.objects.all().delete()
+        with mock.patch("keel_booking.services.mail.send_confirmation", side_effect=OSError("down")):
+            self.assertEqual(self.post().status_code, 201)
+        FixedAttendee.objects.create(event_type=self.et, email="partner@example.com")
+        outbox.outbox.clear()
+        services.tick()
+        self.assertIn(["partner@example.com"], [m.to for m in outbox.outbox])
+
+    def test_reminder_and_cancellation_reach_the_fixed_attendee(self, _now):
+        self.assertEqual(self.post().status_code, 201)
+        booking = Booking.objects.get()
+        outbox.outbox.clear()
+        services.tick(now=booking.start_at - timedelta(minutes=booking.event_type.reminder_minutes - 1))
+        self.assertIn(["partner@example.com"], [m.to for m in outbox.outbox])
+        outbox.outbox.clear()
+        services.cancel_booking(Booking.objects.get())
+        self.assertEqual(sorted(m.to[0] for m in outbox.outbox),
+                         ["colleague@example.com", "partner@example.com", "sara@example.com"])
+
     @override_settings(EMAIL_BACKEND="keel_booking.mail.GmailBackend")
     def test_emails_wait_for_google_without_using_retries(self, _now):
         self.assertEqual(self.post().status_code, 201)

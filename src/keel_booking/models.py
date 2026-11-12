@@ -484,6 +484,8 @@ class Booking(models.Model):
     reminder_sent_at = models.DateTimeField(null=True, blank=True)
     mail_attempts = models.PositiveSmallIntegerField(default=0)
     mail_error = models.TextField(blank=True)
+    mail_delivered = models.JSONField(default=dict, blank=True, help_text=(
+        "Per email kind, the addresses it already reached, so a retry only sends to the ones that failed."))
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

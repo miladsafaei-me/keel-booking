@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from django.db import connection, transaction
+from django.db.models import F
 from django.utils import timezone
 
 from . import availability, conf, google, mail, telegram
@@ -296,6 +297,7 @@ def send_new_booking_emails(booking: Booking) -> None:
         except Exception as error:
             errors.append(f"owner: {error}")
     if not booking.confirmation_sent_at and not _waiting_for_meet(booking):
+        ensure_fixed_attendees(booking)
         try:
             mail.send_confirmation(booking)
             booking.confirmation_sent_at = timezone.now()
@@ -310,6 +312,32 @@ def send_new_booking_emails(booking: Booking) -> None:
     booking.save(update_fields=["owner_notified_at", "confirmation_sent_at", "mail_attempts", "mail_error", "updated_at"])
 
 
+def ensure_fixed_attendees(booking: Booking) -> None:
+    """Add the meeting type's fixed attendees that the booking does not carry yet (one added to the
+    type after the booking was made), so they get the confirmation and the reminder too."""
+    have = {a.email.lower() for a in booking.attendees.all()}
+    for fixed in booking.event_type.fixed_attendees.all():
+        if fixed.email.lower() not in have:
+            have.add(fixed.email.lower())
+            BookingAttendee.objects.create(booking=booking, email=fixed.email, name=fixed.name,
+                                           role=BookingAttendee.Role.FIXED, receive_emails=fixed.receive_emails)
+
+
+def send_cancellation_email(booking: Booking) -> None:
+    """The cancellation notice to the guest and the fixed attendees; whoever it missed is retried by ``tick``."""
+    try:
+        mail.send_cancellation(booking)
+    except Exception as error:
+        log.warning("cancellation email failed for %s: %s", booking.uid, error)
+        Booking.objects.filter(pk=booking.pk).update(mail_attempts=F("mail_attempts") + 1,
+                                                    mail_error=f"cancellation: {error}"[:2000])
+
+
+def _cancellation_unsent(booking: Booking) -> bool:
+    delivered = booking.mail_delivered.get("cancellation")
+    return delivered is not None and bool(set(booking.email_recipients()) - set(delivered))
+
+
 def cancel_booking(booking: Booking, notify: bool = True) -> None:
     if booking.status == Booking.Status.CANCELLED:
         return
@@ -319,9 +347,15 @@ def cancel_booking(booking: Booking, notify: bool = True) -> None:
         except google.GoogleError as error:
             log.warning("calendar delete failed for %s: %s", booking.uid, error)
     booking.status = Booking.Status.CANCELLED
-    booking.save(update_fields=["status", "updated_at"])
+    booking.mail_attempts = 0
+    fields = ["status", "mail_attempts", "updated_at"]
     if notify and booking.start_at > timezone.now():
-        mail.send_cancellation(booking)
+        # An empty entry marks the notice as owed, so tick retries whoever it did not reach.
+        booking.mail_delivered = {**booking.mail_delivered, "cancellation": []}
+        fields.append("mail_delivered")
+    booking.save(update_fields=fields)
+    if "mail_delivered" in fields:
+        send_cancellation_email(booking)
 
 
 def tick(now: datetime | None = None) -> dict:
@@ -379,9 +413,19 @@ def tick(now: datetime | None = None) -> dict:
         try:
             mail.send_reminder(booking)
             done["reminders"] += 1
-        except Exception:
-            log.exception("reminder failed for %s", booking.uid)
-            Booking.objects.filter(pk=booking.pk).update(reminder_sent_at=None)
+        except Exception as error:
+            # Whoever it reached is remembered; the next pass retries only the rest, a few times.
+            log.warning("reminder failed for %s: %s", booking.uid, error)
+            booking.refresh_from_db(fields=["mail_attempts"])
+            retry = booking.mail_attempts + 1 < MAX_ATTEMPTS
+            Booking.objects.filter(pk=booking.pk).update(
+                reminder_sent_at=None if retry else now, mail_attempts=F("mail_attempts") + 1,
+                mail_error=f"reminder: {error}"[:2000])
+
+    for booking in Booking.objects.filter(status=Booking.Status.CANCELLED, start_at__gt=now,
+                                          mail_attempts__lt=MAX_ATTEMPTS, mail_delivered__has_key="cancellation"):
+        if _cancellation_unsent(booking):
+            send_cancellation_email(booking)
 
     for follow_up in FollowUp.objects.filter(is_done=False, reminder_sent_at__isnull=True, due_at__lte=now).select_related("booking__event_type"):
         if not FollowUp.objects.filter(pk=follow_up.pk, reminder_sent_at__isnull=True).update(reminder_sent_at=now):

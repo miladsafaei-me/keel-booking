@@ -324,8 +324,9 @@ class BookingAdmin(admin.ModelAdmin):
     def resend_confirmation(self, request, queryset):
         for booking in queryset.filter(status=Booking.Status.CONFIRMED):
             booking.confirmation_sent_at = None
+            booking.mail_delivered = {**booking.mail_delivered, "confirmation": []}
             booking.mail_attempts = 0
-            booking.save(update_fields=["confirmation_sent_at", "mail_attempts"])
+            booking.save(update_fields=["confirmation_sent_at", "mail_attempts", "mail_delivered"])
             services.send_new_booking_emails(booking)
         self.message_user(request, "Confirmations sent again.")
 

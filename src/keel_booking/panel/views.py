@@ -91,8 +91,9 @@ def _run_action(request, booking, action):
         ok = booking.status == Booking.Status.CONFIRMED
         if ok:
             booking.confirmation_sent_at = None
+            booking.mail_delivered = {**booking.mail_delivered, "confirmation": []}
             booking.mail_attempts = 0
-            booking.save(update_fields=["confirmation_sent_at", "mail_attempts"])
+            booking.save(update_fields=["confirmation_sent_at", "mail_attempts", "mail_delivered"])
             services.send_new_booking_emails(booking)
     elif action == "cancel":
         services.cancel_booking(booking)

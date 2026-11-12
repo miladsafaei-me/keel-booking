@@ -12,6 +12,7 @@ the guest booked in (``Booking.language``). The owner's emails follow it too whe
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 import zoneinfo
 from datetime import datetime, timezone as dt_timezone
 from urllib.parse import urlencode
@@ -172,11 +173,21 @@ def _context(booking, tz_name: str, **extra) -> dict:
     }
 
 
+class SendFailed(Exception):
+    """One or more recipients of an email failed; the others were still sent."""
+
+
 def _send(template: str, subject: str, to: list[str], context: dict, attach_ics=None, reply_to=None,
-          files=()) -> None:
+          files=(), delivered: set | None = None) -> None:
+    """Send one email to each address. Every address is tried even when an earlier one fails, so a bad
+    guest address never keeps the fixed attendees from their copy. With ``delivered``, addresses already
+    in it are skipped and each success is added, so a retry reaches only the ones that failed."""
     text = render_to_string(f"keel_booking/email/{template}.txt", context)
     html = render_to_string(f"keel_booking/email/{template}.html", {**context, "subject": subject})
+    failed = []
     for address in to:
+        if delivered is not None and address.lower() in delivered:
+            continue
         message = EmailMultiAlternatives(subject, text, conf.from_email(), [address], reply_to=reply_to)
         message.attach_alternative(html, "text/html")
         if attach_ics:
@@ -184,7 +195,29 @@ def _send(template: str, subject: str, to: list[str], context: dict, attach_ics=
         for item in files:
             with item.file.open("rb") as handle:
                 message.attach(item.original_name, handle.read(), item.content_type or "application/octet-stream")
-        message.send()
+        try:
+            message.send()
+        except Exception as error:
+            log.warning("%s email to %s failed: %s", template, address, error)
+            failed.append(f"{address}: {error}")
+            continue
+        if delivered is not None:
+            delivered.add(address.lower())
+    if failed:
+        raise SendFailed("; ".join(failed))
+
+
+@contextmanager
+def _tracked(booking, kind: str):
+    """The set of addresses an email kind already reached on this booking, saved back even when a send fails."""
+    from .models import Booking
+
+    delivered = set(booking.mail_delivered.get(kind, []))
+    try:
+        yield delivered
+    finally:
+        booking.mail_delivered = {**booking.mail_delivered, kind: sorted(delivered)}
+        Booking.objects.filter(pk=booking.pk).update(mail_delivered=booking.mail_delivered)
 
 
 def owner_language(booking) -> str:
@@ -203,8 +236,9 @@ def send_confirmation(booking) -> None:
         context = _context(booking, booking.guest_timezone)
         subject = _("Confirmed: {meeting} with {owner}, {when}").format(
             meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"), when=context["when"]["short"])
-        _send("confirmation", subject, booking.email_recipients(), context, attach_ics=ics(booking),
-              reply_to=[conf.get("OWNER_EMAIL")])
+        with _tracked(booking, "confirmation") as delivered:
+            _send("confirmation", subject, booking.email_recipients(), context, attach_ics=ics(booking),
+                  reply_to=[conf.get("OWNER_EMAIL")], delivered=delivered)
 
 
 def send_request_received(booking) -> None:
@@ -282,14 +316,23 @@ def send_reminder(booking) -> None:
         guest_context = _context(booking, booking.guest_timezone, minutes=i18n.digits(minutes))
         subject = _("Starts in {minutes} minutes: {meeting} with {owner}").format(
             minutes=i18n.digits(minutes), meeting=guest_context["event_type"].name, owner=conf.get("OWNER_NAME"))
-        _send("reminder", subject, booking.email_recipients(), guest_context, reply_to=[conf.get("OWNER_EMAIL")])
+        guest_failure = None
+        try:
+            with _tracked(booking, "reminder") as delivered:
+                _send("reminder", subject, booking.email_recipients(), guest_context,
+                      reply_to=[conf.get("OWNER_EMAIL")], delivered=delivered)
+        except SendFailed as error:
+            guest_failure = error  # the owner's copy still goes out below
     with _owner_language(booking):
         owner_context = _context(booking, booking.event_type.timezone, minutes=i18n.digits(minutes), for_owner=True,
                                  admin_url=conf.manage_url(booking))
         subject = _("Starts in {minutes} minutes: {meeting} with {owner}").format(
             minutes=i18n.digits(minutes), meeting=owner_context["event_type"].name, owner=booking.guest_name)
-        _send("reminder", subject, [conf.get("OWNER_EMAIL")], owner_context,
-              reply_to=[booking.guest_email] if booking.guest_email else None)
+        with _tracked(booking, "reminder_owner") as delivered:
+            _send("reminder", subject, [conf.get("OWNER_EMAIL")], owner_context,
+                  reply_to=[booking.guest_email] if booking.guest_email else None, delivered=delivered)
+    if guest_failure:
+        raise guest_failure
 
 
 def send_cancellation(booking) -> None:
@@ -297,7 +340,9 @@ def send_cancellation(booking) -> None:
         context = _context(booking, booking.guest_timezone)
         subject = _("Cancelled: {meeting} with {owner}, {when}").format(
             meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"), when=context["when"]["short"])
-        _send("cancellation", subject, booking.email_recipients(), context, reply_to=[conf.get("OWNER_EMAIL")])
+        with _tracked(booking, "cancellation") as delivered:
+            _send("cancellation", subject, booking.email_recipients(), context, reply_to=[conf.get("OWNER_EMAIL")],
+                  delivered=delivered)
 
 
 def send_follow_up_reminder(follow_up) -> None:
