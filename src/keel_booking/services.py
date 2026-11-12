@@ -142,7 +142,10 @@ def approve_booking(booking: Booking) -> bool:
             return False
         send_payment_email(booking)
         return True
-    if not _move(booking, (Booking.Status.PENDING,), Booking.Status.CONFIRMED, decided_at=now):
+    # owner_notified_at was set by the Telegram request; clear it so the owner's email notice
+    # (with the calendar file) still goes out for the confirmed meeting.
+    if not _move(booking, (Booking.Status.PENDING,), Booking.Status.CONFIRMED, decided_at=now,
+                 owner_notified_at=None):
         return False
     sync_to_google(booking)
     send_new_booking_emails(booking)
@@ -152,7 +155,8 @@ def approve_booking(booking: Booking) -> bool:
 def mark_paid(booking: Booking) -> bool:
     """The owner saw the receipt: the meeting is confirmed, goes on the calendar, and the guest gets the
     confirmation with the Meet link. False when it was not waiting for a payment."""
-    if not _move(booking, (Booking.Status.PAYMENT,), Booking.Status.CONFIRMED, paid_at=timezone.now()):
+    if not _move(booking, (Booking.Status.PAYMENT,), Booking.Status.CONFIRMED, paid_at=timezone.now(),
+                 owner_notified_at=None):
         return False
     sync_to_google(booking)
     send_new_booking_emails(booking)

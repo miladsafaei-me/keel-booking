@@ -463,6 +463,10 @@ class ApprovalTests(TestCase):
         guest = [m for m in outbox.outbox if m.to == ["sara@example.com"]]
         self.assertEqual(len(guest), 1)
         self.assertIn("https://meet.google.com/abc-defg-hij", guest[0].body)
+        # The owner also gets the email notice with the calendar file, not only the Telegram message.
+        owner = [m for m in outbox.outbox if m.to == ["owner@example.com"]]
+        self.assertEqual(len(owner), 1)
+        self.assertIsNotNone(booking.owner_notified_at)
         edit = [data for method, data in self.calls if method == "editMessageText"][-1]
         self.assertIn("Approved", edit["text"])
         self.assertNotIn("callback_data", json.dumps(edit["reply_markup"]))
@@ -587,6 +591,7 @@ class PaymentTests(TestCase):
         self.assertIsNotNone(self.booking.paid_at)
         guest = [m for m in outbox.outbox if m.to == ["sara@example.com"]]
         self.assertIn("https://meet.google.com/abc-defg-hij", guest[0].body)
+        self.assertEqual(len([m for m in outbox.outbox if m.to == ["owner@example.com"]]), 1)
 
     def test_unpaid_time_is_released(self, _now):
         self.press("approve")
