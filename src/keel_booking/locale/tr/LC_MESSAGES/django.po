@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-04 23:52+0000\n"
+"POT-Creation-Date: 2026-11-13 09:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 msgid "Your request is booked. The email I just sent you has every detail."
-msgstr "Talebiniz alındı. Az önce size gönderdiğim e-postada tüm ayrıntılar var."
+msgstr ""
+"Talebiniz alındı. Az önce size gönderdiğim e-postada tüm ayrıntılar var."
 
 msgid "Website"
 msgstr "Web sitesi"
@@ -82,6 +83,10 @@ msgstr "Onaylandı: {owner} ile {meeting}, {when}"
 #, python-brace-format
 msgid "Request received: {meeting} with {owner}"
 msgstr "Talep alındı: {owner} ile {meeting}"
+
+#, python-brace-format
+msgid "A new time for your request: {meeting} with {owner}"
+msgstr "Talebiniz için yeni bir zaman: {owner} ile {meeting}"
 
 #, python-brace-format
 msgid "About your request: {meeting} with {owner}"
@@ -172,6 +177,10 @@ msgstr "Reddedildi. Katılımcıya e-postayla bildirildi."
 msgid "Cancelled"
 msgstr "İptal edildi"
 
+msgid "Time declined. The guest was asked by email to pick a new time."
+msgstr ""
+"Zaman reddedildi. Katılımcıdan e-postayla yeni bir zaman seçmesi istendi."
+
 msgid "Paid and confirmed. The Meet link went to the guest by email."
 msgstr ""
 "Ödendi ve kesinleşti. Meet bağlantısı katılımcıya e-postayla gönderildi."
@@ -192,17 +201,17 @@ msgstr "Dosyalar"
 msgid "Language"
 msgstr "Dil"
 
-msgid "Approve"
-msgstr "Onayla"
-
-msgid "Decline"
-msgstr "Reddet"
-
-msgid "Payment received"
-msgstr "Ödeme alındı"
+msgid "Change the time"
+msgstr "Zamanı değiştir"
 
 msgid "Cancel"
 msgstr "İptal"
+
+msgid "Approve"
+msgstr "Onayla"
+
+msgid "Payment received"
+msgstr "Ödeme alındı"
 
 msgid "Open in the admin"
 msgstr "Yönetim panelinde aç"
@@ -225,6 +234,10 @@ msgstr "Bu talep için zaten karar verildi."
 msgid "Payment received. The guest gets the Meet link by email."
 msgstr "Ödeme kaydedildi. Katılımcı Meet bağlantısını e-postayla alacak."
 
+msgid "Time declined. The guest is asked by email to pick a new time."
+msgstr ""
+"Zaman reddedildi. Katılımcıdan e-postayla yeni bir zaman seçmesi isteniyor."
+
 msgid "Declined. The guest is told by email."
 msgstr "Reddedildi. Katılımcıya e-postayla bildirilecek."
 
@@ -242,15 +255,15 @@ msgid "Booked: %(meeting)s with %(owner_name)s"
 msgstr "Randevu alındı: %(owner_name)s ile %(meeting)s"
 
 msgid ""
-"Your request is approved. The ways to pay are in your email; reply to it "
-"with the receipt."
+"Your request is approved. The ways to pay are in your email; reply to it with"
+" the receipt."
 msgstr ""
 "Talebiniz onaylandı. Ödeme yolları e-postanızda. Dekontu o e-postaya yanıt "
 "olarak gönderin."
 
 msgid ""
-"I have received your request to set up a meeting. I will review it as soon "
-"as I can and let you know by email."
+"I have received your request to set up a meeting. I will review it as soon as"
+" I can and let you know by email."
 msgstr ""
 "Görüşme ayarlama talebinizi aldım. En kısa sürede inceleyip size e-postayla "
 "haber vereceğim."
@@ -309,8 +322,8 @@ msgstr "Görüşmeniz iptal edildi"
 
 #, python-format
 msgid ""
-"Hi %(guest)s, the meeting below with %(owner_name)s is cancelled and has "
-"been removed from the calendar."
+"Hi %(guest)s, the meeting below with %(owner_name)s is cancelled and has been"
+" removed from the calendar."
 msgstr ""
 "Merhaba %(guest)s, %(owner_name)s ile aşağıdaki görüşmeniz iptal edildi ve "
 "takvimden kaldırıldı."
@@ -358,8 +371,8 @@ msgid ""
 "out. A reminder with the link arrives %(minutes)s minutes before the start."
 msgstr ""
 "Zamanı değiştirmeniz mi gerekiyor? Bu e-postayı yanıtlayın, %(owner_name)s "
-"sizin için düzenlesin. Bağlantıyı içeren hatırlatma, başlangıçtan "
-"%(minutes)s dakika önce gelir."
+"sizin için düzenlesin. Bağlantıyı içeren hatırlatma, başlangıçtan %(minutes)s"
+" dakika önce gelir."
 
 #, python-format
 msgid "Your %(meeting)s with %(owner_name)s is confirmed."
@@ -511,8 +524,8 @@ msgstr "Ödeme adımı"
 
 #, python-format
 msgid ""
-"I have approved your request. To confirm the session, pay %(price)s in one "
-"of the ways below, then reply to this email with the receipt."
+"I have approved your request. To confirm the session, pay %(price)s in one of"
+" the ways below, then reply to this email with the receipt."
 msgstr ""
 "Talebinizi onayladım. Görüşmeyi kesinleştirmek için %(price)s tutarını "
 "aşağıdaki yollardan biriyle ödeyin, ardından dekontu bu e-postaya yanıt "
@@ -530,8 +543,8 @@ msgid ""
 "Once the payment is confirmed, the confirmation email with the Google Meet "
 "link will be sent to you."
 msgstr ""
-"Ödeme onaylandıktan sonra Google Meet bağlantısını içeren onay e-postası "
-"size gönderilecek."
+"Ödeme onaylandıktan sonra Google Meet bağlantısını içeren onay e-postası size"
+" gönderilecek."
 
 #, python-format
 msgid "%(meeting)s starts at %(time)s."
@@ -587,6 +600,19 @@ msgid ""
 msgstr ""
 "Bu saat, yanıt verene kadar sizin için ayrıldı. Eklemek istediğiniz bir şey "
 "varsa bu e-postayı yanıtlayın."
+
+msgid "Please pick another time for our meeting."
+msgstr "Lütfen görüşmemiz için başka bir zaman seçin."
+
+msgid "Let's find another time"
+msgstr "Başka bir zaman bulalım"
+
+msgid ""
+"Thank you for your request. I am sorry, I cannot be there at the time you "
+"picked. Please pick another time that suits you, and I will confirm it."
+msgstr ""
+"Talebiniz için teşekkür ederim. Üzgünüm, seçtiğiniz saatte görüşmeye "
+"katılamıyorum. Lütfen size uygun başka bir zaman seçin, ben de onaylayayım."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -782,6 +808,9 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "Bu zaman az önce doldu. Lütfen başka bir zaman seçin."
+
+#~ msgid "Decline"
+#~ msgstr "Reddet"
 
 #~ msgid "One step left: the payment"
 #~ msgstr "Tek adım kaldı: ödeme"

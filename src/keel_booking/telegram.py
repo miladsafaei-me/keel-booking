@@ -1,4 +1,4 @@
-"""The owner's Telegram bot: each meeting request arrives with Approve and Decline buttons.
+"""The owner's Telegram bot: each meeting request arrives with Approve, Change the time and Cancel buttons.
 
 The booking worker long-polls the bot (``poll``), so the presses need no public webhook URL.
 Only presses from ``TELEGRAM_CHAT_ID`` count. A press decides the request through ``services``,
@@ -20,7 +20,7 @@ from . import conf, i18n
 log = logging.getLogger(__name__)
 
 API = "https://api.telegram.org/bot{token}/{method}"
-APPROVE, DECLINE, PAID = "approve", "decline", "paid"
+APPROVE, DECLINE, RESCHEDULE, PAID = "approve", "decline", "reschedule", "paid"
 
 
 class TelegramError(Exception):
@@ -69,7 +69,9 @@ def request_text(booking) -> str:
         Booking.Status.DECLINED: "❌ " + _("Declined. The guest was told by email."),
         Booking.Status.CANCELLED: "🚫 " + _("Cancelled"),
     }[booking.status]
-    if booking.status == Booking.Status.CONFIRMED and booking.paid_at:
+    if booking.status == Booking.Status.DECLINED and booking.decline_reason == Booking.DeclineReason.RESCHEDULE:
+        status_line = "🔁 " + _("Time declined. The guest was asked by email to pick a new time.")
+    elif booking.status == Booking.Status.CONFIRMED and booking.paid_at:
         status_line = "✅ " + _("Paid and confirmed. The Meet link went to the guest by email.")
     elif booking.status == Booking.Status.CANCELLED and booking.payment_due_at and not booking.paid_at:
         status_line = "⌛ " + _("The payment did not arrive in time. The time is free again.")
@@ -104,12 +106,12 @@ def request_text(booking) -> str:
 def _keyboard(booking) -> dict:
     admin = conf.manage_url(booking)
     rows = []
+    declines = [{"text": "🔁 " + _("Change the time"), "callback_data": f"kb:{RESCHEDULE}:{booking.uid}"},
+                {"text": "❌ " + _("Cancel"), "callback_data": f"kb:{DECLINE}:{booking.uid}"}]
     if booking.status == booking.Status.PENDING:
-        rows.append([{"text": "✅ " + _("Approve"), "callback_data": f"kb:{APPROVE}:{booking.uid}"},
-                     {"text": "❌ " + _("Decline"), "callback_data": f"kb:{DECLINE}:{booking.uid}"}])
+        rows += [[{"text": "✅ " + _("Approve"), "callback_data": f"kb:{APPROVE}:{booking.uid}"}], declines]
     elif booking.status == booking.Status.PAYMENT:
-        rows.append([{"text": "💰 " + _("Payment received"), "callback_data": f"kb:{PAID}:{booking.uid}"},
-                     {"text": "❌ " + _("Cancel"), "callback_data": f"kb:{DECLINE}:{booking.uid}"}])
+        rows += [[{"text": "💰 " + _("Payment received"), "callback_data": f"kb:{PAID}:{booking.uid}"}], declines]
     if admin.startswith("https://"):
         rows.append([{"text": _("Open in the admin"), "url": admin}])
     return {"inline_keyboard": rows}
@@ -160,7 +162,7 @@ def handle_update(update: dict) -> None:
             return
         parts = str(press.get("data", "")).split(":")
         booking = None
-        if len(parts) == 3 and parts[0] == "kb" and parts[1] in (APPROVE, DECLINE, PAID):
+        if len(parts) == 3 and parts[0] == "kb" and parts[1] in (APPROVE, DECLINE, RESCHEDULE, PAID):
             booking = Booking.objects.select_related("event_type").filter(uid=parts[2]).first()
         if booking is None:
             call("answerCallbackQuery", callback_query_id=press["id"], text=_("This request no longer exists."))
@@ -175,6 +177,10 @@ def handle_update(update: dict) -> None:
         elif parts[1] == PAID:
             done = services.mark_paid(booking)
             note = (_("Payment received. The guest gets the Meet link by email.") if done
+                    else _("This request was already decided."))
+        elif parts[1] == RESCHEDULE:
+            done = services.decline_booking(booking, reschedule=True)
+            note = (_("Time declined. The guest is asked by email to pick a new time.") if done
                     else _("This request was already decided."))
         else:
             done = services.decline_booking(booking)

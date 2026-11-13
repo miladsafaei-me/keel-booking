@@ -164,10 +164,13 @@ def mark_paid(booking: Booking) -> bool:
     return True
 
 
-def decline_booking(booking: Booking) -> bool:
-    """Decline a request (or one still waiting for its payment): the slot opens again and the guest is told."""
+def decline_booking(booking: Booking, reschedule: bool = False) -> bool:
+    """Decline a request (or one still waiting for its payment): the slot opens again and the guest is told.
+    With ``reschedule`` the guest's email is an apology for the time with an invitation to pick a new one;
+    otherwise it says the meeting will not go ahead."""
+    reason = Booking.DeclineReason.RESCHEDULE if reschedule else Booking.DeclineReason.CANCEL
     if not _move(booking, (Booking.Status.PENDING, Booking.Status.PAYMENT), Booking.Status.DECLINED,
-                 decided_at=booking.decided_at or timezone.now()):
+                 decided_at=booking.decided_at or timezone.now(), decline_reason=reason):
         return False
     send_decline_email(booking)
     return True

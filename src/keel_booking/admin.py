@@ -185,7 +185,7 @@ class BookingAdmin(admin.ModelAdmin):
                                                           "decision_sent_at", "confirmation_sent_at", "owner_notified_at", "reminder_sent_at",
                                                           "sync_error", "mail_error", "uid", "created_at")}),
     )
-    actions = ("approve_requests", "mark_payments_received", "decline_requests", "resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
+    actions = ("approve_requests", "mark_payments_received", "decline_requests", "reschedule_requests", "resync_to_google", "push_guests", "resend_confirmation", "cancel_bookings")
 
     def has_add_permission(self, request):
         return False
@@ -261,6 +261,17 @@ class BookingAdmin(admin.ModelAdmin):
                 done += 1
                 telegram.refresh_request(booking)
         self.message_user(request, f"{done} requests declined.")
+
+    @admin.action(description="Ask for a new time (the guests are invited by email to pick another time)")
+    def reschedule_requests(self, request, queryset):
+        from . import telegram
+
+        done = 0
+        for booking in queryset.filter(status__in=(Booking.Status.PENDING, Booking.Status.PAYMENT)):
+            if services.decline_booking(booking, reschedule=True):
+                done += 1
+                telegram.refresh_request(booking)
+        self.message_user(request, f"{done} guests asked to pick a new time.")
 
     @admin.display(description="Social")
     def socials_short(self, obj):

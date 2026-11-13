@@ -435,6 +435,10 @@ class Booking(models.Model):
         DECLINED = "declined", "Declined"
         CANCELLED = "cancelled", "Cancelled"
 
+    class DeclineReason(models.TextChoices):
+        CANCEL = "cancel", "Cancelled"
+        RESCHEDULE = "reschedule", "Asked to pick a new time"
+
     # The statuses whose time is taken: a request waiting for the owner holds its slot.
     HOLDING = (Status.PENDING, Status.PAYMENT, Status.CONFIRMED)
 
@@ -473,6 +477,8 @@ class Booking(models.Model):
 
     decided_at = models.DateTimeField(null=True, blank=True, help_text="When the owner approved or declined the request.")
     request_ack_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the guest was told the request arrived.")
+    decline_reason = models.CharField(max_length=12, choices=DeclineReason.choices, blank=True,
+                                      help_text="Why a request was declined: cancelled, or the guest was asked to pick a new time.")
     decision_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the guest was told the request was declined.")
     payment_due_at = models.DateTimeField(null=True, blank=True, help_text="The guest must pay by then, or the time is released.")
     payment_sent_at = models.DateTimeField(null=True, blank=True, help_text="When the payment details went to the guest.")

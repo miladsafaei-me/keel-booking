@@ -251,12 +251,18 @@ def send_request_received(booking) -> None:
 
 
 def send_declined(booking) -> None:
-    """The guest's answer when the owner declines a request (or it lapses undecided)."""
+    """The guest's answer when the owner declines a request (or it lapses undecided). A request declined
+    for its time (``decline_reason`` reschedule) gets an apology and a link to pick a new time instead."""
+    reschedule = booking.decline_reason == booking.DeclineReason.RESCHEDULE
     with translation.override(booking.guest_language):
         context = _context(booking, booking.guest_timezone)
-        subject = _("About your request: {meeting} with {owner}").format(
-            meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
-        _send("declined", subject, [booking.guest_email], context, reply_to=[conf.get("OWNER_EMAIL")])
+        if reschedule:
+            subject = _("A new time for your request: {meeting} with {owner}")
+        else:
+            subject = _("About your request: {meeting} with {owner}")
+        subject = subject.format(meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
+        _send("reschedule" if reschedule else "declined", subject, [booking.guest_email], context,
+              reply_to=[conf.get("OWNER_EMAIL")])
 
 
 def payment_due_text(booking, tz_name: str) -> str:

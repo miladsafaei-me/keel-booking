@@ -489,7 +489,10 @@ class ApprovalTests(TestCase):
         self.assertIn("Intro call", data["text"])
         self.assertIn('href="https://t.me/sara_k"', data["text"])
         self.assertIn('href="https://wa.me/905551234567"', data["text"])
-        self.assertEqual(len(data["reply_markup"]["inline_keyboard"][0]), 2)
+        keyboard = data["reply_markup"]["inline_keyboard"]
+        self.assertEqual([len(row) for row in keyboard[:2]], [1, 2])
+        self.assertIn("kb:reschedule:", keyboard[1][0]["callback_data"])
+        self.assertIn("kb:decline:", keyboard[1][1]["callback_data"])
         # The held slot is gone for the next visitor.
         self.assertEqual(self.post(email="other@example.com").status_code, 409)
         self.assertContains(self.client.get(response.json()["redirect"]), "Request received")
@@ -528,6 +531,24 @@ class ApprovalTests(TestCase):
         self.assertEqual(booking.status, Booking.Status.DECLINED)
         self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
         self.assertIn("cannot hold this meeting", outbox.outbox[0].body)
+        self.assertEqual(booking.decline_reason, Booking.DeclineReason.CANCEL)
+        self.assertEqual(self.post(email="other@example.com").status_code, 201)
+
+    def test_reschedule_frees_the_slot_and_invites_a_new_time(self, _now):
+        self.post()
+        booking = Booking.objects.get()
+        outbox.outbox.clear()
+        self.press("reschedule", booking)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.DECLINED)
+        self.assertEqual(booking.decline_reason, Booking.DeclineReason.RESCHEDULE)
+        self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
+        self.assertIn("cannot be there at the time you picked", outbox.outbox[0].body)
+        self.assertIn(f"/{booking.event_type.slug}", outbox.outbox[0].body)
+        self.assertNotIn("cannot hold this meeting", outbox.outbox[0].body)
+        edit = [data for method, data in self.calls if method == "editMessageText"][-1]
+        self.assertIn("pick a new time", edit["text"])
+        self.assertNotIn("callback_data", json.dumps(edit["reply_markup"]))
         self.assertEqual(self.post(email="other@example.com").status_code, 201)
 
     def test_presses_from_another_chat_are_ignored(self, _now):

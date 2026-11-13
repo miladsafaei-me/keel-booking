@@ -70,7 +70,10 @@ ACTIONS = {
                 lambda b: b.status == Booking.Status.PENDING and services.approve_booking(b), True),
     "paid": ("Payment received: the calendar event, the Meet link and the confirmation email follow.",
              lambda b: b.status == Booking.Status.PAYMENT and services.mark_paid(b), True),
-    "decline": ("Declined. The guest is told by email.",
+    "reschedule": ("Time declined. The guest is asked by email to pick a new time.",
+                   lambda b: b.status in (Booking.Status.PENDING, Booking.Status.PAYMENT)
+                   and services.decline_booking(b, reschedule=True), True),
+    "decline": ("Cancelled. The guest is told by email that the meeting will not go ahead.",
                 lambda b: b.status in (Booking.Status.PENDING, Booking.Status.PAYMENT) and services.decline_booking(b), True),
     "resync": ("Written to Google Calendar again.",
                lambda b: b.status == Booking.Status.CONFIRMED and services.sync_to_google(b), False),
@@ -173,9 +176,9 @@ def booking_detail(request, pk):
             return back
     actions = []
     if booking.status == Booking.Status.PENDING:
-        actions += [("approve", "Approve", "primary"), ("decline", "Decline", "danger")]
+        actions += [("approve", "Approve", "primary"), ("reschedule", "Change the time", ""), ("decline", "Cancel", "danger")]
     if booking.status == Booking.Status.PAYMENT:
-        actions += [("paid", "Payment received", "primary"), ("decline", "Decline", "danger")]
+        actions += [("paid", "Payment received", "primary"), ("reschedule", "Change the time", ""), ("decline", "Cancel", "danger")]
     if booking.status == Booking.Status.CONFIRMED:
         actions += [("resync", "Write to Google Calendar again", ""), ("push_guests", "Copy the guests to the event", ""),
                     ("resend", "Send the confirmation again", ""), ("cancel", "Cancel the meeting", "danger")]

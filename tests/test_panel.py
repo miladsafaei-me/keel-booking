@@ -69,6 +69,13 @@ class PanelTests(TestCase):
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, Booking.Status.DECLINED)
 
+    def test_reschedule_action(self):
+        with mock.patch("keel_booking.telegram.refresh_request"):
+            self.client.post(f"/panel/bookings/{self.booking.pk}/", {"part": "reschedule"})
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, Booking.Status.DECLINED)
+        self.assertEqual(self.booking.decline_reason, Booking.DeclineReason.RESCHEDULE)
+
     def test_event_type_saves_with_its_rows(self):
         url = f"/panel/bookings/types/{self.kind.pk}/"
         page = self.client.get(url)

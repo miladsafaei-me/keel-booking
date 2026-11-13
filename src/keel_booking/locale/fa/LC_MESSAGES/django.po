@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-04 23:52+0000\n"
+"POT-Creation-Date: 2026-11-13 09:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 msgid "Your request is booked. The email I just sent you has every detail."
-msgstr "درخواست‌تون ثبت شد. همه‌ی جزئیاتش توی ایمیلی هست که همین الان براتون فرستادم."
+msgstr ""
+"درخواست‌تون ثبت شد. همه‌ی جزئیاتش توی ایمیلی هست که همین الان براتون فرستادم."
 
 msgid "Website"
 msgstr "وب‌سایت"
@@ -84,6 +85,10 @@ msgid "Request received: {meeting} with {owner}"
 msgstr "درخواست دریافت شد: {meeting} با {owner}"
 
 #, python-brace-format
+msgid "A new time for your request: {meeting} with {owner}"
+msgstr "یه زمان دیگه برای درخواستتون: {meeting} با {owner}"
+
+#, python-brace-format
 msgid "About your request: {meeting} with {owner}"
 msgstr "درباره‌ی درخواست شما: {meeting} با {owner}"
 
@@ -116,7 +121,8 @@ msgstr "شما درخواست را ارسال می‌کنید"
 
 msgid "Pick a time and fill in the form. The time is held for you."
 msgstr ""
-"زمان را انتخاب می‌کنید و فرم را پر می‌کنید. این زمان برای شما نگه داشته می‌شود."
+"زمان را انتخاب می‌کنید و فرم را پر می‌کنید. این زمان برای شما نگه داشته "
+"می‌شود."
 
 msgid "You sent the request"
 msgstr "شما درخواست را ارسال کردید"
@@ -173,6 +179,9 @@ msgstr "رد شد. با ایمیل به مهمان خبر داده شد."
 msgid "Cancelled"
 msgstr "لغو شد"
 
+msgid "Time declined. The guest was asked by email to pick a new time."
+msgstr "زمان رد شد. با ایمیل از مهمان خواسته شد زمان دیگری انتخاب کند."
+
 msgid "Paid and confirmed. The Meet link went to the guest by email."
 msgstr "پرداخت شد و جلسه قطعی است. لینک Meet با ایمیل برای مهمان فرستاده شد."
 
@@ -192,17 +201,17 @@ msgstr "فایل‌ها"
 msgid "Language"
 msgstr "زبان"
 
-msgid "Approve"
-msgstr "تأیید"
-
-msgid "Decline"
-msgstr "رد"
-
-msgid "Payment received"
-msgstr "پرداخت دریافت شد"
+msgid "Change the time"
+msgstr "تغییر زمان"
 
 msgid "Cancel"
 msgstr "لغو"
+
+msgid "Approve"
+msgstr "تأیید"
+
+msgid "Payment received"
+msgstr "پرداخت دریافت شد"
 
 msgid "Open in the admin"
 msgstr "باز کردن در پنل مدیریت"
@@ -225,6 +234,9 @@ msgstr "درباره‌ی این درخواست قبلاً تصمیم گرفته
 msgid "Payment received. The guest gets the Meet link by email."
 msgstr "پرداخت ثبت شد. لینک Meet با ایمیل برای مهمان فرستاده می‌شود."
 
+msgid "Time declined. The guest is asked by email to pick a new time."
+msgstr "زمان رد شد. با ایمیل از مهمان خواسته می‌شود زمان دیگری انتخاب کند."
+
 msgid "Declined. The guest is told by email."
 msgstr "رد شد. با ایمیل به مهمان خبر داده می‌شود."
 
@@ -242,15 +254,15 @@ msgid "Booked: %(meeting)s with %(owner_name)s"
 msgstr "رزرو شد: %(meeting)s با %(owner_name)s"
 
 msgid ""
-"Your request is approved. The ways to pay are in your email; reply to it "
-"with the receipt."
+"Your request is approved. The ways to pay are in your email; reply to it with"
+" the receipt."
 msgstr ""
 "درخواست شما تأیید شد. راه‌های پرداخت در ایمیل شماست. رسید را در پاسخ همان "
 "ایمیل بفرستید."
 
 msgid ""
-"I have received your request to set up a meeting. I will review it as soon "
-"as I can and let you know by email."
+"I have received your request to set up a meeting. I will review it as soon as"
+" I can and let you know by email."
 msgstr ""
 "درخواست شما را برای تنظیم جلسه دریافت کردم. در اولین فرصت بررسی می‌کنم و از "
 "طریق ایمیل به شما اطلاع می‌دهم."
@@ -309,8 +321,8 @@ msgstr "جلسه‌ی شما لغو شد"
 
 #, python-format
 msgid ""
-"Hi %(guest)s, the meeting below with %(owner_name)s is cancelled and has "
-"been removed from the calendar."
+"Hi %(guest)s, the meeting below with %(owner_name)s is cancelled and has been"
+" removed from the calendar."
 msgstr ""
 "سلام %(guest)s، جلسه‌ی زیر با %(owner_name)s لغو شد و از تقویم هم حذف شد."
 
@@ -345,8 +357,8 @@ msgid ""
 "Hi %(guest)s, your %(meeting)s is confirmed. The details are below, and the "
 "calendar file attached adds it to your calendar."
 msgstr ""
-"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما تأیید شد. جزئیات را پایین‌تر می‌بینید. "
-"فایل تقویم پیوست‌شده هم جلسه را به تقویم شما اضافه می‌کند."
+"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما تأیید شد. جزئیات را پایین‌تر "
+"می‌بینید. فایل تقویم پیوست‌شده هم جلسه را به تقویم شما اضافه می‌کند."
 
 msgid "View the booking"
 msgstr "دیدن رزرو"
@@ -433,8 +445,8 @@ msgid ""
 "A new meeting is on your calendar. Times below are in the meeting type's "
 "timezone."
 msgstr ""
-"جلسه‌ی تازه‌ای به تقویم شما اضافه شد. زمان‌های زیر به وقت منطقه‌ی زمانی این نوع "
-"جلسه است."
+"جلسه‌ی تازه‌ای به تقویم شما اضافه شد. زمان‌های زیر به وقت منطقه‌ی زمانی این "
+"نوع جلسه است."
 
 msgid "Their timezone"
 msgstr "منطقه‌ی زمانی مهمان"
@@ -468,7 +480,8 @@ msgstr ""
 "می‌کند."
 
 msgid "Not on Google Calendar yet. The site retries every minute."
-msgstr "هنوز در Google Calendar ثبت نشده است. سایت هر دقیقه دوباره تلاش می‌کند."
+msgstr ""
+"هنوز در Google Calendar ثبت نشده است. سایت هر دقیقه دوباره تلاش می‌کند."
 
 msgid "Open the booking to add notes and a follow-up"
 msgstr "برای افزودن یادداشت و پیگیری، رزرو را باز کنید"
@@ -495,8 +508,8 @@ msgid ""
 "The payment for this session did not arrive in time, so the time is free "
 "again. If you still want the session, reply to this email."
 msgstr ""
-"پرداخت این جلسه به‌موقع انجام نشد و زمان آن دوباره آزاد شد. اگر هنوز این جلسه "
-"را می‌خواهید، به همین ایمیل جواب بدهید."
+"پرداخت این جلسه به‌موقع انجام نشد و زمان آن دوباره آزاد شد. اگر هنوز این جلسه"
+" را می‌خواهید، به همین ایمیل جواب بدهید."
 
 #, python-format
 msgid "Your request is approved. Pay %(price)s to confirm the session."
@@ -510,8 +523,8 @@ msgstr "مرحله‌ی پرداخت"
 
 #, python-format
 msgid ""
-"I have approved your request. To confirm the session, pay %(price)s in one "
-"of the ways below, then reply to this email with the receipt."
+"I have approved your request. To confirm the session, pay %(price)s in one of"
+" the ways below, then reply to this email with the receipt."
 msgstr ""
 "درخواست شما را تأیید کردم. برای قطعی شدن جلسه، مبلغ %(price)s را از یکی از "
 "راه‌های زیر پرداخت کنید. بعد رسید را در پاسخ همین ایمیل بفرستید."
@@ -555,16 +568,16 @@ msgid ""
 "Hi %(guest)s, this is a reminder that your %(meeting)s starts in %(minutes)s "
 "minutes."
 msgstr ""
-"سلام %(guest)s، یادآوری می‌کنیم که جلسه‌ی «%(meeting)s» شما %(minutes)s دقیقه‌ی "
-"دیگر شروع می‌شود."
+"سلام %(guest)s، یادآوری می‌کنیم که جلسه‌ی «%(meeting)s» شما %(minutes)s "
+"دقیقه‌ی دیگر شروع می‌شود."
 
 #, python-format
 msgid ""
 "Hi %(guest)s, your %(meeting)s with %(owner_name)s starts in %(minutes)s "
 "minutes."
 msgstr ""
-"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما با %(owner_name)s %(minutes)s دقیقه‌ی "
-"دیگر شروع می‌شود."
+"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما با %(owner_name)s %(minutes)s "
+"دقیقه‌ی دیگر شروع می‌شود."
 
 msgid "Join"
 msgstr "ورود به جلسه"
@@ -584,6 +597,19 @@ msgid ""
 msgstr ""
 "این زمان تا پاسخ من برای شما نگه داشته می‌شود. اگر نکته‌ای می‌خواهید اضافه "
 "کنید، به همین ایمیل جواب بدهید."
+
+msgid "Please pick another time for our meeting."
+msgstr "لطفاً یه زمان دیگه برای جلسه‌مون انتخاب کنید."
+
+msgid "Let's find another time"
+msgstr "یه زمان دیگه پیدا کنیم"
+
+msgid ""
+"Thank you for your request. I am sorry, I cannot be there at the time you "
+"picked. Please pick another time that suits you, and I will confirm it."
+msgstr ""
+"ممنون از درخواستتون. شرمنده‌م، توی زمانی که انتخاب کردید نمی‌تونم در جلسه "
+"باشم. لطفاً یه زمان دیگه که براتون مناسبه انتخاب کنید تا تأییدش کنم."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -717,7 +743,8 @@ msgstr "لطفاً شماره‌ی واتس‌اپ را با کد کشور وا�
 
 msgid "Please enter your Telegram or WhatsApp, so I can reach you online."
 msgstr ""
-"لطفاً تلگرام یا واتس‌اپ خود را وارد کنید تا بتوانم آنلاین با شما در تماس باشم."
+"لطفاً تلگرام یا واتس‌اپ خود را وارد کنید تا بتوانم آنلاین با شما در تماس "
+"باشم."
 
 msgid "Please pick one of the options."
 msgstr "لطفاً یکی از گزینه‌ها را انتخاب کنید."
@@ -770,10 +797,14 @@ msgid "Please pick a time."
 msgstr "لطفاً یک زمان انتخاب کنید."
 
 msgid "Too many bookings from this connection. Please try again later."
-msgstr "از این اتصال رزروهای زیادی ثبت شده است. لطفاً کمی بعد دوباره تلاش کنید."
+msgstr ""
+"از این اتصال رزروهای زیادی ثبت شده است. لطفاً کمی بعد دوباره تلاش کنید."
 
 msgid "That time was just taken. Please pick another one."
 msgstr "این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید."
+
+#~ msgid "Decline"
+#~ msgstr "رد"
 
 #~ msgid "One step left: the payment"
 #~ msgstr "فقط یک قدم مانده: پرداخت"
