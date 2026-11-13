@@ -4,8 +4,9 @@ Part of the **Keel** platform (see keel-kit `PLATFORM.md`). A reusable Django ap
 meetings: meeting types, the slot engine, Google Calendar/Meet/Gmail, emails, reminders, the
 owner's notes and follow-ups. Guest-facing text is translated (English source, Persian and Turkish
 shipped in `locale/`); every email follows the booking's language (the owner's too when
-`OWNER_EMAILS_IN_BOOKING_LANGUAGE` is on); the admin stays in `LANGUAGE_CODE`. No banner comments; CSS
-variables only in styling; multi-line Django template comments use `{% comment %}...{% endcomment %}`.
+`OWNER_EMAILS_IN_BOOKING_LANGUAGE` is on); the admin stays in `LANGUAGE_CODE`. The global code rules (no banner
+comments, CSS custom properties only, `{% comment %}` in Django templates) apply from
+`~/.claude/CLAUDE.md`, section "Code, every project".
 
 ## Task tracking
 
@@ -19,6 +20,7 @@ Remaining and follow-up work is tracked in [TODO.md](TODO.md), not in chat memor
   assistant: `assistant.py` (instructions, the `find_times` and `book_session` tools, the tool loop) over
   `gemini.py` (the package's one Gemini client: model fallback, timeouts, usage log) and the view
   `assistant_chat`, which the host mounts itself (`ASSISTANT_*` settings in `conf.py`).
+  Also here: `panel/` (the staff panel the host site relies on) and `telegram.py`.
 - **Stays in the host:** the look (its own templates and CSS on top of the `data-kb-*` contract),
   the meeting types themselves (seeded by a host data migration or the admin), `KEEL_BOOKING`
   values, the email theme, where the app is mounted and how it is deployed.
