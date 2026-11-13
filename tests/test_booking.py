@@ -530,7 +530,7 @@ class ApprovalTests(TestCase):
         booking.refresh_from_db()
         self.assertEqual(booking.status, Booking.Status.DECLINED)
         self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
-        self.assertIn("cannot hold this meeting", outbox.outbox[0].body)
+        self.assertIn("rather not hold this meeting", outbox.outbox[0].body)
         self.assertEqual(booking.decline_reason, Booking.DeclineReason.CANCEL)
         self.assertEqual(self.post(email="other@example.com").status_code, 201)
 
@@ -545,7 +545,7 @@ class ApprovalTests(TestCase):
         self.assertEqual([m.to for m in outbox.outbox], [["sara@example.com"]])
         self.assertIn("cannot be there at the time you picked", outbox.outbox[0].body)
         self.assertIn(f"/{booking.event_type.slug}", outbox.outbox[0].body)
-        self.assertNotIn("cannot hold this meeting", outbox.outbox[0].body)
+        self.assertNotIn("rather not hold this meeting", outbox.outbox[0].body)
         edit = [data for method, data in self.calls if method == "editMessageText"][-1]
         self.assertIn("pick a new time", edit["text"])
         self.assertNotIn("callback_data", json.dumps(edit["reply_markup"]))

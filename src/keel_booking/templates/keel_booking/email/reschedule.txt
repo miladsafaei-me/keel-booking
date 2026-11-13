@@ -8,7 +8,7 @@
 {% translate "Requested time" %}: {{ when.full }}
 {% translate "Timezone" %}: {{ when.timezone }}
 
-{% translate "If you have a question, reply to this email." %}
+{% translate "The Google Meet link will be emailed to you." %}
 
 {{ owner_name }}
 {{ site_url }}

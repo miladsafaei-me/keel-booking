@@ -257,9 +257,9 @@ def send_declined(booking) -> None:
     with translation.override(booking.guest_language):
         context = _context(booking, booking.guest_timezone)
         if reschedule:
-            subject = _("A new time for your request: {meeting} with {owner}")
+            subject = _("Meeting time change: {meeting} with {owner}")
         else:
-            subject = _("About your request: {meeting} with {owner}")
+            subject = _("Meeting cancelled: {meeting} with {owner}")
         subject = subject.format(meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"))
         _send("reschedule" if reschedule else "declined", subject, [booking.guest_email], context,
               reply_to=[conf.get("OWNER_EMAIL")])

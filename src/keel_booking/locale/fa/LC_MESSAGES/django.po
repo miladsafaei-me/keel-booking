@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 09:57+0000\n"
+"POT-Creation-Date: 2026-11-13 11:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,12 +85,12 @@ msgid "Request received: {meeting} with {owner}"
 msgstr "درخواست دریافت شد: {meeting} با {owner}"
 
 #, python-brace-format
-msgid "A new time for your request: {meeting} with {owner}"
-msgstr "یه زمان دیگه برای درخواستتون: {meeting} با {owner}"
+msgid "Meeting time change: {meeting} with {owner}"
+msgstr "تغییر زمان جلسه: {meeting} با {owner}"
 
 #, python-brace-format
-msgid "About your request: {meeting} with {owner}"
-msgstr "درباره‌ی درخواست شما: {meeting} با {owner}"
+msgid "Meeting cancelled: {meeting} with {owner}"
+msgstr "جلسه کنسل شد: {meeting} با {owner}"
 
 #, python-brace-format
 msgid "Approved, the payment step: {meeting} with {owner}"
@@ -381,21 +381,18 @@ msgstr "منطقه‌ی زمانی"
 msgid "An answer to your meeting request."
 msgstr "پاسخ درخواست جلسه‌ی شما."
 
-msgid "Your request"
-msgstr "درخواست شما"
-
 msgid "This meeting will not go ahead"
 msgstr "این جلسه برگزار نمی‌شود"
 
 msgid ""
-"Thank you for your request. I reviewed it, and unfortunately I cannot hold "
-"this meeting. The time you picked is free again."
+"Thank you for your request, but I would rather not hold this meeting. I wish "
+"you every success."
 msgstr ""
-"از درخواست شما ممنونم. آن را بررسی کردم و متأسفانه نمی‌توانم این جلسه را "
-"برگزار کنم. زمانی که انتخاب کرده بودید دوباره آزاد شد."
+"از درخواست شما ممنونم، ولی تمایلی به برگزاری این جلسه ندارم. امیدوارم موفق "
+"باشید."
 
 msgid "If you have a question, reply to this email."
-msgstr "اگر سؤالی دارید، به همین ایمیل جواب بدهید."
+msgstr "اگر سؤالی دارید، به همین ایمیل جواب بدید."
 
 #, python-format
 msgid "Follow up with %(guest)s."
@@ -501,6 +498,9 @@ msgstr "یادداشت‌ها و پیگیری"
 msgid "The payment did not arrive in time, so the time is free again."
 msgstr "پرداخت به‌موقع انجام نشد و این زمان دوباره آزاد شد."
 
+msgid "Your request"
+msgstr "درخواست شما"
+
 msgid "The time was released"
 msgstr "زمان جلسه آزاد شد"
 
@@ -601,8 +601,8 @@ msgstr ""
 msgid "Please pick another time for our meeting."
 msgstr "لطفاً یه زمان دیگه برای جلسه‌مون انتخاب کنید."
 
-msgid "Let's find another time"
-msgstr "یه زمان دیگه پیدا کنیم"
+msgid "Please pick another time for the meeting"
+msgstr "لطفاً یه زمان دیگه برای جلسه انتخاب کنید"
 
 msgid ""
 "Thank you for your request. I am sorry, I cannot be there at the time you "
@@ -610,6 +610,9 @@ msgid ""
 msgstr ""
 "ممنون از درخواستتون. شرمنده‌م، توی زمانی که انتخاب کردید نمی‌تونم در جلسه "
 "باشم. لطفاً یه زمان دیگه که براتون مناسبه انتخاب کنید تا تأییدش کنم."
+
+msgid "The Google Meet link will be emailed to you."
+msgstr "لینک گوگل‌میت براتون ایمیل میشه."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -802,6 +805,17 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید."
+
+#, python-brace-format
+#~ msgid "A new time for your request: {meeting} with {owner}"
+#~ msgstr "یه زمان دیگه برای درخواستتون: {meeting} با {owner}"
+
+#, python-brace-format
+#~ msgid "About your request: {meeting} with {owner}"
+#~ msgstr "درباره‌ی درخواست شما: {meeting} با {owner}"
+
+#~ msgid "Let's find another time"
+#~ msgstr "یه زمان دیگه پیدا کنیم"
 
 #~ msgid "Decline"
 #~ msgstr "رد"

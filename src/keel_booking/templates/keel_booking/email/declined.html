@@ -2,10 +2,9 @@
 {% load i18n %}
 {% comment %}The guest's answer when a meeting request is declined. No link to book again.{% endcomment %}
 {% block preheader %}{% translate "An answer to your meeting request." %}{% endblock %}
-{% block eyebrow %}{% translate "Your request" %}{% endblock %}
+{% block eyebrow %}{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}{% endblock %}
 {% block title %}{% translate "This meeting will not go ahead" %}{% endblock %}
-{% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}</p>
-<p style="margin:12px 0 0 0;">{% translate "Thank you for your request. I reviewed it, and unfortunately I cannot hold this meeting. The time you picked is free again." %}</p>{% endblock %}
+{% block intro %}<p style="margin:0;">{% translate "Thank you for your request, but I would rather not hold this meeting. I wish you every success." %}</p>{% endblock %}
 {% block details %}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;border-top:1px solid {{ theme.rule }};">
   <tr><td style="padding:14px 0;padding-{{ end }}:12px;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};{{ caps }}color:{{ theme.muted }};width:110px;vertical-align:top;">{% translate "Meeting" %}</td>
