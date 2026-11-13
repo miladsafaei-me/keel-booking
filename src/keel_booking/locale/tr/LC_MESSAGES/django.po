@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 12:17+0000\n"
+"POT-Creation-Date: 2026-11-13 12:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,8 +77,8 @@ msgid "Join: {url}"
 msgstr "Katılın: {url}"
 
 #, python-brace-format
-msgid "Confirmed: {meeting} with {owner}, {when}"
-msgstr "Onaylandı: {owner} ile {meeting}, {when}"
+msgid "Meeting confirmed: {meeting} with {owner}, {when}"
+msgstr "Görüşme onaylandı: {owner} ile {meeting}, {when}"
 
 #, python-brace-format
 msgid "Request received: {meeting} with {owner}"
@@ -119,8 +119,8 @@ msgstr "Takip: {guest} ({meeting})"
 msgid "Meeting request"
 msgstr "Görüşme talebi"
 
-msgid "You choose the topic and time of the meeting"
-msgstr "Görüşmenin konusunu ve zamanını siz seçersiniz"
+msgid "You choose the topic and time of the meeting."
+msgstr "Görüşmenin konusunu ve zamanını siz seçersiniz."
 
 msgid "Request review"
 msgstr "Talebin incelenmesi"
@@ -128,20 +128,14 @@ msgstr "Talebin incelenmesi"
 msgid "I review it as soon as I can and answer by email."
 msgstr "İlk fırsatta inceleyip e-postayla yanıt veririm."
 
-msgid "I approved the request"
-msgstr "Talebi onayladım"
-
 msgid "I reviewed your request and approved it."
 msgstr "Talebinizi inceleyip onayladım."
 
-msgid "You pay"
-msgstr "Ödemeyi yaparsınız"
+msgid "Payment"
+msgstr "Ödeme"
 
 msgid "The email has the ways to pay. Reply to it with the receipt."
 msgstr "Ödeme yolları e-postadadır. Dekontu o e-postaya yanıt olarak gönderin."
-
-msgid "You paid"
-msgstr "Ödemeyi yaptınız"
 
 msgid "I received your payment."
 msgstr "Ödemenizi aldım."
@@ -152,11 +146,8 @@ msgstr "Google Meet bağlantısını alma"
 msgid "The Google Meet link will be sent to you."
 msgstr "Google Meet bağlantısı size gönderilecek."
 
-msgid "You got the Google Meet link"
-msgstr "Google Meet bağlantısını aldınız"
-
-msgid "The confirmation email has the link and the calendar invitation."
-msgstr "Onay e-postasında bağlantı ve takvim daveti vardır."
+msgid "The Google Meet link was emailed to you."
+msgstr "Google Meet bağlantısı size e-postayla gönderildi."
 
 msgid "New meeting request"
 msgstr "Yeni görüşme talebi"
@@ -344,36 +335,27 @@ msgstr ""
 msgid "%(meeting)s, %(date)s at %(time)s."
 msgstr "%(meeting)s, %(date)s, %(time)s."
 
-msgid "Booking confirmed"
-msgstr "Randevu onaylandı"
+msgid "Our meeting is confirmed"
+msgstr "Görüşmemiz onaylandı"
 
-#, python-format
-msgid "You are booked with %(owner_name)s"
-msgstr "%(owner_name)s ile randevunuz alındı"
-
-#, python-format
 msgid ""
-"Hi %(guest)s, your %(meeting)s is confirmed. The details are below, and the "
-"calendar file attached adds it to your calendar."
+"Thank you for your request. I look forward to our meeting. The details are "
+"below, and the attached calendar file adds it to your calendar."
 msgstr ""
-"Merhaba %(guest)s, %(meeting)s randevunuz onaylandı. Ayrıntılar aşağıda. "
-"Ekteki takvim dosyası görüşmeyi takviminize ekler."
+"Talebiniz için teşekkür ederim. Görüşmemizi sabırsızlıkla bekliyorum. "
+"Ayrıntılar aşağıda; ekteki takvim dosyasıyla görüşmeyi takviminize "
+"ekleyebilirsiniz."
 
 msgid "View the booking"
 msgstr "Randevuyu görüntüle"
 
 #, python-format
 msgid ""
-"Need to change the time? Reply to this email and %(owner_name)s will sort it "
-"out. A reminder with the link arrives %(minutes)s minutes before the start."
+"If you need to change the time, reply to this email. A reminder with the "
+"meeting link reaches you %(minutes)s minutes before the start."
 msgstr ""
-"Zamanı değiştirmeniz mi gerekiyor? Bu e-postayı yanıtlayın, %(owner_name)s "
-"sizin için düzenlesin. Bağlantıyı içeren hatırlatma, başlangıçtan %(minutes)s"
-" dakika önce gelir."
-
-#, python-format
-msgid "Your %(meeting)s with %(owner_name)s is confirmed."
-msgstr "%(owner_name)s ile %(meeting)s randevunuz onaylandı."
+"Zamanı değiştirmeniz gerekirse bu e-postayı yanıtlayın. Başlangıçtan "
+"%(minutes)s dakika önce görüşme bağlantısıyla bir hatırlatma gelir."
 
 msgid "Timezone"
 msgstr "Saat dilimi"
@@ -806,6 +788,32 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "Bu zaman az önce doldu. Lütfen başka bir zaman seçin."
+
+#~ msgid "I approved the request"
+#~ msgstr "Talebi onayladım"
+
+#~ msgid "You pay"
+#~ msgstr "Ödemeyi yaparsınız"
+
+#~ msgid "You paid"
+#~ msgstr "Ödemeyi yaptınız"
+
+#~ msgid "You got the Google Meet link"
+#~ msgstr "Google Meet bağlantısını aldınız"
+
+#~ msgid "The confirmation email has the link and the calendar invitation."
+#~ msgstr "Onay e-postasında bağlantı ve takvim daveti vardır."
+
+#~ msgid "Booking confirmed"
+#~ msgstr "Randevu onaylandı"
+
+#, python-format
+#~ msgid "You are booked with %(owner_name)s"
+#~ msgstr "%(owner_name)s ile randevunuz alındı"
+
+#, python-format
+#~ msgid "Your %(meeting)s with %(owner_name)s is confirmed."
+#~ msgstr "%(owner_name)s ile %(meeting)s randevunuz onaylandı."
 
 #~ msgid "You send the request"
 #~ msgstr "Talebinizi gönderirsiniz"

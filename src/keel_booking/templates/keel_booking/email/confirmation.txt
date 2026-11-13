@@ -1,6 +1,6 @@
 {% load i18n keel_booking %}{% autoescape off %}{% blocktranslate with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}
 
-{% blocktranslate trimmed with meeting=event_type.name %}Your {{ meeting }} with {{ owner_name }} is confirmed.{% endblocktranslate %}
+{% translate "Thank you for your request. I look forward to our meeting. The details are below, and the attached calendar file adds it to your calendar." %}
 
 {% translate "Meeting" %}: {% include "keel_booking/email/_meeting.txt" %}
 {% translate "When" %}: {{ when.full }}
@@ -12,7 +12,7 @@
 {% translate "Add to Google Calendar" %}: {{ calendar_link }}
 {% translate "View the booking" %}: {{ page_url }}
 
-{% with minutes=event_type.reminder_minutes|local_digits %}{% blocktranslate trimmed %}Need to change the time? Reply to this email and {{ owner_name }} will sort it out. A reminder with the link arrives {{ minutes }} minutes before the start.{% endblocktranslate %}{% endwith %}
+{% with minutes=event_type.reminder_minutes|local_digits %}{% blocktranslate trimmed %}If you need to change the time, reply to this email. A reminder with the meeting link reaches you {{ minutes }} minutes before the start.{% endblocktranslate %}{% endwith %}
 
 {{ owner_name }}
 {{ site_url }}

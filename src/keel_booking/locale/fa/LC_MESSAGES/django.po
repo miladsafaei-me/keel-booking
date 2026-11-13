@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 12:17+0000\n"
+"POT-Creation-Date: 2026-11-13 12:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,8 +77,8 @@ msgid "Join: {url}"
 msgstr "ورود به جلسه: {url}"
 
 #, python-brace-format
-msgid "Confirmed: {meeting} with {owner}, {when}"
-msgstr "تأیید شد: {meeting} با {owner}، {when}"
+msgid "Meeting confirmed: {meeting} with {owner}, {when}"
+msgstr "جلسه تأیید شد: {meeting} با {owner}، {when}"
 
 #, python-brace-format
 msgid "Request received: {meeting} with {owner}"
@@ -119,8 +119,8 @@ msgstr "پیگیری: {guest} ({meeting})"
 msgid "Meeting request"
 msgstr "درخواست جلسه"
 
-msgid "You choose the topic and time of the meeting"
-msgstr "شما موضوع و زمان جلسه رو انتخاب می‌کنید"
+msgid "You choose the topic and time of the meeting."
+msgstr "شما موضوع و زمان جلسه رو انتخاب می‌کنید."
 
 msgid "Request review"
 msgstr "بررسی درخواست"
@@ -128,23 +128,17 @@ msgstr "بررسی درخواست"
 msgid "I review it as soon as I can and answer by email."
 msgstr "در اولین فرصت بررسی می‌کنم و با ایمیل جواب میدم."
 
-msgid "I approved the request"
-msgstr "من درخواست را تأیید کردم"
-
 msgid "I reviewed your request and approved it."
-msgstr "درخواست شما را بررسی و تأیید کردم."
+msgstr "درخواستتون رو بررسی و تأیید کردم."
 
-msgid "You pay"
-msgstr "شما پرداخت می‌کنید"
+msgid "Payment"
+msgstr "پرداخت هزینه"
 
 msgid "The email has the ways to pay. Reply to it with the receipt."
-msgstr "راه‌های پرداخت در ایمیل آمده است. رسید را در پاسخ همان ایمیل بفرستید."
-
-msgid "You paid"
-msgstr "شما پرداخت کردید"
+msgstr "راه‌های پرداخت توی ایمیل هست. رسید رو در جواب همون ایمیل بفرستید."
 
 msgid "I received your payment."
-msgstr "پرداخت شما را دریافت کردم."
+msgstr "پرداختتون به دستم رسید."
 
 msgid "Getting the Google Meet link"
 msgstr "دریافت لینک Google Meet"
@@ -152,11 +146,8 @@ msgstr "دریافت لینک Google Meet"
 msgid "The Google Meet link will be sent to you."
 msgstr "لینک گوگل‌میت براتون ارسال میشه."
 
-msgid "You got the Google Meet link"
-msgstr "لینک Google Meet را دریافت کردید"
-
-msgid "The confirmation email has the link and the calendar invitation."
-msgstr "ایمیل تأیید، لینک جلسه و دعوت‌نامه‌ی تقویم را دارد."
+msgid "The Google Meet link was emailed to you."
+msgstr "لینک گوگل‌میت براتون ایمیل شد."
 
 msgid "New meeting request"
 msgstr "درخواست جلسه‌ی جدید"
@@ -340,35 +331,26 @@ msgstr ""
 msgid "%(meeting)s, %(date)s at %(time)s."
 msgstr "%(meeting)s، %(date)s، ساعت %(time)s."
 
-msgid "Booking confirmed"
-msgstr "رزرو تأیید شد"
+msgid "Our meeting is confirmed"
+msgstr "جلسه‌مون تأیید شد"
 
-#, python-format
-msgid "You are booked with %(owner_name)s"
-msgstr "جلسه‌ی شما با %(owner_name)s رزرو شد"
-
-#, python-format
 msgid ""
-"Hi %(guest)s, your %(meeting)s is confirmed. The details are below, and the "
-"calendar file attached adds it to your calendar."
+"Thank you for your request. I look forward to our meeting. The details are "
+"below, and the attached calendar file adds it to your calendar."
 msgstr ""
-"سلام %(guest)s، جلسه‌ی «%(meeting)s» شما تأیید شد. جزئیات را پایین‌تر "
-"می‌بینید. فایل تقویم پیوست‌شده هم جلسه را به تقویم شما اضافه می‌کند."
+"ممنون از درخواستتون. منتظر جلسه‌مون هستم. جزئیات جلسه پایین همین ایمیله و با "
+"فایل تقویم پیوست می‌تونید جلسه رو به تقویمتون اضافه کنید."
 
 msgid "View the booking"
 msgstr "دیدن رزرو"
 
 #, python-format
 msgid ""
-"Need to change the time? Reply to this email and %(owner_name)s will sort it "
-"out. A reminder with the link arrives %(minutes)s minutes before the start."
+"If you need to change the time, reply to this email. A reminder with the "
+"meeting link reaches you %(minutes)s minutes before the start."
 msgstr ""
-"اگر لازم است زمان را عوض کنید، به همین ایمیل پاسخ دهید تا %(owner_name)s "
-"هماهنگ کند. یادآوری همراه با لینک جلسه %(minutes)s دقیقه پیش از شروع می‌رسد."
-
-#, python-format
-msgid "Your %(meeting)s with %(owner_name)s is confirmed."
-msgstr "جلسه‌ی «%(meeting)s» شما با %(owner_name)s تأیید شد."
+"اگه لازم شد زمان جلسه رو تغییر بدید، به همین ایمیل جواب بدید. %(minutes)s "
+"دقیقه قبل از شروع هم یه یادآوری با لینک جلسه براتون ایمیل میشه."
 
 msgid "Timezone"
 msgstr "منطقه‌ی زمانی"
@@ -799,6 +781,32 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید."
+
+#~ msgid "I approved the request"
+#~ msgstr "من درخواست را تأیید کردم"
+
+#~ msgid "You pay"
+#~ msgstr "شما پرداخت می‌کنید"
+
+#~ msgid "You paid"
+#~ msgstr "شما پرداخت کردید"
+
+#~ msgid "You got the Google Meet link"
+#~ msgstr "لینک Google Meet را دریافت کردید"
+
+#~ msgid "The confirmation email has the link and the calendar invitation."
+#~ msgstr "ایمیل تأیید، لینک جلسه و دعوت‌نامه‌ی تقویم را دارد."
+
+#~ msgid "Booking confirmed"
+#~ msgstr "رزرو تأیید شد"
+
+#, python-format
+#~ msgid "You are booked with %(owner_name)s"
+#~ msgstr "جلسه‌ی شما با %(owner_name)s رزرو شد"
+
+#, python-format
+#~ msgid "Your %(meeting)s with %(owner_name)s is confirmed."
+#~ msgstr "جلسه‌ی «%(meeting)s» شما با %(owner_name)s تأیید شد."
 
 #~ msgid "You send the request"
 #~ msgstr "شما درخواست را ارسال می‌کنید"

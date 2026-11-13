@@ -281,7 +281,7 @@ class LanguageTests(TestCase):
         self.assertEqual(booking.language, "fa")
         guest = next(m for m in outbox.outbox if m.to == ["sara@example.com"])
         owner = next(m for m in outbox.outbox if m.to == ["owner@example.com"])
-        self.assertTrue(guest.subject.startswith("تأیید شد: مشاوره‌ی سئو"), guest.subject)
+        self.assertTrue(guest.subject.startswith("جلسه تأیید شد: مشاوره‌ی سئو"), guest.subject)
         self.assertIn("دوشنبه، ۲ نوامبر ۲۰۲۶", guest.body)
         self.assertIn("https://example.com/fa/book/confirmed/", guest.body)
         html = guest.alternatives[0][0]
@@ -626,7 +626,7 @@ class PaymentTests(TestCase):
     def test_receipt_shows_the_steps(self, _now):
         body = outbox.outbox[0].body
         self.assertIn("[>] 2. Request review", body)
-        self.assertIn("3. You pay", body)
+        self.assertIn("3. Payment", body)
 
     def test_approve_sends_payment_details_without_a_link(self, _now):
         outbox.outbox.clear()
@@ -638,9 +638,9 @@ class PaymentTests(TestCase):
         self.assertIn("100 USDT", email.body)
         self.assertIn("The equivalent of $100 in lira", email.body)
         self.assertIn("0xabc", email.alternatives[0][0])
-        self.assertIn("[>] 3. You pay", email.body)
+        self.assertIn("[>] 3. Payment", email.body)
         self.assertIn("[x] 1. Meeting request", email.body)
-        self.assertIn("[x] 2. I approved the request", email.body)
+        self.assertIn("[x] 2. Request review", email.body)
         self.assertNotIn("meet.google", email.body)
         keyboard = json.dumps([d for m, d in self.calls if m == "editMessageText"][-1]["reply_markup"])
         self.assertIn("kb:paid:", keyboard)

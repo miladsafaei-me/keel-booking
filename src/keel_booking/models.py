@@ -152,23 +152,23 @@ class EventType(models.Model):
         # Each step has its present form (now or next) and its past form (done).
         steps = [
             {"key": "request", "title": gettext("Meeting request"),
-             "text": gettext("You choose the topic and time of the meeting"),
+             "text": gettext("You choose the topic and time of the meeting."),
              "title_done": gettext("Meeting request"),
-             "text_done": gettext("You choose the topic and time of the meeting")},
+             "text_done": gettext("You choose the topic and time of the meeting.")},
             {"key": "review", "title": gettext("Request review"),
              "text": gettext("I review it as soon as I can and answer by email."),
-             "title_done": gettext("I approved the request"),
+             "title_done": gettext("Request review"),
              "text_done": gettext("I reviewed your request and approved it.")},
         ]
         if self.requires_payment:
-            steps.append({"key": "payment", "title": gettext("You pay"),
+            steps.append({"key": "payment", "title": gettext("Payment"),
                           "text": gettext("The email has the ways to pay. Reply to it with the receipt."),
-                          "title_done": gettext("You paid"),
+                          "title_done": gettext("Payment"),
                           "text_done": gettext("I received your payment.")})
         steps.append({"key": "meet", "title": gettext("Getting the Google Meet link"),
                       "text": gettext("The Google Meet link will be sent to you."),
-                      "title_done": gettext("You got the Google Meet link"),
-                      "text_done": gettext("The confirmation email has the link and the calendar invitation.")})
+                      "title_done": gettext("Getting the Google Meet link"),
+                      "text_done": gettext("The Google Meet link was emailed to you.")})
         return steps
 
     @property

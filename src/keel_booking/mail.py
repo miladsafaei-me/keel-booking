@@ -234,7 +234,7 @@ def _owner_language(booking):
 def send_confirmation(booking) -> None:
     with translation.override(booking.guest_language):
         context = _context(booking, booking.guest_timezone)
-        subject = _("Confirmed: {meeting} with {owner}, {when}").format(
+        subject = _("Meeting confirmed: {meeting} with {owner}, {when}").format(
             meeting=context["event_type"].name, owner=conf.get("OWNER_NAME"), when=context["when"]["short"])
         with _tracked(booking, "confirmation") as delivered:
             _send("confirmation", subject, booking.email_recipients(), context, attach_ics=ics(booking),
