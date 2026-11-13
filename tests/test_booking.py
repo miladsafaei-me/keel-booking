@@ -625,7 +625,7 @@ class PaymentTests(TestCase):
 
     def test_receipt_shows_the_steps(self, _now):
         body = outbox.outbox[0].body
-        self.assertIn("[>] 2. I review it", body)
+        self.assertIn("[>] 2. Request review", body)
         self.assertIn("3. You pay", body)
 
     def test_approve_sends_payment_details_without_a_link(self, _now):
@@ -639,7 +639,7 @@ class PaymentTests(TestCase):
         self.assertIn("The equivalent of $100 in lira", email.body)
         self.assertIn("0xabc", email.alternatives[0][0])
         self.assertIn("[>] 3. You pay", email.body)
-        self.assertIn("[x] 1. You sent the request", email.body)
+        self.assertIn("[x] 1. Meeting request", email.body)
         self.assertIn("[x] 2. I approved the request", email.body)
         self.assertNotIn("meet.google", email.body)
         keyboard = json.dumps([d for m, d in self.calls if m == "editMessageText"][-1]["reply_markup"])

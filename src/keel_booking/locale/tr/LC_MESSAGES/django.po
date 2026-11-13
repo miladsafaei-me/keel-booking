@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 11:17+0000\n"
+"POT-Creation-Date: 2026-11-13 12:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -116,23 +116,17 @@ msgstr "İptal edildi: {owner} ile {meeting}, {when}"
 msgid "Follow up: {guest} ({meeting})"
 msgstr "Takip: {guest} ({meeting})"
 
-msgid "You send the request"
-msgstr "Talebinizi gönderirsiniz"
+msgid "Meeting request"
+msgstr "Görüşme talebi"
 
-msgid "Pick a time and fill in the form. The time is held for you."
-msgstr "Bir saat seçip formu doldurursunuz. Saat sizin için ayrılır."
+msgid "You choose the topic and time of the meeting"
+msgstr "Görüşmenin konusunu ve zamanını siz seçersiniz"
 
-msgid "You sent the request"
-msgstr "Talebinizi gönderdiniz"
+msgid "Request review"
+msgstr "Talebin incelenmesi"
 
-msgid "You picked a time and filled in the form."
-msgstr "Bir saat seçip formu doldurdunuz."
-
-msgid "I review it"
-msgstr "Talebi incelerim"
-
-msgid "I answer by email as soon as I can."
-msgstr "En kısa sürede e-postayla yanıt veririm."
+msgid "I review it as soon as I can and answer by email."
+msgstr "İlk fırsatta inceleyip e-postayla yanıt veririm."
 
 msgid "I approved the request"
 msgstr "Talebi onayladım"
@@ -152,14 +146,17 @@ msgstr "Ödemeyi yaptınız"
 msgid "I received your payment."
 msgstr "Ödemenizi aldım."
 
-msgid "You get the Google Meet link"
-msgstr "Google Meet bağlantısını alırsınız"
+msgid "Getting the Google Meet link"
+msgstr "Google Meet bağlantısını alma"
 
-msgid "The confirmation email has the link and the calendar invitation."
-msgstr "Onay e-postasında bağlantı ve takvim daveti vardır."
+msgid "The Google Meet link will be sent to you."
+msgstr "Google Meet bağlantısı size gönderilecek."
 
 msgid "You got the Google Meet link"
 msgstr "Google Meet bağlantısını aldınız"
+
+msgid "The confirmation email has the link and the calendar invitation."
+msgstr "Onay e-postasında bağlantı ve takvim daveti vardır."
 
 msgid "New meeting request"
 msgstr "Yeni görüşme talebi"
@@ -282,8 +279,8 @@ msgstr "Onay e-postası %(email)s adresine gönderiliyor."
 msgid "Add to Google Calendar"
 msgstr "Google Takvim'e ekle"
 
-msgid "Where things stand"
-msgstr "Süreç nerede"
+msgid "Steps to set up the meeting"
+msgstr "Görüşmeyi ayarlama adımları"
 
 msgid "now"
 msgstr "şimdi"
@@ -595,11 +592,9 @@ msgid "Your request has arrived"
 msgstr "Talebiniz ulaştı"
 
 msgid ""
-"This time is held for you until I answer. Want to add something? Reply to "
-"this email."
+"The time you picked stays reserved for you, and no one else can book it."
 msgstr ""
-"Bu saat, yanıt verene kadar sizin için ayrıldı. Eklemek istediğiniz bir şey "
-"varsa bu e-postayı yanıtlayın."
+"Seçtiğiniz zaman sizin için ayrılmış kalır ve başka kimse o saati seçemez."
 
 msgid "Please pick another time for our meeting."
 msgstr "Lütfen görüşmemiz için başka bir zaman seçin."
@@ -811,6 +806,34 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "Bu zaman az önce doldu. Lütfen başka bir zaman seçin."
+
+#~ msgid "You send the request"
+#~ msgstr "Talebinizi gönderirsiniz"
+
+#~ msgid "Pick a time and fill in the form. The time is held for you."
+#~ msgstr "Bir saat seçip formu doldurursunuz. Saat sizin için ayrılır."
+
+#~ msgid "You sent the request"
+#~ msgstr "Talebinizi gönderdiniz"
+
+#~ msgid "You picked a time and filled in the form."
+#~ msgstr "Bir saat seçip formu doldurdunuz."
+
+#~ msgid "I review it"
+#~ msgstr "Talebi incelerim"
+
+#~ msgid "I answer by email as soon as I can."
+#~ msgstr "En kısa sürede e-postayla yanıt veririm."
+
+#~ msgid "Where things stand"
+#~ msgstr "Süreç nerede"
+
+#~ msgid ""
+#~ "This time is held for you until I answer. Want to add something? Reply to "
+#~ "this email."
+#~ msgstr ""
+#~ "Bu saat, yanıt verene kadar sizin için ayrıldı. Eklemek istediğiniz bir şey "
+#~ "varsa bu e-postayı yanıtlayın."
 
 #, python-brace-format
 #~ msgid "A new time for your request: {meeting} with {owner}"

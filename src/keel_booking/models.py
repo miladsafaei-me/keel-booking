@@ -151,12 +151,12 @@ class EventType(models.Model):
             return []
         # Each step has its present form (now or next) and its past form (done).
         steps = [
-            {"key": "request", "title": gettext("You send the request"),
-             "text": gettext("Pick a time and fill in the form. The time is held for you."),
-             "title_done": gettext("You sent the request"),
-             "text_done": gettext("You picked a time and filled in the form.")},
-            {"key": "review", "title": gettext("I review it"),
-             "text": gettext("I answer by email as soon as I can."),
+            {"key": "request", "title": gettext("Meeting request"),
+             "text": gettext("You choose the topic and time of the meeting"),
+             "title_done": gettext("Meeting request"),
+             "text_done": gettext("You choose the topic and time of the meeting")},
+            {"key": "review", "title": gettext("Request review"),
+             "text": gettext("I review it as soon as I can and answer by email."),
              "title_done": gettext("I approved the request"),
              "text_done": gettext("I reviewed your request and approved it.")},
         ]
@@ -165,8 +165,8 @@ class EventType(models.Model):
                           "text": gettext("The email has the ways to pay. Reply to it with the receipt."),
                           "title_done": gettext("You paid"),
                           "text_done": gettext("I received your payment.")})
-        steps.append({"key": "meet", "title": gettext("You get the Google Meet link"),
-                      "text": gettext("The confirmation email has the link and the calendar invitation."),
+        steps.append({"key": "meet", "title": gettext("Getting the Google Meet link"),
+                      "text": gettext("The Google Meet link will be sent to you."),
                       "title_done": gettext("You got the Google Meet link"),
                       "text_done": gettext("The confirmation email has the link and the calendar invitation.")})
         return steps

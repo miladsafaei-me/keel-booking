@@ -5,10 +5,9 @@
   and the asked-for time and carries no Meet link, no calendar file and no calendar link.
 {% endcomment %}
 {% block preheader %}{% translate "I have received your request to set up a meeting." %}{% endblock %}
-{% block eyebrow %}{% translate "Request received" %}{% endblock %}
+{% block eyebrow %}{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}{% endblock %}
 {% block title %}{% translate "Your request has arrived" %}{% endblock %}
-{% block intro %}<p style="margin:0;">{% blocktranslate trimmed with guest=booking.guest_name %}Hi {{ guest }},{% endblocktranslate %}</p>
-<p style="margin:12px 0 0 0;">{% translate "I have received your request to set up a meeting. I will review it as soon as I can and let you know by email." %}</p>{% endblock %}
+{% block intro %}<p style="margin:0;">{% translate "I have received your request to set up a meeting. I will review it as soon as I can and let you know by email." %}</p>{% endblock %}
 {% block details %}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;border-top:1px solid {{ theme.rule }};">
   <tr><td style="padding:14px 0;padding-{{ end }}:12px;border-bottom:1px solid {{ theme.rule }};font:500 12px/1.4 {{ theme.font_heading }};{{ caps }}color:{{ theme.muted }};width:110px;vertical-align:top;">{% translate "Meeting" %}</td>
@@ -18,4 +17,4 @@
 </table>
 {% endblock %}
 {% block cta %}{% include "keel_booking/email/_journey.html" %}{% endblock %}
-{% block body_extra %}<p style="margin:0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};">{% translate "This time is held for you until I answer. Want to add something? Reply to this email." %}</p>{% endblock %}
+{% block body_extra %}<p style="margin:0;font:400 14px/1.8 {{ theme.font_body }};color:{{ theme.muted }};">{% translate "The time you picked stays reserved for you, and no one else can book it." %}</p>{% endblock %}

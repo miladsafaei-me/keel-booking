@@ -7,7 +7,7 @@
 {% translate "Timezone" %}: {{ when.timezone }}
 
 {% include "keel_booking/email/_journey.txt" %}
-{% translate "This time is held for you until I answer. Want to add something? Reply to this email." %}
+{% translate "The time you picked stays reserved for you, and no one else can book it." %}
 
 {{ owner_name }}
 {{ site_url }}

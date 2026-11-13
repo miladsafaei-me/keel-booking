@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 11:17+0000\n"
+"POT-Creation-Date: 2026-11-13 12:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -116,25 +116,17 @@ msgstr "لغو شد: {meeting} با {owner}، {when}"
 msgid "Follow up: {guest} ({meeting})"
 msgstr "پیگیری: {guest} ({meeting})"
 
-msgid "You send the request"
-msgstr "شما درخواست را ارسال می‌کنید"
+msgid "Meeting request"
+msgstr "درخواست جلسه"
 
-msgid "Pick a time and fill in the form. The time is held for you."
-msgstr ""
-"زمان را انتخاب می‌کنید و فرم را پر می‌کنید. این زمان برای شما نگه داشته "
-"می‌شود."
+msgid "You choose the topic and time of the meeting"
+msgstr "شما موضوع و زمان جلسه رو انتخاب می‌کنید"
 
-msgid "You sent the request"
-msgstr "شما درخواست را ارسال کردید"
+msgid "Request review"
+msgstr "بررسی درخواست"
 
-msgid "You picked a time and filled in the form."
-msgstr "زمان را انتخاب کردید و فرم را فرستادید."
-
-msgid "I review it"
-msgstr "من درخواست را بررسی می‌کنم"
-
-msgid "I answer by email as soon as I can."
-msgstr "در اولین فرصت با ایمیل جواب می‌دهم."
+msgid "I review it as soon as I can and answer by email."
+msgstr "در اولین فرصت بررسی می‌کنم و با ایمیل جواب میدم."
 
 msgid "I approved the request"
 msgstr "من درخواست را تأیید کردم"
@@ -154,14 +146,17 @@ msgstr "شما پرداخت کردید"
 msgid "I received your payment."
 msgstr "پرداخت شما را دریافت کردم."
 
-msgid "You get the Google Meet link"
-msgstr "لینک Google Meet را دریافت می‌کنید"
+msgid "Getting the Google Meet link"
+msgstr "دریافت لینک Google Meet"
 
-msgid "The confirmation email has the link and the calendar invitation."
-msgstr "ایمیل تأیید، لینک جلسه و دعوت‌نامه‌ی تقویم را دارد."
+msgid "The Google Meet link will be sent to you."
+msgstr "لینک گوگل‌میت براتون ارسال میشه."
 
 msgid "You got the Google Meet link"
 msgstr "لینک Google Meet را دریافت کردید"
+
+msgid "The confirmation email has the link and the calendar invitation."
+msgstr "ایمیل تأیید، لینک جلسه و دعوت‌نامه‌ی تقویم را دارد."
 
 msgid "New meeting request"
 msgstr "درخواست جلسه‌ی جدید"
@@ -281,8 +276,8 @@ msgstr "ایمیل تأیید به %(email)s فرستاده می‌شود."
 msgid "Add to Google Calendar"
 msgstr "افزودن به Google Calendar"
 
-msgid "Where things stand"
-msgstr "کار به کجا رسیده"
+msgid "Steps to set up the meeting"
+msgstr "مراحل تنظیم جلسه"
 
 msgid "now"
 msgstr "الان"
@@ -592,11 +587,10 @@ msgid "Your request has arrived"
 msgstr "درخواست شما به دستم رسید"
 
 msgid ""
-"This time is held for you until I answer. Want to add something? Reply to "
-"this email."
+"The time you picked stays reserved for you, and no one else can book it."
 msgstr ""
-"این زمان تا پاسخ من برای شما نگه داشته می‌شود. اگر نکته‌ای می‌خواهید اضافه "
-"کنید، به همین ایمیل جواب بدهید."
+"زمانی که انتخاب کردید، برای شما محفوظ باقی می‌مونه و شخص دیگه‌ای نمی‌تونه اون"
+" تایم رو انتخاب کنه."
 
 msgid "Please pick another time for our meeting."
 msgstr "لطفاً یه زمان دیگه برای جلسه‌مون انتخاب کنید."
@@ -805,6 +799,36 @@ msgstr ""
 
 msgid "That time was just taken. Please pick another one."
 msgstr "این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید."
+
+#~ msgid "You send the request"
+#~ msgstr "شما درخواست را ارسال می‌کنید"
+
+#~ msgid "Pick a time and fill in the form. The time is held for you."
+#~ msgstr ""
+#~ "زمان را انتخاب می‌کنید و فرم را پر می‌کنید. این زمان برای شما نگه داشته "
+#~ "می‌شود."
+
+#~ msgid "You sent the request"
+#~ msgstr "شما درخواست را ارسال کردید"
+
+#~ msgid "You picked a time and filled in the form."
+#~ msgstr "زمان را انتخاب کردید و فرم را فرستادید."
+
+#~ msgid "I review it"
+#~ msgstr "من درخواست را بررسی می‌کنم"
+
+#~ msgid "I answer by email as soon as I can."
+#~ msgstr "در اولین فرصت با ایمیل جواب می‌دهم."
+
+#~ msgid "Where things stand"
+#~ msgstr "کار به کجا رسیده"
+
+#~ msgid ""
+#~ "This time is held for you until I answer. Want to add something? Reply to "
+#~ "this email."
+#~ msgstr ""
+#~ "این زمان تا پاسخ من برای شما نگه داشته می‌شود. اگر نکته‌ای می‌خواهید اضافه "
+#~ "کنید، به همین ایمیل جواب بدهید."
 
 #, python-brace-format
 #~ msgid "A new time for your request: {meeting} with {owner}"
